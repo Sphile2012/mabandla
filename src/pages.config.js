@@ -64,6 +64,7 @@ import Register from './pages/Register';
 import StudentDashboard from './pages/StudentDashboard';
 import VideoPlayer from './pages/VideoPlayer';
 import __Layout from './Layout.jsx';
+import Signup from './pages/Signup';
 
 
 export const PAGES = {
@@ -83,6 +84,7 @@ export const PAGES = {
     "Register": Register,
     "StudentDashboard": StudentDashboard,
     "VideoPlayer": VideoPlayer,
+    "Signup": Signup,
 }
 
 export const pagesConfig = {

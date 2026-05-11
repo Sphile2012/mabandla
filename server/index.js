@@ -60,7 +60,7 @@ async function requireAuth(req, res, next) {
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     const { data: user, error } = await supabase
-      .from('users').select('*').eq('id', payload.sub).single();
+      .from('users').select('*').eq('id', payload.sub).maybeSingle();
     if (error || !user) return res.status(401).json({ error: 'User not found' });
     req.user = user;
     next();
@@ -111,7 +111,7 @@ app.patch('/api/auth/me', requireAuth, async (req, res) => {
     if (req.body[key] !== undefined) updates[key] = req.body[key];
   }
   const { data, error } = await supabase
-    .from('users').update(updates).eq('id', req.user.id).select().single();
+    .from('users').update(updates).eq('id', req.user.id).select().maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
 });
@@ -125,7 +125,7 @@ app.post('/api/auth/register', async (req, res) => {
 
   // Check duplicate
   const { data: existing } = await supabase
-    .from('users').select('id').eq('email', email.toLowerCase().trim()).single();
+    .from('users').select('id').eq('email', email.toLowerCase().trim()).maybeSingle();
   if (existing)
     return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' });
 
@@ -133,7 +133,7 @@ app.post('/api/auth/register', async (req, res) => {
   const id = uuidv4();
   const role = email === ADMIN_EMAIL ? 'admin' : 'student';
   const { data, error } = await supabase
-    .from('users').insert({ id, email: email.toLowerCase().trim(), password_hash: hash, full_name: full_name.trim(), role }).select().single();
+    .from('users').insert({ id, email: email.toLowerCase().trim(), password_hash: hash, full_name: full_name.trim(), role }).select().maybeSingle();
   if (error) {
     if (error.code === '23505')
       return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' });
@@ -148,7 +148,7 @@ app.post('/api/auth/login', async (req, res) => {
   if (!email || !password)
     return res.status(400).json({ error: 'Email and password are required' });
   const { data: user, error } = await supabase
-    .from('users').select('*').eq('email', email.toLowerCase().trim()).single();
+    .from('users').select('*').eq('email', email.toLowerCase().trim()).maybeSingle();
   if (error || !user) return res.status(401).json({ error: 'No account found with this email. Please register first.' });
   if (!user.password_hash) return res.status(401).json({ error: 'This account was created differently. Please reset your password.' });
   const valid = await bcrypt.compare(password, user.password_hash);
@@ -192,7 +192,7 @@ app.get('/api/entities/:entity', async (req, res) => {
 app.get('/api/entities/:entity/:id', async (req, res) => {
   const { entity, id } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) return res.status(404).json({ error: 'Unknown entity' });
-  const { data, error } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
+  const { data, error } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
   if (error) return res.status(404).json({ error: 'Not found' });
   res.json(normalise(data));
 });
@@ -201,7 +201,7 @@ app.post('/api/entities/:entity', requireAuth, async (req, res) => {
   const { entity } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) return res.status(404).json({ error: 'Unknown entity' });
   const { data, error } = await supabase
-    .from(TABLE(entity)).insert({ ...req.body, id: uuidv4() }).select().single();
+    .from(TABLE(entity)).insert({ ...req.body, id: uuidv4() }).select().maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json(normalise(data));
 });
@@ -212,7 +212,7 @@ app.patch('/api/entities/:entity/:id', requireAuth, async (req, res) => {
 
   // Data protection: non-admins can only edit their own records
   if (req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
-    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
+    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
     if (existing) {
       const ownerField = existing.user_email || existing.author_email || existing.sender_email;
       if (ownerField && ownerField !== req.user.email) {
@@ -221,7 +221,7 @@ app.patch('/api/entities/:entity/:id', requireAuth, async (req, res) => {
     }
   }
 
-  const { data, error } = await supabase.from(TABLE(entity)).update(req.body).eq('id', id).select().single();
+  const { data, error } = await supabase.from(TABLE(entity)).update(req.body).eq('id', id).select().maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
   res.json(normalise(data));
 });
@@ -232,7 +232,7 @@ app.delete('/api/entities/:entity/:id', requireAuth, async (req, res) => {
 
   // Data protection: non-admins can only delete their own records
   if (req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
-    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
+    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
     if (existing) {
       const ownerField = existing.user_email || existing.author_email || existing.sender_email;
       if (ownerField && ownerField !== req.user.email) {
@@ -284,7 +284,7 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
 app.post('/api/functions/trackVideoView', requireAuth, async (req, res) => {
   const { video_id } = req.body;
   if (!video_id) return res.status(400).json({ error: 'video_id is required' });
-  const { data: video } = await supabase.from('videos').select('views').eq('id', video_id).single();
+  const { data: video } = await supabase.from('videos').select('views').eq('id', video_id).maybeSingle();
   if (!video) return res.status(404).json({ error: 'Video not found' });
   const newViews = (video.views || 0) + 1;
   await supabase.from('videos').update({ views: newViews }).eq('id', video_id);

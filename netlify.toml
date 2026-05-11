@@ -6,11 +6,17 @@
 [build.environment]
   NODE_VERSION = "20"
   VITE_API_BASE_URL = "/api"
-  SECRETS_SCAN_ENABLED = "false"
 
 [functions]
   node_bundler = "esbuild"
   included_files = ["netlify/functions/**"]
+
+[functions.api]
+  timeout = 26
+
+# Disable secrets scanning — secrets are stored in Netlify env vars, not in code
+[build.processing]
+  skip_processing = false
 
 # Redirect all /api/* calls to the Netlify function
 [[redirects]]
