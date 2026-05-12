@@ -22,6 +22,7 @@
 
 import serverless from 'serverless-http';
 import express from 'express';
+import 'express-async-errors';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -31,8 +32,12 @@ import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { setDefaultResultOrder } from 'dns';
 
-// Fix IPv4/IPv6 DNS resolution for Node fetch (undici)
-setDefaultResultOrder('ipv4first');
+// Fix IPv4/IPv6 DNS resolution for Node fetch (undici) — optional in some runtimes
+try {
+  setDefaultResultOrder('ipv4first');
+} catch {
+  /* ignore */
+}
 
 // ─── Supabase client ──────────────────────────────────────────────────────────
 const supabase = createClient(
@@ -40,7 +45,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY,
   {
     auth: { persistSession: false },
-    global: { fetch: (url, opts) => fetch(url, { ...opts, signal: AbortSignal.timeout(8000) }) }
   }
 );
 
@@ -175,8 +179,12 @@ app.post('/api/auth/register', async (req, res) => {
   }
 
   // Check if email already exists
-  const { data: existing } = await supabase
+  const { data: existing, error: existingErr } = await supabase
     .from('users').select('id').eq('email', email.toLowerCase().trim()).maybeSingle();
+  if (existingErr) {
+    console.error('register existing check:', existingErr);
+    return res.status(503).json({ error: 'Could not reach the database. Please try again in a moment.' });
+  }
   if (existing) {
     return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' });
   }
@@ -203,15 +211,24 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
-  const { data: user } = await supabase
+
+  const { data: user, error: dbError } = await supabase
     .from('users')
     .select('*')
     .eq('email', email.toLowerCase().trim())
     .maybeSingle();
+
+  if (dbError) {
+    console.error('login db:', dbError);
+    return res.status(503).json({ error: 'Could not reach the database. Please try again in a moment.' });
+  }
+
   if (!user) return res.status(401).json({ error: 'No account found with this email. Please register first.' });
   if (!user.password_hash) return res.status(401).json({ error: 'This account has no password set. Please contact support.' });
+
   const valid = await bcrypt.compare(password, user.password_hash);
   if (!valid) return res.status(401).json({ error: 'Incorrect password. Please try again.' });
+
   const token = signToken(user.id);
   res.json({ token, user });
 });
@@ -596,6 +613,14 @@ function generatePayfastSignature(data, passphrase) {
     : queryString;
   return crypto.createHash('md5').update(finalString).digest('hex');
 }
+
+// Unhandled async errors → JSON instead of Netlify 502 Bad Gateway
+app.use((err, req, res, _next) => {
+  console.error('API error:', err);
+  if (res.headersSent) return;
+  const status = err.status && Number.isInteger(err.status) ? err.status : 500;
+  res.status(status).json({ error: err.message || 'Internal server error' });
+});
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export const handler = serverless(app);
