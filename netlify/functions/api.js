@@ -53,6 +53,17 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Netlify redirects `/api/*` → `/.netlify/functions/api/:splat`; the function often
+// receives paths without the `/api` prefix (e.g. `/auth/login`). Normalize so routes
+// registered as `/api/...` still match.
+app.use((req, _res, next) => {
+  const p = req.path || '';
+  if (p === '/api' || p.startsWith('/api/')) return next();
+  const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+  req.url = '/api' + p + qs;
+  next();
+});
+
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 function signToken(userId) {
   return jwt.sign({ sub: userId }, JWT_SECRET, { expiresIn: '30d' });

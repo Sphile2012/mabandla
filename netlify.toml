@@ -5,8 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  # In production, call the Netlify function directly (avoids relying on redirects)
-  VITE_API_BASE_URL = "/.netlify/functions/api/api"
+  # Must match src/api/client.js: paths are like /auth/me → full URL /api/auth/me
+  VITE_API_BASE_URL = "/api"
 
 [functions]
   node_bundler = "esbuild"
@@ -19,10 +19,10 @@
 [build.processing]
   skip_processing = false
 
-# Redirect all /api/* calls to the Netlify function
+# Proxy /api/* to the serverless Express app (function file: netlify/functions/api.js)
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/api/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
   force = true
 
