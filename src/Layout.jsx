@@ -34,6 +34,7 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     prince.auth.me().then(u => {
@@ -43,7 +44,7 @@ export default function Layout({ children, currentPageName }) {
         setUser(u);
       }
     }).catch(() => setUser(null));
-  }, []);
+  }, [location.pathname]);
 
   const isAdmin = user?.email === ADMIN_EMAIL || user?.role === 'admin';
   const hasAccess = checkAccess(user);

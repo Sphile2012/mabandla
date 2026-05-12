@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { setToken } from '@/api/client';
 
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const benefits = ['3 days full access', 'All grade lessons', 'Ask questions', 'No credit card'];
@@ -55,7 +56,7 @@ export default function Register() {
         throw new Error(data.error || `Registration failed (${res.status})`);
       }
 
-      localStorage.setItem('access_token', data.token);
+      setToken(data.token);
       sessionStorage.setItem('pendingRegistration', JSON.stringify({
         phone_number: formData.phone_number,
         grade: formData.grade,

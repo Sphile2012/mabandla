@@ -15,7 +15,19 @@ export default function Login() {
   const [showPass, setShowPass] = useState(false);
 
   const urlParams = new URLSearchParams(window.location.search);
-  const returnUrl = urlParams.get('return_url') || createPageUrl('Home');
+  const rawReturn = urlParams.get('return_url');
+  const returnUrl = (() => {
+    const fallback = createPageUrl('Home');
+    if (!rawReturn || typeof rawReturn !== 'string') return fallback;
+    const t = rawReturn.trim();
+    if (!t) return fallback;
+    try {
+      const u = new URL(t, window.location.origin);
+      if (u.origin === window.location.origin) return u.pathname + u.search + u.hash;
+    } catch { /* ignore */ }
+    if (t.startsWith('/') && !t.startsWith('//')) return t;
+    return fallback;
+  })();
 
   useEffect(() => {
     const token = getToken();
@@ -24,7 +36,7 @@ export default function Login() {
         .then(() => navigate(returnUrl, { replace: true }))
         .catch(() => {});
     }
-  }, []);
+  }, [navigate, returnUrl]);
 
   const set = (field) => (e) => {
     setFormData(p => ({ ...p, [field]: e.target.value }));
