@@ -171,14 +171,14 @@ export default function VideoPlayer() {
     <div className="min-h-screen" style={{ background: '#080d1a' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-          <Link to={createPageUrl('Home')} className="hover:text-violet-400 transition-colors text-slate-400">Home</Link>
-          <ChevronRight className="w-4 h-4 text-slate-600" />
-          <Link to={createPageUrl('Categories')} className="hover:text-violet-400 transition-colors text-slate-400">Categories</Link>
-          <ChevronRight className="w-4 h-4 text-slate-600" />
-          <Link to={createPageUrl('Categories') + `?grade=${video.grade}`} className="hover:text-violet-400 transition-colors text-slate-400">{video.grade}</Link>
-          <ChevronRight className="w-4 h-4 text-slate-600" />
-          <span className="text-slate-300 truncate max-w-[200px]">{video.title}</span>
+        <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-slate-500 mb-6 overflow-x-auto max-w-full pb-1 -mx-1 px-1 scrollbar-hide">
+          <Link to={createPageUrl('Home')} className="hover:text-violet-400 transition-colors text-slate-400 shrink-0">Home</Link>
+          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600 shrink-0" />
+          <Link to={createPageUrl('Categories')} className="hover:text-violet-400 transition-colors text-slate-400 shrink-0">Categories</Link>
+          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600 shrink-0" />
+          <Link to={createPageUrl('Categories') + `?grade=${encodeURIComponent(video.grade)}`} className="hover:text-violet-400 transition-colors text-slate-400 shrink-0">{video.grade}</Link>
+          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600 shrink-0" />
+          <span className="text-slate-300 min-w-0 truncate" title={video.title}>{video.title}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -262,7 +262,7 @@ export default function VideoPlayer() {
                   <Badge className={`bg-gradient-to-r ${categoryColors[video.topic] || 'from-slate-400 to-slate-500'} text-white border-0 mb-3`}>
                     {video.topic || video.grade}
                   </Badge>
-                  <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">{video.title}</h1>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 break-words">{video.title}</h1>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
                     <span className="flex items-center gap-1.5">
                       <Eye className="w-4 h-4" />
@@ -316,7 +316,7 @@ export default function VideoPlayer() {
 
           {/* Sidebar - Related Videos */}
           <div className="lg:col-span-1">
-            <div className="sticky top-6">
+            <div className="sticky top-20 lg:top-24">
               <h3 className="font-semibold text-white mb-4">More {video.topic || video.grade} Lessons</h3>
               <div className="space-y-4">
                 {relatedVideos

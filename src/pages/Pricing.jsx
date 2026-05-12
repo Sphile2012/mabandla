@@ -148,8 +148,8 @@ export default function Pricing() {
                 <GraduationCap className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-slate-800">{plan.grade}</h2>
-                <p className="text-slate-500 text-xs md:text-sm">Mathematics by Prince Mabandla</p>
+                <h2 className="text-xl md:text-2xl font-bold text-white">{plan.grade}</h2>
+                <p className="text-slate-400 text-xs md:text-sm">Mathematics by Prince Mabandla</p>
               </div>
             </div>
 
