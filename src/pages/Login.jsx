@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { setToken, getToken } from '@/api/client';
+import { setToken, getToken, getApiBaseUrl, parseJsonBody } from '@/api/client';
 import { prince } from '@/api/princeClient';
 
 export default function Login() {
@@ -51,15 +51,13 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
-      const res = await fetch(`${BASE_URL}/auth/login`, {
+      const res = await fetch(`${getApiBaseUrl()}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email.trim(), password: formData.password }),
       });
 
-      let data;
-      try { data = await res.json(); } catch { data = {}; }
+      const data = await parseJsonBody(res);
 
       if (!res.ok) {
         throw new Error(data.error || `Login failed (${res.status})`);
@@ -74,8 +72,7 @@ export default function Login() {
         navigate(returnUrl, { replace: true });
       }
     } catch (err) {
-      // Network error
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      if (err.name === 'TypeError') {
         setError('Network error — please check your connection and try again.');
       } else {
         setError(err.message || 'Login failed. Please try again.');

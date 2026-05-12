@@ -53,15 +53,48 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Netlify redirects `/api/*` → `/.netlify/functions/api/:splat`; the function often
-// receives paths without the `/api` prefix (e.g. `/auth/login`). Normalize so routes
-// registered as `/api/...` still match.
+// Netlify rewrites `/api/*` → `/.netlify/functions/api/:splat`. Express may see
+// `/.netlify/functions/api/...`, `/auth/...`, or `/api/...` depending on version.
+// Always normalize to `/api/...` so route handlers match.
 app.use((req, _res, next) => {
-  const p = req.path || '';
-  if (p === '/api' || p.startsWith('/api/')) return next();
-  const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
-  req.url = '/api' + p + qs;
+  const full = req.originalUrl || req.url || '';
+  const qIndex = full.indexOf('?');
+  let pathname = qIndex >= 0 ? full.slice(0, qIndex) : full;
+  const query = qIndex >= 0 ? full.slice(qIndex) : '';
+
+  const netlifyFn = '/.netlify/functions/api';
+  if (pathname === netlifyFn || pathname.startsWith(`${netlifyFn}/`)) {
+    pathname = pathname.slice(netlifyFn.length) || '/';
+    if (!pathname.startsWith('/')) pathname = `/${pathname}`;
+  }
+
+  if (pathname === '/api' || pathname.startsWith('/api/')) {
+    req.url = pathname + query;
+    return next();
+  }
+
+  const bareApi =
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/entities') ||
+    pathname.startsWith('/functions') ||
+    pathname.startsWith('/upload') ||
+    pathname.startsWith('/payfast');
+
+  if (bareApi) {
+    req.url = `/api${pathname.startsWith('/') ? pathname : `/${pathname}`}` + query;
+    return next();
+  }
+
+  req.url = pathname + query;
   next();
+});
+
+app.get('/api/health', (_req, res) => {
+  res.json({
+    ok: true,
+    supabaseConfigured: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
+    time: new Date().toISOString(),
+  });
 });
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────

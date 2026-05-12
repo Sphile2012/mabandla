@@ -5,6 +5,26 @@
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
 
+export function getApiBaseUrl() {
+  return BASE_URL;
+}
+
+/** Parse JSON from a fetch Response; throws if body is HTML (e.g. SPA index). */
+export async function parseJsonBody(res) {
+  const text = await res.text();
+  const trimmed = text.trim();
+  if (trimmed.startsWith('<')) {
+    throw new Error(
+      'The server returned a web page instead of API data. /api may not be reaching the Netlify function — redeploy and check Netlify redirects and env vars.'
+    );
+  }
+  try {
+    return trimmed ? JSON.parse(text) : {};
+  } catch {
+    return {};
+  }
+}
+
 function getToken() {
   return localStorage.getItem('access_token') || null;
 }
@@ -18,24 +38,54 @@ async function request(method, path, body, options = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = 'Bearer ' + token;
 
-  const res = await fetch(BASE_URL + path, {
-    method,
-    headers,
-    body: body != null ? JSON.stringify(body) : undefined,
-    ...options,
-  });
-
-  if (!res.ok) {
-    let errData;
-    try { errData = await res.json(); } catch (e) { errData = {}; }
-    const err = new Error(errData.message || errData.error || res.statusText);
-    err.status = res.status;
-    err.data = errData;
+  let res;
+  try {
+    res = await fetch(BASE_URL + path, {
+      method,
+      headers,
+      body: body != null ? JSON.stringify(body) : undefined,
+      ...options,
+    });
+  } catch (e) {
+    const err = new Error(
+      'Cannot reach the API. Check your internet connection, whether this site loads (DNS), and that the backend is deployed on Netlify with env vars set.'
+    );
+    err.cause = e;
     throw err;
   }
 
-  if (res.status === 204) return null;
-  return res.json();
+  if (res.status === 204 || res.status === 205) return null;
+
+  const text = await res.text();
+  const trimmed = text.trim();
+  let data = null;
+  if (trimmed) {
+    if (trimmed.startsWith('<')) {
+      const err = new Error(
+        'The server returned a web page instead of API data — /api is probably not reaching the Netlify function. Redeploy the site and confirm netlify.toml redirects.'
+      );
+      err.status = res.status;
+      throw err;
+    }
+    try {
+      data = JSON.parse(text);
+    } catch {
+      const err = new Error((trimmed.slice(0, 120) || res.statusText) + ' (invalid JSON)');
+      err.status = res.status;
+      throw err;
+    }
+  } else {
+    data = {};
+  }
+
+  if (!res.ok) {
+    const err = new Error((data && (data.message || data.error)) || res.statusText);
+    err.status = res.status;
+    err.data = data || {};
+    throw err;
+  }
+
+  return data;
 }
 
 function makeEntity(name) {

@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { setToken } from '@/api/client';
+import { setToken, getApiBaseUrl, parseJsonBody } from '@/api/client';
 
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const benefits = ['3 days full access', 'All grade lessons', 'Ask questions', 'No credit card'];
@@ -38,8 +38,7 @@ export default function Register() {
     if (!formData.grade) return setError('Please select your grade level.');
     setLoading(true);
     try {
-      const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
-      const res = await fetch(`${BASE_URL}/auth/register`, {
+      const res = await fetch(`${getApiBaseUrl()}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -49,8 +48,7 @@ export default function Register() {
         }),
       });
 
-      let data;
-      try { data = await res.json(); } catch { data = {}; }
+      const data = await parseJsonBody(res);
 
       if (!res.ok) {
         throw new Error(data.error || `Registration failed (${res.status})`);
@@ -65,7 +63,7 @@ export default function Register() {
       toast.success('Account created! Setting up your profile...');
       navigate(createPageUrl('CompleteProfile'));
     } catch (err) {
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      if (err.name === 'TypeError') {
         setError('Network error — please check your connection and try again.');
       } else {
         setError(err.message || 'Registration failed. Please try again.');
