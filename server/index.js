@@ -157,6 +157,81 @@ app.post('/api/auth/login', async (req, res) => {
   res.json({ token, user });
 });
 
+// ─── OTP and Password Reset ─────────────────────────────────────────────────────────
+const otpStore = new Map(); // In production, use Redis or database
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email)
+    return res.status(400).json({ error: 'Email is required' });
+
+  const { data: user, error } = await supabase
+    .from('users').select('*').eq('email', email.toLowerCase().trim()).maybeSingle();
+  
+  if (error || !user) {
+    // Don't reveal if email exists or not for security
+    return res.json({ message: 'If an account exists with this email, a reset code will be sent.' });
+  }
+
+  const otp = generateOTP();
+  otpStore.set(email.toLowerCase().trim(), { otp, expires: Date.now() + 10 * 60 * 1000 }); // 10 minutes
+
+  // In production, send email here
+  console.log(`OTP for ${email}: ${otp}`); // For development
+  
+  res.json({ message: 'Reset code sent to your email.' });
+});
+
+app.post('/api/auth/verify-otp', async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp)
+    return res.status(400).json({ error: 'Email and OTP are required' });
+
+  const stored = otpStore.get(email.toLowerCase().trim());
+  if (!stored || stored.otp !== otp || Date.now() > stored.expires) {
+    return res.status(400).json({ error: 'Invalid or expired code.' });
+  }
+
+  // Mark OTP as verified
+  stored.verified = true;
+  otpStore.set(email.toLowerCase().trim(), stored);
+
+  res.json({ message: 'Code verified successfully.' });
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, otp, new_password } = req.body;
+  if (!email || !otp || !new_password)
+    return res.status(400).json({ error: 'Email, OTP, and new password are required' });
+
+  if (new_password.length < 6)
+    return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+
+  const stored = otpStore.get(email.toLowerCase().trim());
+  if (!stored || !stored.verified || stored.otp !== otp || Date.now() > stored.expires) {
+    return res.status(400).json({ error: 'Invalid or expired verification code.' });
+  }
+
+  const hash = await bcrypt.hash(new_password, 10);
+  const { error } = await supabase
+    .from('users')
+    .update({ password_hash: hash })
+    .eq('email', email.toLowerCase().trim());
+
+  if (error) {
+    return res.status(500).json({ error: 'Failed to update password.' });
+  }
+
+  // Clear OTP
+  otpStore.delete(email.toLowerCase().trim());
+
+  res.json({ message: 'Password reset successfully.' });
+});
+
 // ─── Entity CRUD ──────────────────────────────────────────────────────────────
 const ALLOWED_ENTITIES = ['Video', 'Favorite', 'Comment', 'XPEvent', 'Notification', 'Message', 'User'];
 const TABLE = (name) => name.toLowerCase() + 's';

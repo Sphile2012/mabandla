@@ -123,7 +123,7 @@ export default function Home() {
                 <span>📱</span> Add to Home Screen
               </Link>
               <span className="inline-flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                <span>🚀</span> Android App — Coming Soon
+                <span>�</span> Download Mobile App
               </span>
             </div>
           </motion.div>

@@ -207,7 +207,7 @@ export default function VideoPlayer() {
                 /* Has access but no video uploaded yet */
                 <div className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br ${categoryColors[video.topic] || 'from-violet-600 to-purple-700'}`}>
                   <Play className="w-16 h-16 text-white/60 mb-4" />
-                  <p className="text-white/80 text-lg font-medium">Video coming soon</p>
+                  <p className="text-white/80 text-lg font-medium">Video not available</p>
                 </div>
               ) : (
                 /* Locked — no access */

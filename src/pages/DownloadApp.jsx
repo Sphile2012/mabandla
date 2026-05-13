@@ -16,10 +16,11 @@ const platforms = [
     text: 'text-green-700',
     badge: 'bg-green-100 text-green-800',
     hasApk: true,
+    downloadUrl: 'https://github.com/Sphile2012/math-mastery-hub-copy/releases/latest/download/MathTutor.apk',
     steps: [
-      { title: 'Download the APK', desc: 'Tap the green "Download APK" button above to download MathTutor.apk to your phone.' },
+      { title: 'Download APK', desc: 'Tap the green "Download APK" button to download MathTutor.apk to your phone.' },
       { title: 'Enable Unknown Sources', desc: 'When prompted, tap "Settings" and enable "Install from this source" (or go to Settings → Security → Unknown Sources).' },
-      { title: 'Open the File', desc: 'Open your Downloads folder and tap on MathTutor.apk.' },
+      { title: 'Open File', desc: 'Open your Downloads folder and tap on MathTutor.apk.' },
       { title: 'Install & Sign In', desc: 'Tap "Install", wait for it to finish, then open the app and sign in.' },
     ],
     note: 'Requires Android 5.0 or higher',
@@ -34,13 +35,14 @@ const platforms = [
     text: 'text-slate-700',
     badge: 'bg-slate-100 text-slate-800',
     hasApk: false,
+    downloadUrl: 'https://princemath.co.za',
     steps: [
       { title: 'Open Safari', desc: 'On your iPhone or iPad, open Safari (not Chrome).' },
-      { title: 'Visit the Website', desc: 'Go to princemath.co.za in Safari.' },
-      { title: 'Tap the Share Button', desc: 'Tap the Share icon (the box with an arrow pointing up) at the bottom of Safari.' },
+      { title: 'Visit Website', desc: 'Go to princemath.co.za in Safari.' },
+      { title: 'Tap Share Button', desc: 'Tap the Share icon (the box with an arrow pointing up) at the bottom of Safari.' },
       { title: 'Add to Home Screen', desc: 'Scroll down and tap "Add to Home Screen", then tap "Add". The MathTutor icon will appear on your home screen!' },
     ],
-    note: 'Works on iOS 12 or higher — no App Store needed',
+    note: 'Works on iOS 12 or higher — Web App Available',
   },
   {
     id: 'desktop',
@@ -52,13 +54,14 @@ const platforms = [
     text: 'text-blue-700',
     badge: 'bg-blue-100 text-blue-800',
     hasApk: false,
+    downloadUrl: 'https://princemath.co.za',
     steps: [
-      { title: 'Open Chrome or Edge', desc: 'Use Google Chrome or Microsoft Edge on your computer.' },
-      { title: 'Visit the Website', desc: 'Go to princemath.co.za.' },
-      { title: 'Click the Install Icon', desc: 'Look for the install icon (⊕) in the browser address bar on the right side.' },
-      { title: 'Install & Launch', desc: 'Click "Install" and MathTutor will open like a desktop app — no browser tab needed!' },
+      { title: 'Open Browser', desc: 'Open Google Chrome, Microsoft Edge, Safari, or Firefox on your computer.' },
+      { title: 'Visit Website', desc: 'Go to princemath.co.za.' },
+      { title: 'Install as App', desc: 'Click the install icon (⊕) in the browser address bar to install MathTutor as a desktop app.' },
+      { title: 'Launch & Sign In', desc: 'Open MathTutor from your desktop or applications folder and sign in.' },
     ],
-    note: 'Works on Windows, Mac, and Linux',
+    note: 'Works on Windows, Mac, and Linux — PWA Available',
   },
 ];
 
@@ -77,12 +80,13 @@ export default function DownloadApp() {
   }, []);
 
   const handleDownloadApk = async () => {
-    // Try APK URL from function first
-    if (apkInfo?.downloadUrl) {
-      window.open(apkInfo.downloadUrl, '_blank');
+    // Use direct download URL from platform config
+    const platform = platforms.find(p => p.id === selected);
+    if (platform?.downloadUrl) {
+      window.open(platform.downloadUrl, '_blank');
       return;
     }
-    // Fallback: direct download from GitHub releases or known URL
+    // Fallback: GitHub releases
     const fallbackUrl = 'https://github.com/Sphile2012/math-mastery-hub-copy/releases/latest/download/MathTutor.apk';
     window.open(fallbackUrl, '_blank');
   };
@@ -114,8 +118,8 @@ export default function DownloadApp() {
                 onClick={handleDownloadApk}
                 className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 sm:px-8 h-12 w-full sm:w-auto"
               >
-                <Download className="w-5 h-5 mr-2 shrink-0" />
-                Download Android APK
+                <Download className="w-5 h-5 mr-2" />
+                Download Android App
               </Button>
               <Button
                 size="lg"

@@ -38,13 +38,24 @@ export default function CompleteProfile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.grade) { toast.error('Please select your grade'); return; }
+    if (!formData.grade) { 
+      toast.error('Please select your grade'); 
+      return; 
+    }
+    
+    // Validate phone number if provided
+    if (formData.phone_number && !/^0[6-8]\d{8}$/.test(formData.phone_number.replace(/\s/g, ''))) {
+      toast.error('Please enter a valid South African phone number (e.g., 0812345678)');
+      return;
+    }
+    
     setLoading(true);
     try {
       const trialEndDate = new Date();
       trialEndDate.setDate(trialEndDate.getDate() + 3);
+      
       await prince.auth.updateMe({
-        phone_number: formData.phone_number,
+        phone_number: formData.phone_number.trim(),
         grade: formData.grade,
         subscription_tier: 'Trial',
         trial_end_date: trialEndDate.toISOString(),
@@ -53,10 +64,13 @@ export default function CompleteProfile() {
         ...(formData.account_number && { account_number: formData.account_number }),
         ...(formData.account_type && { account_type: formData.account_type }),
       });
+      
       toast.success('🎉 Welcome! Your 3-day free trial has started!');
       navigate(createPageUrl('Home'));
     } catch (err) {
-      toast.error('Failed to set up trial: ' + err.message);
+      console.error('Profile completion error:', err);
+      toast.error('Failed to set up trial: ' + (err.message || 'Please try again.'));
+    } finally {
       setLoading(false);
     }
   };

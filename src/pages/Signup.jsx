@@ -25,11 +25,17 @@ export default function Signup() {
       setError('Please enter your name.');
       return;
     }
+    if (formData.name.trim().length < 2) {
+      setError('Name must be at least 2 characters long.');
+      return;
+    }
     if (!formData.email.trim()) {
       setError('Please enter your email address.');
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+    // Enhanced email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
       setError('Please enter a valid email address.');
       return;
     }
@@ -38,7 +44,12 @@ export default function Signup() {
       return;
     }
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+    // Password strength check
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      setError('Password should contain uppercase, lowercase, and numbers for better security.');
       return;
     }
 
@@ -71,6 +82,7 @@ export default function Signup() {
         navigate(createPageUrl('Home'), { replace: true });
       }
     } catch (err) {
+      console.error('Signup error:', err);
       if (err.name === 'TypeError') {
         setError('Network error — please check your connection and try again.');
       } else {
@@ -193,6 +205,32 @@ export default function Signup() {
                   onFocus={(e) => (e.target.style.borderColor = focusBorder)}
                   onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                 />
+                {formData.password.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1 bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full transition-all duration-300"
+                          style={{
+                            width: `${Math.min((formData.password.length / 12) * 100, 100)}%`,
+                            backgroundColor: formData.password.length < 6 ? '#ef4444' : 
+                                           formData.password.length < 8 ? '#f59e0b' : '#10b981'
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-slate-400">
+                        {formData.password.length < 6 ? 'Weak' : 
+                         formData.password.length < 8 ? 'Fair' : 'Strong'}
+                      </span>
+                    </div>
+                    {formData.password.length < 6 && (
+                      <p className="text-xs text-amber-400">Password needs {6 - formData.password.length} more character{6 - formData.password.length !== 1 ? 's' : ''}</p>
+                    )}
+                    {formData.password.length >= 6 && !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password) && (
+                      <p className="text-xs text-amber-400">Add uppercase, lowercase, and numbers for better security</p>
+                    )}
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}

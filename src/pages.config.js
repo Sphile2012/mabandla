@@ -53,6 +53,7 @@ import Categories from './pages/Categories';
 import CompleteProfile from './pages/CompleteProfile';
 import DownloadApp from './pages/DownloadApp';
 import Favorites from './pages/Favorites';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Messages from './pages/Messages';
@@ -61,6 +62,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import Pricing from './pages/Pricing';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
+import ResetPassword from './pages/ResetPassword';
 import StudentDashboard from './pages/StudentDashboard';
 import VideoPlayer from './pages/VideoPlayer';
 import __Layout from './Layout.jsx';
@@ -74,6 +76,7 @@ export const PAGES = {
     "CompleteProfile": CompleteProfile,
     "DownloadApp": DownloadApp,
     "Favorites": Favorites,
+    "ForgotPassword": ForgotPassword,
     "Home": Home,
     "Login": Login,
     "Messages": Messages,
@@ -82,6 +85,7 @@ export const PAGES = {
     "Pricing": Pricing,
     "Profile": Profile,
     "Register": Register,
+    "ResetPassword": ResetPassword,
     "StudentDashboard": StudentDashboard,
     "VideoPlayer": VideoPlayer,
     "Signup": Signup,

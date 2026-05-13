@@ -48,13 +48,26 @@ export default function Login() {
     setError('');
     if (!formData.email.trim()) { setError('Please enter your email address.'); return; }
     if (!formData.password) { setError('Please enter your password.'); return; }
+    
+    // Enhanced email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    
+    // Password strength validation
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
 
     setLoading(true);
     try {
       const res = await fetch(`${getApiBaseUrl()}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email.trim(), password: formData.password }),
+        body: JSON.stringify({ email: formData.email.trim().toLowerCase(), password: formData.password }),
       });
 
       const data = await parseJsonBody(res);
@@ -72,6 +85,7 @@ export default function Login() {
         navigate(returnUrl, { replace: true });
       }
     } catch (err) {
+      console.error('Login error:', err);
       if (err.name === 'TypeError') {
         setError('Network error — please check your connection and try again.');
       } else {
@@ -189,10 +203,18 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 h-px bg-white/8" />
-            <span className="text-xs text-slate-600">new here?</span>
-            <div className="flex-1 h-px bg-white/8" />
+          <div className="flex justify-between items-center my-5">
+            <Link 
+              to={createPageUrl('ForgotPassword')}
+              className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+            >
+              Forgot password?
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="h-px bg-white/8 w-16" />
+              <span className="text-xs text-slate-600">new here?</span>
+              <div className="h-px bg-white/8 w-16" />
+            </div>
           </div>
 
           <Link to={createPageUrl('Register')}
