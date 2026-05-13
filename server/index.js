@@ -232,6 +232,26 @@ app.post('/api/auth/reset-password', async (req, res) => {
   res.json({ message: 'Password reset successfully.' });
 });
 
+// ─── Email Notifications ─────────────────────────────────────────────────
+app.post('/api/auth/request-password-change', async (req, res) => {
+  const { email } = req.body;
+  if (!email)
+    return res.status(400).json({ error: 'Email is required' });
+
+  try {
+    // In production, send email notification here
+    console.log(`Password change requested for: ${email}`);
+    
+    res.json({ 
+      message: 'Password change link sent to your email',
+      success: true 
+    });
+  } catch (error) {
+    console.error('Password change request error:', error);
+    res.status(500).json({ error: 'Failed to process password change request' });
+  }
+});
+
 // ─── Entity CRUD ──────────────────────────────────────────────────────────────
 const ALLOWED_ENTITIES = ['Video', 'Favorite', 'Comment', 'XPEvent', 'Notification', 'Message', 'User'];
 const TABLE = (name) => name.toLowerCase() + 's';

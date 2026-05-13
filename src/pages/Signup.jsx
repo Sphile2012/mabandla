@@ -170,15 +170,14 @@ export default function Signup() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Email <span className="text-xs text-slate-500">(optional)</span></label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
                 <input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="you@example.com (optional)"
                   value={formData.email}
                   onChange={set('email')}
-                  required
                   autoComplete="email"
                   className={inputClass}
                   style={{ ...inputStyle, paddingLeft: '2.5rem', paddingRight: '1rem' }}
