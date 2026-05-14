@@ -13,15 +13,6 @@ import { createPageUrl } from '@/utils';
 const banks = ['FNB','Standard Bank','ABSA','Nedbank','Capitec','African Bank','Discovery Bank','TymeBank','Investec'];
 const grades = ['Grade 10','Grade 11','Grade 12'];
 
-// Email notification preferences
-const emailNotifications = [
-  { id: 'password_changes', label: 'Password changes', description: 'Notify when password is changed' },
-  { id: 'login_alerts', label: 'Login alerts', description: 'Notify on new login attempts' },
-  { id: 'account_updates', label: 'Account updates', description: 'Important account notifications' },
-  { id: 'promotional', label: 'Promotional emails', description: 'Special offers and announcements' },
-  { id: 'security', label: 'Security alerts', description: 'Security and privacy notifications' }
-];
-
 // Reusable dark section card — plain function, no forwardRef needed
 function Section({ sectionRef = null, icon, title, desc, children }) {
   return (
@@ -46,7 +37,6 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     full_name: '', phone_number: '', grade: '',
     bank_name: '', account_holder: '', account_number: '', account_type: '',
-    email_notifications: {},
   });
 
   useEffect(() => {
@@ -63,7 +53,6 @@ export default function Profile() {
         account_holder: u.account_holder || '',
         account_number: u.account_number || '',
         account_type: u.account_type || '',
-        email_notifications: u.email_notifications || {},
       });
     }).catch(() => navigate(createPageUrl('Login')));
   }, []);
@@ -224,38 +213,6 @@ export default function Profile() {
                 </Link>
               </div>
             )}
-          </Section>
-
-          {/* Email Notifications */}
-          <Section sectionRef={null} icon={<Shield className="w-4 h-4 text-violet-400" />} title="Email Notifications" desc="Manage your email notification preferences">
-            <div className="space-y-4">
-              {emailNotifications.map(notification => (
-                <div key={notification.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-700/50 border border-slate-600/30">
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <h4 className="font-medium text-white">{notification.label}</h4>
-                      <p className="text-xs text-slate-300">{notification.description}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={user.email_notifications?.[notification.id] || false}
-                          onChange={(e) => {
-                            const updated = { ...user.email_notifications, [notification.id]: e.target.checked };
-                            prince.auth.updateMe({ email_notifications: updated }).catch(() => {
-                              toast.error('Failed to update notification preferences');
-                            });
-                          }}
-                          className="w-4 h-4 text-violet-400 rounded focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
-                        />
-                        <span className="ml-2 text-sm text-slate-300">{notification.label}</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </Section>
 
           {/* Save */}

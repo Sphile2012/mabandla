@@ -60,7 +60,7 @@ async function requireAuth(req, res, next) {
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     const { data: user, error } = await supabase
-      .from('users').select('*').eq('id', payload.sub).maybeSingle();
+      .from('users').select('*').eq('id', payload.sub).single();
     if (error || !user) return res.status(401).json({ error: 'User not found' });
     req.user = user;
     next();
@@ -111,145 +111,57 @@ app.patch('/api/auth/me', requireAuth, async (req, res) => {
     if (req.body[key] !== undefined) updates[key] = req.body[key];
   }
   const { data, error } = await supabase
-    .from('users').update(updates).eq('id', req.user.id).select().maybeSingle();
+    .from('users').update(updates).eq('id', req.user.id).select().single();
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
 });
 
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, full_name } = req.body;
-  if (!email || !password || !full_name)
-    return res.status(400).json({ error: 'Name, email and password are required' });
-  if (password.length < 6)
-    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  if (!password || !full_name)
+    return res.status(400).json({ error: 'password and full_name are required' });
 
-  // Check duplicate
-  const { data: existing } = await supabase
-    .from('users').select('id').eq('email', email.toLowerCase().trim()).maybeSingle();
-  if (existing)
-    return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' });
+  // Email is optional - if provided, check if it exists
+  if (email) {
+    const { data: existing } = await supabase
+      .from('users').select('id').eq('email', email).single();
+    if (existing) return res.status(400).json({ error: 'An account with this email already exists' });
+  }
 
   const hash = await bcrypt.hash(password, 10);
   const id = uuidv4();
   const role = email === ADMIN_EMAIL ? 'admin' : 'student';
   const { data, error } = await supabase
-    .from('users').insert({ id, email: email.toLowerCase().trim(), password_hash: hash, full_name: full_name.trim(), role }).select().maybeSingle();
-  if (error) {
-    if (error.code === '23505')
-      return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' });
-    return res.status(400).json({ error: error.message });
-  }
+    .from('users').insert({ id, email: email || null, password_hash: hash, full_name, role }).select().single();
+  if (error) return res.status(400).json({ error: error.message });
   const token = signToken(data.id);
   res.json({ token, user: data });
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: 'Email and password are required' });
-  const { data: user, error } = await supabase
-    .from('users').select('*').eq('email', email.toLowerCase().trim()).maybeSingle();
-  if (error || !user) return res.status(401).json({ error: 'No account found with this email. Please register first.' });
-  if (!user.password_hash) return res.status(401).json({ error: 'This account was created differently. Please reset your password.' });
-  const valid = await bcrypt.compare(password, user.password_hash);
-  if (!valid) return res.status(401).json({ error: 'Incorrect password. Please try again.' });
+  const { email, password, username } = req.body;
+  if (!password)
+    return res.status(400).json({ error: 'password required' });
+  if (!email && !username)
+    return res.status(400).json({ error: 'email or username required' });
+
+  // Try email first, then username
+  let user, error;
+  if (email) {
+    const result = await supabase.from('users').select('*').eq('email', email).single();
+    user = result.data;
+    error = result.error;
+  } else {
+    const result = await supabase.from('users').select('*').eq('full_name', username).single();
+    user = result.data;
+    error = result.error;
+  }
+
+  if (error || !user) return res.status(401).json({ error: 'Invalid credentials' });
+  const valid = await bcrypt.compare(password, user.password_hash || '');
+  if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
   const token = signToken(user.id);
   res.json({ token, user });
-});
-
-// ─── OTP and Password Reset ─────────────────────────────────────────────────────────
-const otpStore = new Map(); // In production, use Redis or database
-
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-app.post('/api/auth/forgot-password', async (req, res) => {
-  const { email } = req.body;
-  if (!email)
-    return res.status(400).json({ error: 'Email is required' });
-
-  const { data: user, error } = await supabase
-    .from('users').select('*').eq('email', email.toLowerCase().trim()).maybeSingle();
-  
-  if (error || !user) {
-    // Don't reveal if email exists or not for security
-    return res.json({ message: 'If an account exists with this email, a reset code will be sent.' });
-  }
-
-  const otp = generateOTP();
-  otpStore.set(email.toLowerCase().trim(), { otp, expires: Date.now() + 10 * 60 * 1000 }); // 10 minutes
-
-  // In production, send email here
-  console.log(`OTP for ${email}: ${otp}`); // For development
-  
-  res.json({ message: 'Reset code sent to your email.' });
-});
-
-app.post('/api/auth/verify-otp', async (req, res) => {
-  const { email, otp } = req.body;
-  if (!email || !otp)
-    return res.status(400).json({ error: 'Email and OTP are required' });
-
-  const stored = otpStore.get(email.toLowerCase().trim());
-  if (!stored || stored.otp !== otp || Date.now() > stored.expires) {
-    return res.status(400).json({ error: 'Invalid or expired code.' });
-  }
-
-  // Mark OTP as verified
-  stored.verified = true;
-  otpStore.set(email.toLowerCase().trim(), stored);
-
-  res.json({ message: 'Code verified successfully.' });
-});
-
-app.post('/api/auth/reset-password', async (req, res) => {
-  const { email, otp, new_password } = req.body;
-  if (!email || !otp || !new_password)
-    return res.status(400).json({ error: 'Email, OTP, and new password are required' });
-
-  if (new_password.length < 6)
-    return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
-
-  const stored = otpStore.get(email.toLowerCase().trim());
-  if (!stored || !stored.verified || stored.otp !== otp || Date.now() > stored.expires) {
-    return res.status(400).json({ error: 'Invalid or expired verification code.' });
-  }
-
-  const hash = await bcrypt.hash(new_password, 10);
-  const { error } = await supabase
-    .from('users')
-    .update({ password_hash: hash })
-    .eq('email', email.toLowerCase().trim());
-
-  if (error) {
-    return res.status(500).json({ error: 'Failed to update password.' });
-  }
-
-  // Clear OTP
-  otpStore.delete(email.toLowerCase().trim());
-
-  res.json({ message: 'Password reset successfully.' });
-});
-
-// ─── Email Notifications ─────────────────────────────────────────────────
-app.post('/api/auth/request-password-change', async (req, res) => {
-  const { email } = req.body;
-  if (!email)
-    return res.status(400).json({ error: 'Email is required' });
-
-  try {
-    // In production, send email notification here
-    console.log(`Password change requested for: ${email}`);
-    
-    res.json({ 
-      message: 'Password change link sent to your email',
-      success: true 
-    });
-  } catch (error) {
-    console.error('Password change request error:', error);
-    res.status(500).json({ error: 'Failed to process password change request' });
-  }
 });
 
 // ─── Entity CRUD ──────────────────────────────────────────────────────────────
@@ -287,7 +199,7 @@ app.get('/api/entities/:entity', async (req, res) => {
 app.get('/api/entities/:entity/:id', async (req, res) => {
   const { entity, id } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) return res.status(404).json({ error: 'Unknown entity' });
-  const { data, error } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
+  const { data, error } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
   if (error) return res.status(404).json({ error: 'Not found' });
   res.json(normalise(data));
 });
@@ -296,7 +208,7 @@ app.post('/api/entities/:entity', requireAuth, async (req, res) => {
   const { entity } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) return res.status(404).json({ error: 'Unknown entity' });
   const { data, error } = await supabase
-    .from(TABLE(entity)).insert({ ...req.body, id: uuidv4() }).select().maybeSingle();
+    .from(TABLE(entity)).insert({ ...req.body, id: uuidv4() }).select().single();
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json(normalise(data));
 });
@@ -307,7 +219,7 @@ app.patch('/api/entities/:entity/:id', requireAuth, async (req, res) => {
 
   // Data protection: non-admins can only edit their own records
   if (req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
-    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
+    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
     if (existing) {
       const ownerField = existing.user_email || existing.author_email || existing.sender_email;
       if (ownerField && ownerField !== req.user.email) {
@@ -316,7 +228,7 @@ app.patch('/api/entities/:entity/:id', requireAuth, async (req, res) => {
     }
   }
 
-  const { data, error } = await supabase.from(TABLE(entity)).update(req.body).eq('id', id).select().maybeSingle();
+  const { data, error } = await supabase.from(TABLE(entity)).update(req.body).eq('id', id).select().single();
   if (error) return res.status(400).json({ error: error.message });
   res.json(normalise(data));
 });
@@ -327,7 +239,7 @@ app.delete('/api/entities/:entity/:id', requireAuth, async (req, res) => {
 
   // Data protection: non-admins can only delete their own records
   if (req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
-    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
+    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
     if (existing) {
       const ownerField = existing.user_email || existing.author_email || existing.sender_email;
       if (ownerField && ownerField !== req.user.email) {
@@ -346,9 +258,9 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
   const { grade, tier, amount } = req.body;
   if (!grade || !tier || !amount)
     return res.status(400).json({ error: 'Missing required fields' });
-  const merchantId = process.env.PAYFAST_MERCHANT_ID;
-  const merchantKey = process.env.PAYFAST_MERCHANT_KEY;
-  const passphrase = process.env.PAYFAST_PASSPHRASE;
+  const merchantId = process.env.PAYFAST_MERCHANT_ID || '33954157';
+  const merchantKey = process.env.PAYFAST_MERCHANT_KEY || 'f5dfdtf71uqh2';
+  const passphrase = process.env.PAYFAST_PASSPHRASE || 'Lusindiso.1974';
   const isSandbox = process.env.PAYFAST_SANDBOX === 'true';
   const paymentUrl = isSandbox
     ? 'https://sandbox.payfast.co.za/eng/process'
@@ -379,7 +291,7 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
 app.post('/api/functions/trackVideoView', requireAuth, async (req, res) => {
   const { video_id } = req.body;
   if (!video_id) return res.status(400).json({ error: 'video_id is required' });
-  const { data: video } = await supabase.from('videos').select('views').eq('id', video_id).maybeSingle();
+  const { data: video } = await supabase.from('videos').select('views').eq('id', video_id).single();
   if (!video) return res.status(404).json({ error: 'Video not found' });
   const newViews = (video.views || 0) + 1;
   await supabase.from('videos').update({ views: newViews }).eq('id', video_id);
@@ -450,7 +362,7 @@ app.post('/api/functions/getApkDownload', (req, res) => {
 app.post('/api/payfast-webhook', express.urlencoded({ extended: true }), async (req, res) => {
   try {
     const raw = req.body;
-    const passphrase = process.env.PAYFAST_PASSPHRASE || '';
+    const passphrase = process.env.PAYFAST_PASSPHRASE || 'Lusindiso.1974';
     const sigParams = new URLSearchParams();
     for (const key of Object.keys(raw).filter(k => k !== 'signature').sort()) {
       sigParams.append(key, String(raw[key]).trim());

@@ -44,13 +44,6 @@
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
     -webkit-text-size-adjust: 100%;
-    overflow-x: clip;
-  }
-
-  #root {
-    min-height: 100dvh;
-    min-height: 100vh;
-    overflow-x: clip;
   }
 
   body {
@@ -66,13 +59,6 @@
       radial-gradient(ellipse 60% 50% at 90% 100%, rgba(37,99,235,0.08) 0%, transparent 60%),
       radial-gradient(ellipse 40% 40% at 50% 50%, rgba(6,182,212,0.04) 0%, transparent 70%);
     background-attachment: fixed;
-  }
-
-  @media (max-width: 768px) {
-    body {
-      /* Fixed backgrounds often jank on mobile; scroll is smoother */
-      background-attachment: scroll;
-    }
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -374,50 +360,5 @@
     border: 1px solid rgba(124,58,237,0.2);
     border-radius: 0.5rem;
     padding: 0.1em 0.4em;
-  }
-
-  /* Horizontal filter rows (Categories) — hide scrollbar, keep swipe scroll */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Slightly smaller tap delay on controls */
-  button,
-  a[role='button'],
-  input[type='submit'] {
-    touch-action: manipulation;
-  }
-}
-
-/* Responsive typography — keep body readable (avoid 12px on phones) */
-@media (max-width: 768px) {
-  body {
-    font-size: 14px;
-  }
-
-  .container {
-    padding: 1rem;
-  }
-
-  .nav-link {
-    font-size: 0.8125rem;
-  }
-}
-
-@media (max-width: 480px) {
-  body {
-    font-size: 14px;
-  }
-
-  .container {
-    padding: 0.75rem;
-  }
-
-  .nav-link {
-    font-size: 0.8125rem;
   }
 }

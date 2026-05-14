@@ -29,15 +29,13 @@ export default function Signup() {
       setError('Name must be at least 2 characters long.');
       return;
     }
-    if (!formData.email.trim()) {
-      setError('Please enter your email address.');
-      return;
-    }
-    // Enhanced email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email.trim())) {
-      setError('Please enter a valid email address.');
-      return;
+    // Email is optional - only validate if provided
+    if (formData.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        setError('Please enter a valid email address or leave it blank.');
+        return;
+      }
     }
     if (!formData.password) {
       setError('Please enter your password.');

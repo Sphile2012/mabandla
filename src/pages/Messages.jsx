@@ -29,17 +29,11 @@ export default function Messages() {
   }, [selectedUser]);
 
   // Only load users who have a full_name (username set)
-  // Hide sensitive user data for security - only show usernames
   const { data: allUsers = [] } = useQuery({
     queryKey: ['users-chat'],
     queryFn: () => prince.entities.User.list(),
     enabled: !!user,
-    select: (data) => data.filter(u => u.email !== user?.email && u.full_name).map(u => ({
-      ...u,
-      email: undefined, // Hide email for security
-      phone_number: undefined, // Hide phone for security
-      id: undefined // Hide ID for security
-    })),
+    select: (data) => data.filter(u => u.email !== user?.email && u.full_name),
   });
 
   const { data: messages = [], refetch: refetchMessages } = useQuery({
@@ -99,7 +93,7 @@ export default function Messages() {
     }
   };
 
-  // Build conversation list - hide sensitive info
+  // Build conversation list
   const conversations = allUsers.map(otherUser => {
     const thread = allMessages.filter(m =>
       (m.sender_email === user?.email && m.recipient_email === otherUser.email) ||
@@ -107,19 +101,7 @@ export default function Messages() {
     ).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
 
     const unread = thread.filter(m => m.recipient_email === user?.email && !m.is_read).length;
-    
-    // Return safe user data - hide email and other sensitive info
-    return { 
-      user: {
-        ...otherUser,
-        email: undefined, // Hide email for security
-        phone_number: undefined, // Hide phone for security
-        id: undefined // Hide ID for security
-      }, 
-      messages: thread, 
-      lastMessage: thread[thread.length - 1], 
-      unread 
-    };
+    return { user: otherUser, messages: thread, lastMessage: thread[thread.length - 1], unread };
   })
     .filter(c => !searchQuery || c.user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
@@ -129,20 +111,7 @@ export default function Messages() {
       return new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date);
     });
 
-  // Hide sensitive user data in message display
-  const formatMessageContent = (message) => {
-    // Only show sender name, not email or other sensitive info
-    return {
-      ...message,
-      sender_email: message.sender_email === user?.email ? 'You' : message.sender_name || 'Unknown',
-      recipient_email: undefined // Hide recipient email for security
-    };
-  };
-
-  const safeConversations = conversations.map(conv => ({
-    ...conv,
-    messages: conv.messages.map(formatMessageContent)
-  }));
+  const activeConv = selectedUser ? conversations.find(c => c.user.email === selectedUser.email) : null;
 
   // Mark messages as read when opening conversation
   useEffect(() => {

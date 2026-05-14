@@ -5,24 +5,14 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  # Must match src/api/client.js: paths are like /auth/me → full URL /api/auth/me
-  VITE_API_BASE_URL = "/api"
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["netlify/functions/**"]
 
-[functions.api]
-  timeout = 26
-
-# Disable secrets scanning — secrets are stored in Netlify env vars, not in code
-[build.processing]
-  skip_processing = false
-
-# Proxy /api/* to the serverless Express app (function file: netlify/functions/api.js)
+# Redirect all /api/* calls to the Netlify function
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  to = "/.netlify/functions/api/api/:splat"
   status = 200
   force = true
 

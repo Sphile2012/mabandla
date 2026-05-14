@@ -1,9 +1,10 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { motion } from 'framer-motion';
-import { Download, Smartphone, Monitor, CheckCircle, Shield, Apple, Globe } from 'lucide-react';
+import { Download, Smartphone, Monitor, CheckCircle, Shield, Apple, Globe, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 const platforms = [
   {
@@ -16,11 +17,10 @@ const platforms = [
     text: 'text-green-700',
     badge: 'bg-green-100 text-green-800',
     hasApk: true,
-    downloadUrl: 'https://github.com/Sphile2012/math-mastery-hub-copy/releases/latest/download/MathTutor.apk',
     steps: [
-      { title: 'Download APK', desc: 'Tap the green "Download APK" button to download MathTutor.apk to your phone.' },
+      { title: 'Download the APK', desc: 'Tap the green "Download APK" button above to download MathTutor.apk to your phone.' },
       { title: 'Enable Unknown Sources', desc: 'When prompted, tap "Settings" and enable "Install from this source" (or go to Settings → Security → Unknown Sources).' },
-      { title: 'Open File', desc: 'Open your Downloads folder and tap on MathTutor.apk.' },
+      { title: 'Open the File', desc: 'Open your Downloads folder and tap on MathTutor.apk.' },
       { title: 'Install & Sign In', desc: 'Tap "Install", wait for it to finish, then open the app and sign in.' },
     ],
     note: 'Requires Android 5.0 or higher',
@@ -35,14 +35,13 @@ const platforms = [
     text: 'text-slate-700',
     badge: 'bg-slate-100 text-slate-800',
     hasApk: false,
-    downloadUrl: 'https://princemath.co.za',
     steps: [
       { title: 'Open Safari', desc: 'On your iPhone or iPad, open Safari (not Chrome).' },
-      { title: 'Visit Website', desc: 'Go to princemath.co.za in Safari.' },
-      { title: 'Tap Share Button', desc: 'Tap the Share icon (the box with an arrow pointing up) at the bottom of Safari.' },
+      { title: 'Visit the Website', desc: 'Go to princemath.co.za in Safari.' },
+      { title: 'Tap the Share Button', desc: 'Tap the Share icon (the box with an arrow pointing up) at the bottom of Safari.' },
       { title: 'Add to Home Screen', desc: 'Scroll down and tap "Add to Home Screen", then tap "Add". The MathTutor icon will appear on your home screen!' },
     ],
-    note: 'Works on iOS 12 or higher — Web App Available',
+    note: 'Works on iOS 12 or higher — no App Store needed',
   },
   {
     id: 'desktop',
@@ -54,14 +53,13 @@ const platforms = [
     text: 'text-blue-700',
     badge: 'bg-blue-100 text-blue-800',
     hasApk: false,
-    downloadUrl: 'https://princemath.co.za',
     steps: [
-      { title: 'Open Browser', desc: 'Open Google Chrome, Microsoft Edge, Safari, or Firefox on your computer.' },
-      { title: 'Visit Website', desc: 'Go to princemath.co.za.' },
-      { title: 'Install as App', desc: 'Click the install icon (⊕) in the browser address bar to install MathTutor as a desktop app.' },
-      { title: 'Launch & Sign In', desc: 'Open MathTutor from your desktop or applications folder and sign in.' },
+      { title: 'Open Chrome or Edge', desc: 'Use Google Chrome or Microsoft Edge on your computer.' },
+      { title: 'Visit the Website', desc: 'Go to princemath.co.za.' },
+      { title: 'Click the Install Icon', desc: 'Look for the install icon (⊕) in the browser address bar on the right side.' },
+      { title: 'Install & Launch', desc: 'Click "Install" and MathTutor will open like a desktop app — no browser tab needed!' },
     ],
-    note: 'Works on Windows, Mac, and Linux — PWA Available',
+    note: 'Works on Windows, Mac, and Linux',
   },
 ];
 
@@ -80,13 +78,12 @@ export default function DownloadApp() {
   }, []);
 
   const handleDownloadApk = async () => {
-    // Use direct download URL from platform config
-    const platform = platforms.find(p => p.id === selected);
-    if (platform?.downloadUrl) {
-      window.open(platform.downloadUrl, '_blank');
+    // Try APK URL from function first
+    if (apkInfo?.downloadUrl) {
+      window.open(apkInfo.downloadUrl, '_blank');
       return;
     }
-    // Fallback: GitHub releases
+    // Fallback: direct download from GitHub releases or known URL
     const fallbackUrl = 'https://github.com/Sphile2012/math-mastery-hub-copy/releases/latest/download/MathTutor.apk';
     window.open(fallbackUrl, '_blank');
   };
@@ -112,19 +109,19 @@ export default function DownloadApp() {
             </p>
 
             {/* Download APK button — shown for Android */}
-            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto px-1">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button
                 size="lg"
                 onClick={handleDownloadApk}
-                className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 sm:px-8 h-12 w-full sm:w-auto"
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold px-8 h-12"
               >
                 <Download className="w-5 h-5 mr-2" />
-                Download Android App
+                Download Android APK
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 px-6 sm:px-8 h-12 w-full sm:w-auto"
+                className="border-white/30 text-white hover:bg-white/10 px-8 h-12"
                 onClick={() => {
                   setSelected('ios');
                   document.getElementById('platform-tabs')?.scrollIntoView({ behavior: 'smooth' });
@@ -140,19 +137,19 @@ export default function DownloadApp() {
 
       {/* Platform Tabs */}
       <div id="platform-tabs" className="max-w-3xl mx-auto px-4 -mt-5">
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-1.5 sm:p-2 grid grid-cols-3 gap-1 sm:gap-2">
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-2 flex gap-2">
           {platforms.map((p) => (
             <button
               key={p.id}
               onClick={() => setSelected(p.id)}
-              className={`min-w-0 flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 px-1 sm:px-2 rounded-xl text-[11px] sm:text-sm font-medium transition-all ${
+              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 px-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
                 selected === p.id
                   ? `bg-gradient-to-r ${p.color} text-white shadow-md`
                   : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
               <p.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-              <span className="text-center leading-tight line-clamp-2">{p.label}</span>
+              <span className="text-center leading-tight">{p.label}</span>
             </button>
           ))}
         </div>
