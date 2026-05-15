@@ -1,1 +1,1 @@
-Fix login/signup for optional email
+security: remove ALL hardcoded PayFast credentials - use env vars only
