@@ -1,0 +1,67 @@
+functionsDirectory = "C:\\Users\\Phumeh\\Downloads\\math-mastery-hub-copy-c002d8ea (4)\\netlify\\functions"
+functionsDirectoryOrigin = "config-v1"
+redirectsOrigin = "config"
+plugins = []
+headers = []
+
+[build]
+publish = "C:\\Users\\Phumeh\\Downloads\\math-mastery-hub-copy-c002d8ea (4)\\dist"
+publishOrigin = "config"
+commandOrigin = "config"
+base = "C:\\Users\\Phumeh\\Downloads\\math-mastery-hub-copy-c002d8ea (4)"
+command = "npm run build"
+functions = "C:\\Users\\Phumeh\\Downloads\\math-mastery-hub-copy-c002d8ea (4)\\netlify\\functions"
+
+[build.environment]
+NODE_VERSION = "20"
+VITE_API_BASE_URL = "/api"
+
+[build.processing]
+skip_processing = false
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[dev]
+command = "npm run dev"
+port = 8888.0
+targetPort = 5173.0
+publish = "dist"
+autoLaunch = false
+
+[functions]
+
+[functions."*"]
+included_files = ["netlify/functions/**"]
+node_bundler = "esbuild"
+
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/api/api/:splat"
+status = 200.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]

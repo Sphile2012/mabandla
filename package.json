@@ -10,8 +10,7 @@
     "build": "vite build",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview",
-    "deploy": "netlify deploy --prod"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",

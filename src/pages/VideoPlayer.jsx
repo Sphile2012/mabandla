@@ -144,11 +144,11 @@ export default function VideoPlayer() {
 
   if (videoLoading) {
     return (
-      <div className="min-h-screen" style={{ background: '#080d1a' }}>
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Skeleton className="w-full aspect-video rounded-2xl mb-6 bg-white/5" />
-          <Skeleton className="h-8 w-3/4 mb-4 bg-white/5" />
-          <Skeleton className="h-4 w-1/2 bg-white/5" />
+          <Skeleton className="w-full aspect-video rounded-2xl mb-6" />
+          <Skeleton className="h-8 w-3/4 mb-4" />
+          <Skeleton className="h-4 w-1/2" />
         </div>
       </div>
     );
@@ -156,11 +156,11 @@ export default function VideoPlayer() {
 
   if (!video) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#080d1a' }}>
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Video not found</h2>
+          <h2 className="text-2xl font-bold text-slate-800 mb-4">Video not found</h2>
           <Link to={createPageUrl('Categories')}>
-            <Button style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)' }} className="border-0">Browse Videos</Button>
+            <Button>Browse Videos</Button>
           </Link>
         </div>
       </div>
@@ -168,17 +168,26 @@ export default function VideoPlayer() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-slate-500 mb-6 overflow-x-auto max-w-full pb-1 -mx-1 px-1 scrollbar-hide">
-          <Link to={createPageUrl('Home')} className="hover:text-violet-400 transition-colors text-slate-400 shrink-0">Home</Link>
-          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600 shrink-0" />
-          <Link to={createPageUrl('Categories')} className="hover:text-violet-400 transition-colors text-slate-400 shrink-0">Categories</Link>
-          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600 shrink-0" />
-          <Link to={createPageUrl('Categories') + `?grade=${encodeURIComponent(video.grade)}`} className="hover:text-violet-400 transition-colors text-slate-400 shrink-0">{video.grade}</Link>
-          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600 shrink-0" />
-          <span className="text-slate-300 min-w-0 truncate" title={video.title}>{video.title}</span>
+        <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
+          <Link to={createPageUrl('Home')} className="hover:text-violet-600 transition-colors">
+            Home
+          </Link>
+          <ChevronRight className="w-4 h-4" />
+          <Link to={createPageUrl('Categories')} className="hover:text-violet-600 transition-colors">
+            Categories
+          </Link>
+          <ChevronRight className="w-4 h-4" />
+          <Link 
+            to={createPageUrl('Categories') + `?grade=${video.grade}`}
+            className="hover:text-violet-600 transition-colors"
+          >
+            {video.grade}
+          </Link>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-slate-700 truncate max-w-[200px]">{video.title}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -256,14 +265,17 @@ export default function VideoPlayer() {
             </motion.div>
 
             {/* Video Info */}
-            <div className="rounded-2xl border border-white/8 p-6" style={{ background: 'rgba(255,255,255,0.04)' }}>
+            <div className="bg-white rounded-2xl border border-slate-100 p-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <Badge className={`bg-gradient-to-r ${categoryColors[video.topic] || 'from-slate-400 to-slate-500'} text-white border-0 mb-3`}>
                     {video.topic || video.grade}
                   </Badge>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 break-words">{video.title}</h1>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
+                  <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3">
+                    {video.title}
+                  </h1>
+                  
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
                     <span className="flex items-center gap-1.5">
                       <Eye className="w-4 h-4" />
                       {video.views || 0} views
@@ -303,9 +315,9 @@ export default function VideoPlayer() {
               </div>
 
               {video.description && (
-                <div className="mt-6 pt-6 border-t border-white/8">
-                  <h3 className="font-semibold text-white mb-2">About this lesson</h3>
-                  <p className="text-slate-400 leading-relaxed">{video.description}</p>
+                <div className="mt-6 pt-6 border-t border-slate-100">
+                  <h3 className="font-semibold text-slate-800 mb-2">About this lesson</h3>
+                  <p className="text-slate-600 leading-relaxed">{video.description}</p>
                 </div>
               )}
             </div>
@@ -316,8 +328,8 @@ export default function VideoPlayer() {
 
           {/* Sidebar - Related Videos */}
           <div className="lg:col-span-1">
-            <div className="sticky top-20 lg:top-24">
-              <h3 className="font-semibold text-white mb-4">More {video.topic || video.grade} Lessons</h3>
+            <div className="sticky top-6">
+              <h3 className="font-semibold text-slate-800 mb-4">More {video.topic || video.grade} Lessons</h3>
               <div className="space-y-4">
                 {relatedVideos
                   .filter(v => v.id !== videoId)

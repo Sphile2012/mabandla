@@ -82,8 +82,8 @@ export default function Categories() {
       <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {/* Search + view toggle */}
-          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-3">
-            <div className="flex-1 relative min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <Input
                 placeholder="Search lessons, topics..."
@@ -97,7 +97,7 @@ export default function Categories() {
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-1 p-1 rounded-lg border border-white/10 bg-white/5 self-start sm:self-center shrink-0">
+            <div className="flex items-center gap-1 p-1 rounded-lg border border-white/10 bg-white/5">
               <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
                 <Grid className="w-4 h-4" />
               </button>
@@ -168,11 +168,11 @@ export default function Categories() {
         )}
 
         {/* Results count */}
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between mb-6 min-w-0">
-          <h2 className="text-base sm:text-lg font-bold text-white break-words min-w-0 pr-2">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold text-white">
             {selectedGrade ? `${selectedGrade}${selectedTopic ? ` · ${selectedTopic}` : ''}` : searchQuery ? `Results for "${searchQuery}"` : 'All Lessons'}
           </h2>
-          <span className="text-sm text-slate-500 shrink-0">{filteredVideos.length} {filteredVideos.length === 1 ? 'lesson' : 'lessons'}</span>
+          <span className="text-sm text-slate-500">{filteredVideos.length} {filteredVideos.length === 1 ? 'lesson' : 'lessons'}</span>
         </div>
 
         {/* Loading */}

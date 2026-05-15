@@ -54,7 +54,7 @@ export default function Home() {
     <div className="min-h-screen" style={{ background: '#080d1a' }}>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden min-h-[80dvh] min-h-[85vh] sm:min-h-[90vh] flex items-center">
+      <section className="relative overflow-hidden" style={{ minHeight: '92vh', display: 'flex', alignItems: 'center' }}>
         {/* Maths background image */}
         <div className="absolute inset-0">
           <img
@@ -75,7 +75,7 @@ export default function Home() {
               Grade 10, 11 & 12 Mathematics
             </div>
 
-            <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-6 leading-tight px-1 break-words max-w-[min(100%,42rem)] mx-auto" style={{ fontFamily: "'Sora',sans-serif", letterSpacing: '-0.03em' }}>
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight" style={{ fontFamily: "'Sora',sans-serif", letterSpacing: '-0.03em' }}>
               Master Mathematics
               <br />
               <span style={{ background: 'linear-gradient(135deg,#f59e0b,#ef4444,#ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
@@ -129,16 +129,16 @@ export default function Home() {
           </motion.div>
 
           {/* Stats */}
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="mt-16 grid grid-cols-3 gap-2 sm:gap-4 max-w-lg mx-auto">
+          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="mt-16 grid grid-cols-3 gap-4 max-w-lg mx-auto">
             {[
               { icon: BookOpen, label: 'Video Lessons', value: videos.length || '50+' },
               { icon: GraduationCap, label: 'Grades', value: 3 },
               { icon: Play, label: 'Hours of Content', value: '50+' },
             ].map((stat, i) => (
-              <div key={i} className="text-center p-2 sm:p-4 rounded-2xl min-w-0" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 mx-auto mb-1 sm:mb-2" style={{ color: '#a78bfa' }} />
-                <div className="text-lg sm:text-2xl font-bold text-white truncate" style={{ fontFamily: "'Sora',sans-serif" }}>{stat.value}</div>
-                <div className="text-[10px] sm:text-xs mt-0.5 leading-tight line-clamp-2" style={{ color: 'rgba(255,255,255,0.4)' }}>{stat.label}</div>
+              <div key={i} className="text-center p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <stat.icon className="w-5 h-5 mx-auto mb-2" style={{ color: '#a78bfa' }} />
+                <div className="text-2xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>{stat.value}</div>
+                <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -147,12 +147,12 @@ export default function Home() {
 
       {/* ── Grades Section ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div className="min-w-0">
-            <h2 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Choose Your Grade</h2>
-            <p className="mt-1 text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.4)' }}>Select your grade to browse Mathematics lessons</p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Choose Your Grade</h2>
+            <p className="mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Select your grade to browse Mathematics lessons</p>
           </div>
-          <Link to={createPageUrl('Categories')} className="text-sm flex items-center gap-1 font-medium shrink-0 self-start sm:self-auto" style={{ color: '#a78bfa' }}>
+          <Link to={createPageUrl('Categories')} className="text-sm flex items-center gap-1 font-medium" style={{ color: '#a78bfa' }}>
             View all <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -166,12 +166,12 @@ export default function Home() {
       {/* ── Featured Videos ── */}
       {featuredVideos.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
-            <div className="min-w-0">
-              <h2 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Latest Lessons</h2>
-              <p className="mt-1 text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.4)' }}>Recently uploaded video lessons</p>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Latest Lessons</h2>
+              <p className="mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Recently uploaded video lessons</p>
             </div>
-            <Link to={createPageUrl('Categories')} className="text-sm flex items-center gap-1 font-medium shrink-0 self-start sm:self-auto" style={{ color: '#a78bfa' }}>
+            <Link to={createPageUrl('Categories')} className="text-sm flex items-center gap-1 font-medium" style={{ color: '#a78bfa' }}>
               See all <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

@@ -30,7 +30,7 @@ function CommentItem({ comment, user, onReply }) {
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium text-slate-200">{comment.author_name}</span>
+          <span className="font-medium text-slate-800">{comment.author_name}</span>
           {comment.is_question && (
             <Badge variant="outline" className="text-xs border-amber-300 text-amber-600 bg-amber-50">
               <HelpCircle className="w-3 h-3 mr-1" />
@@ -42,7 +42,7 @@ function CommentItem({ comment, user, onReply }) {
           </span>
         </div>
         
-        <p className="text-slate-400 mt-1 text-sm leading-relaxed">{comment.content}</p>
+        <p className="text-slate-600 mt-1 text-sm leading-relaxed">{comment.content}</p>
         
         {user && (
           <button
@@ -92,10 +92,12 @@ export default function CommentSection({ videoId, comments, user }) {
   const replies = comments?.filter(c => c.reply_to) || [];
 
   return (
-    <div className="rounded-2xl border border-white/8 p-6" style={{ background: 'rgba(255,255,255,0.04)' }}>
+    <div className="bg-white rounded-2xl border border-slate-100 p-6">
       <div className="flex items-center gap-2 mb-6">
         <MessageCircle className="w-5 h-5 text-violet-600" />
-        <h3 className="font-semibold text-lg text-white">Discussion ({comments?.length || 0})</h3>
+        <h3 className="font-semibold text-lg text-slate-800">
+          Discussion ({comments?.length || 0})
+        </h3>
       </div>
 
       {user ? (
@@ -144,8 +146,8 @@ export default function CommentSection({ videoId, comments, user }) {
           </div>
         </form>
       ) : (
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 text-center">
-          <p className="text-slate-400 text-sm">Please sign in to join the discussion</p>
+        <div className="bg-slate-50 rounded-xl p-4 mb-6 text-center">
+          <p className="text-slate-600 text-sm">Please sign in to join the discussion</p>
         </div>
       )}
 
@@ -169,8 +171,8 @@ export default function CommentSection({ videoId, comments, user }) {
         </AnimatePresence>
         
         {parentComments.length === 0 && (
-          <div className="text-center py-8 text-slate-500">
-            <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-30" />
+          <div className="text-center py-8 text-slate-400">
+            <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>No comments yet. Be the first to share your thoughts!</p>
           </div>
         )}

@@ -1,0 +1,16 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/Sphile2012/mabandla
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[user]
+	email = poomeigh503@gmail.com
+	name = Sphile2012
+[branch "master"]
+	remote = origin
+	vscode-merge-base = origin/main
+	merge = refs/heads/master

@@ -1,9 +1,10 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { motion } from 'framer-motion';
-import { Download, Smartphone, Monitor, CheckCircle, Shield, Apple, Globe } from 'lucide-react';
+import { Download, Smartphone, Monitor, CheckCircle, Shield, Apple, Globe, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 const platforms = [
   {
@@ -108,19 +109,19 @@ export default function DownloadApp() {
             </p>
 
             {/* Download APK button — shown for Android */}
-            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto px-1">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button
                 size="lg"
                 onClick={handleDownloadApk}
-                className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 sm:px-8 h-12 w-full sm:w-auto"
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold px-8 h-12"
               >
-                <Download className="w-5 h-5 mr-2 shrink-0" />
+                <Download className="w-5 h-5 mr-2" />
                 Download Android APK
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 px-6 sm:px-8 h-12 w-full sm:w-auto"
+                className="border-white/30 text-white hover:bg-white/10 px-8 h-12"
                 onClick={() => {
                   setSelected('ios');
                   document.getElementById('platform-tabs')?.scrollIntoView({ behavior: 'smooth' });
@@ -136,19 +137,19 @@ export default function DownloadApp() {
 
       {/* Platform Tabs */}
       <div id="platform-tabs" className="max-w-3xl mx-auto px-4 -mt-5">
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-1.5 sm:p-2 grid grid-cols-3 gap-1 sm:gap-2">
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-2 flex gap-2">
           {platforms.map((p) => (
             <button
               key={p.id}
               onClick={() => setSelected(p.id)}
-              className={`min-w-0 flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 px-1 sm:px-2 rounded-xl text-[11px] sm:text-sm font-medium transition-all ${
+              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 px-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
                 selected === p.id
                   ? `bg-gradient-to-r ${p.color} text-white shadow-md`
                   : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
               <p.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-              <span className="text-center leading-tight line-clamp-2">{p.label}</span>
+              <span className="text-center leading-tight">{p.label}</span>
             </button>
           ))}
         </div>

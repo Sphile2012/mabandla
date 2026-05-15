@@ -22,7 +22,6 @@
 
 import serverless from 'serverless-http';
 import express from 'express';
-import 'express-async-errors';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -30,76 +29,21 @@ import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
-import { setDefaultResultOrder } from 'dns';
-
-// Fix IPv4/IPv6 DNS resolution for Node fetch (undici) — optional in some runtimes
-try {
-  setDefaultResultOrder('ipv4first');
-} catch {
-  /* ignore */
-}
 
 // ─── Supabase client ──────────────────────────────────────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: { persistSession: false },
-  }
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
-const ADMIN_EMAIL = 'lusindisomabandla72@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@princemath.co.za';
 
 // ─── Express app ──────────────────────────────────────────────────────────────
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Netlify rewrites `/api/*` → `/.netlify/functions/api/:splat`. Express may see
-// `/.netlify/functions/api/...`, `/auth/...`, or `/api/...` depending on version.
-// Always normalize to `/api/...` so route handlers match.
-app.use((req, _res, next) => {
-  const full = req.originalUrl || req.url || '';
-  const qIndex = full.indexOf('?');
-  let pathname = qIndex >= 0 ? full.slice(0, qIndex) : full;
-  const query = qIndex >= 0 ? full.slice(qIndex) : '';
-
-  const netlifyFn = '/.netlify/functions/api';
-  if (pathname === netlifyFn || pathname.startsWith(`${netlifyFn}/`)) {
-    pathname = pathname.slice(netlifyFn.length) || '/';
-    if (!pathname.startsWith('/')) pathname = `/${pathname}`;
-  }
-
-  if (pathname === '/api' || pathname.startsWith('/api/')) {
-    req.url = pathname + query;
-    return next();
-  }
-
-  const bareApi =
-    pathname.startsWith('/auth') ||
-    pathname.startsWith('/entities') ||
-    pathname.startsWith('/functions') ||
-    pathname.startsWith('/upload') ||
-    pathname.startsWith('/payfast');
-
-  if (bareApi) {
-    req.url = `/api${pathname.startsWith('/') ? pathname : `/${pathname}`}` + query;
-    return next();
-  }
-
-  req.url = pathname + query;
-  next();
-});
-
-app.get('/api/health', (_req, res) => {
-  res.json({
-    ok: true,
-    supabaseConfigured: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
-    time: new Date().toISOString(),
-  });
-});
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 function signToken(userId) {
@@ -121,7 +65,7 @@ async function requireAuth(req, res, next) {
       .from('users')
       .select('*')
       .eq('id', payload.sub)
-      .maybeSingle();
+      .single();
     if (error || !user) return res.status(401).json({ error: 'User not found' });
     req.user = user;
     next();
@@ -163,7 +107,7 @@ app.patch('/api/auth/me', requireAuth, async (req, res) => {
     .update(updates)
     .eq('id', req.user.id)
     .select()
-    .maybeSingle();
+    .single();
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
 });
@@ -172,37 +116,17 @@ app.patch('/api/auth/me', requireAuth, async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, full_name } = req.body;
   if (!email || !password || !full_name) {
-    return res.status(400).json({ error: 'Name, email and password are required' });
+    return res.status(400).json({ error: 'email, password and full_name are required' });
   }
-  if (password.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters' });
-  }
-
-  // Check if email already exists
-  const { data: existing, error: existingErr } = await supabase
-    .from('users').select('id').eq('email', email.toLowerCase().trim()).maybeSingle();
-  if (existingErr) {
-    console.error('register existing check:', existingErr);
-    return res.status(503).json({ error: 'Could not reach the database. Please try again in a moment.' });
-  }
-  if (existing) {
-    return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' });
-  }
-
-  const hash = await bcrypt.hash(password, 8);
+  const hash = await bcrypt.hash(password, 10);
   const id = uuidv4();
   const role = email === ADMIN_EMAIL ? 'admin' : 'student';
   const { data, error } = await supabase
     .from('users')
-    .insert({ id, email: email.toLowerCase().trim(), password_hash: hash, full_name: full_name.trim(), role })
+    .insert({ id, email, password_hash: hash, full_name, role })
     .select()
-    .maybeSingle();
-  if (error) {
-    if (error.code === '23505') {
-      return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' });
-    }
-    return res.status(400).json({ error: error.message });
-  }
+    .single();
+  if (error) return res.status(400).json({ error: error.message });
   const token = signToken(data.id);
   res.json({ token, user: data });
 });
@@ -210,25 +134,15 @@ app.post('/api/auth/register', async (req, res) => {
 // POST /api/auth/login
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
-
-  const { data: user, error: dbError } = await supabase
+  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
+  const { data: user, error } = await supabase
     .from('users')
     .select('*')
-    .eq('email', email.toLowerCase().trim())
-    .maybeSingle();
-
-  if (dbError) {
-    console.error('login db:', dbError);
-    return res.status(503).json({ error: 'Could not reach the database. Please try again in a moment.' });
-  }
-
-  if (!user) return res.status(401).json({ error: 'No account found with this email. Please register first.' });
-  if (!user.password_hash) return res.status(401).json({ error: 'This account has no password set. Please contact support.' });
-
-  const valid = await bcrypt.compare(password, user.password_hash);
-  if (!valid) return res.status(401).json({ error: 'Incorrect password. Please try again.' });
-
+    .eq('email', email)
+    .single();
+  if (error || !user) return res.status(401).json({ error: 'Invalid credentials' });
+  const valid = await bcrypt.compare(password, user.password_hash || '');
+  if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
   const token = signToken(user.id);
   res.json({ token, user });
 });
@@ -282,7 +196,7 @@ app.get('/api/entities/:entity', async (req, res) => {
 app.get('/api/entities/:entity/:id', async (req, res) => {
   const { entity, id } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) return res.status(404).json({ error: 'Unknown entity' });
-  const { data, error } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
+  const { data, error } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
   if (error) return res.status(404).json({ error: 'Not found' });
   res.json(normalise(data));
 });
@@ -292,7 +206,7 @@ app.post('/api/entities/:entity', requireAuth, async (req, res) => {
   const { entity } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) return res.status(404).json({ error: 'Unknown entity' });
   const payload = { ...req.body, id: uuidv4() };
-  const { data, error } = await supabase.from(TABLE(entity)).insert(payload).select().maybeSingle();
+  const { data, error } = await supabase.from(TABLE(entity)).insert(payload).select().single();
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json(normalise(data));
 });
@@ -304,7 +218,7 @@ app.patch('/api/entities/:entity/:id', requireAuth, async (req, res) => {
 
   // Data protection: non-admins can only edit records they own
   if (req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
-    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
+    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
     if (existing) {
       const ownerField = existing.user_email || existing.author_email || existing.sender_email;
       if (ownerField && ownerField !== req.user.email) {
@@ -313,7 +227,7 @@ app.patch('/api/entities/:entity/:id', requireAuth, async (req, res) => {
     }
   }
 
-  const { data, error } = await supabase.from(TABLE(entity)).update(req.body).eq('id', id).select().maybeSingle();
+  const { data, error } = await supabase.from(TABLE(entity)).update(req.body).eq('id', id).select().single();
   if (error) return res.status(400).json({ error: error.message });
   res.json(normalise(data));
 });
@@ -325,7 +239,7 @@ app.delete('/api/entities/:entity/:id', requireAuth, async (req, res) => {
 
   // Data protection: non-admins can only delete records they own
   if (req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
-    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).maybeSingle();
+    const { data: existing } = await supabase.from(TABLE(entity)).select('*').eq('id', id).single();
     if (existing) {
       const ownerField = existing.user_email || existing.author_email || existing.sender_email;
       if (ownerField && ownerField !== req.user.email) {
@@ -350,7 +264,7 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
 
   const merchantId = process.env.PAYFAST_MERCHANT_ID;
   const merchantKey = process.env.PAYFAST_MERCHANT_KEY;
-  const passphrase = process.env.PAYFAST_PASSPHRASE;
+  const passphrase = process.env.PAYFAST_PASSPHRASE || '';
   const isSandbox = process.env.PAYFAST_SANDBOX === 'true';
   const paymentUrl = isSandbox
     ? 'https://sandbox.payfast.co.za/eng/process'
@@ -396,7 +310,7 @@ app.post('/api/functions/trackVideoView', requireAuth, async (req, res) => {
   const { video_id } = req.body;
   if (!video_id) return res.status(400).json({ error: 'video_id is required' });
 
-  const { data: video, error } = await supabase.from('videos').select('*').eq('id', video_id).maybeSingle();
+  const { data: video, error } = await supabase.from('videos').select('*').eq('id', video_id).single();
   if (error || !video) return res.status(404).json({ error: 'Video not found' });
 
   const newViews = (video.views || 0) + 1;
@@ -613,14 +527,6 @@ function generatePayfastSignature(data, passphrase) {
     : queryString;
   return crypto.createHash('md5').update(finalString).digest('hex');
 }
-
-// Unhandled async errors → JSON instead of Netlify 502 Bad Gateway
-app.use((err, req, res, _next) => {
-  console.error('API error:', err);
-  if (res.headersSent) return;
-  const status = err.status && Number.isInteger(err.status) ? err.status : 500;
-  res.status(status).json({ error: err.message || 'Internal server error' });
-});
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export const handler = serverless(app);

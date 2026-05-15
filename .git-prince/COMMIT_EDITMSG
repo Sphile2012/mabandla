@@ -1,0 +1,1 @@
+security: remove ALL hardcoded PayFast credentials - use env vars only

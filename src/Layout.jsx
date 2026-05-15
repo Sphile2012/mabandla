@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import NotificationBell from './components/notifications/NotificationBell';
 
-const ADMIN_EMAIL = 'lusindisomabandla72@gmail.com';
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@princemath.co.za';
 
 const navItems = [
   { name: 'Home', icon: Home, page: 'Home' },
@@ -34,7 +34,6 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     prince.auth.me().then(u => {
@@ -44,7 +43,7 @@ export default function Layout({ children, currentPageName }) {
         setUser(u);
       }
     }).catch(() => setUser(null));
-  }, [location.pathname]);
+  }, []);
 
   const isAdmin = user?.email === ADMIN_EMAIL || user?.role === 'admin';
   const hasAccess = checkAccess(user);
@@ -53,27 +52,20 @@ export default function Layout({ children, currentPageName }) {
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?';
 
   return (
-    <div className="min-h-screen overflow-x-clip" style={{background:'#080d1a'}}>
+    <div className="min-h-screen" style={{background:'#080d1a'}}>
       {/* Trial expired banner */}
       {trialExpired && (
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center py-2.5 px-3 sm:px-4 text-xs sm:text-sm font-medium leading-snug break-words">
-          ⏰ Your free trial has ended.{' '}
-          <Link to={createPageUrl('Pricing')} className="underline font-bold">Subscribe now to continue learning →</Link>
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center py-2.5 px-4 text-sm font-medium">
+          ? Your free trial has ended. <Link to={createPageUrl('Pricing')} className="underline font-bold ml-1">Subscribe now to continue learning ?</Link>
         </div>
       )}
 
       {/* Navigation */}
       <nav className="glass sticky top-0 z-50">
-        <div
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-          style={{
-            paddingLeft: 'max(1rem, env(safe-area-inset-left))',
-            paddingRight: 'max(1rem, env(safe-area-inset-right))',
-          }}
-        >
-          <div className="flex items-center justify-between h-16 min-w-0 gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to={createPageUrl('Home')} className="flex items-center gap-2 sm:gap-3 group shrink-0 min-w-0">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-3 group">
               <div className="relative">
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{background:'linear-gradient(135deg,#7c3aed,#2563eb,#06b6d4)',boxShadow:'0 4px 20px rgba(124,58,237,0.5)'}}>
                   <GraduationCap className="w-5 h-5 text-white" />
@@ -85,7 +77,7 @@ export default function Layout({ children, currentPageName }) {
                   <span style={{color:'#e2e8f0'}}>Prince</span>
                   <span style={{background:'linear-gradient(135deg,#a78bfa,#60a5fa,#22d3ee)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}> Math</span>
                 </div>
-                <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.2em',textTransform:'uppercase',marginTop:'2px'}}>Academy · Grade 10–12</div>
+                <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.2em',textTransform:'uppercase',marginTop:'2px'}}>Academy � Grade 10�12</div>
               </div>
             </Link>
 
@@ -130,7 +122,7 @@ export default function Layout({ children, currentPageName }) {
                   <DropdownMenuContent align="end" className="w-60 rounded-2xl p-1" style={{background:'#0f172a',border:'1px solid rgba(255,255,255,0.1)',boxShadow:'0 20px 60px rgba(0,0,0,0.5)'}}>
                     <div className="px-3 py-3 rounded-xl mb-1" style={{background:'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(37,99,235,0.2))'}}>
                       <p className="font-semibold text-white text-sm">{user.full_name}</p>
-                      <p className="text-xs text-slate-400 mt-0.5 break-all">{user.email}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{user.email}</p>
                       {isAdmin && (
                         <span className="inline-flex items-center gap-1 mt-1.5 text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(34,211,238,0.15)',color:'#22d3ee'}}>
                           <Shield className="w-3 h-3" /> Admin
@@ -183,12 +175,7 @@ export default function Layout({ children, currentPageName }) {
                   </Button>
                 </div>
               )}
-              <button
-                type="button"
-                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden min-h-11 min-w-11 shrink-0 inline-flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-400"
-              >
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-xl hover:bg-white/5 text-slate-400">
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
@@ -233,18 +220,18 @@ export default function Layout({ children, currentPageName }) {
       </nav>
 
       {/* Main */}
-      <main className="min-h-[calc(100dvh-4rem)] min-h-[calc(100vh-4rem)] overflow-x-clip">{children}</main>
+      <main className="min-h-[calc(100vh-4rem)]">{children}</main>
 
       {/* Footer */}
       <footer style={{background:'rgba(255,255,255,0.02)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:'linear-gradient(135deg,#7c3aed,#2563eb)'}}>
                 <GraduationCap className="w-5 h-5 text-white" />
               </div>
               <div>
-                <div className="font-bold text-white break-words text-center md:text-left" style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:'clamp(14px, 4vw, 16px)',fontWeight:'800',letterSpacing:'-0.02em'}}>
+                <div className="font-bold text-white" style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:'16px',fontWeight:'800',letterSpacing:'-0.02em'}}>
                   Prince<span style={{background:'linear-gradient(135deg,#a78bfa,#60a5fa,#22d3ee)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}> Math</span> Academy
                 </div>
                 <p className="text-xs text-slate-500">Grade 10-12 Mathematics by Prince Mabandla</p>
@@ -255,7 +242,7 @@ export default function Layout({ children, currentPageName }) {
                 <Link key={p} to={createPageUrl(p)} className="hover:text-violet-400 transition-colors">{p === 'DownloadApp' ? 'Download App' : p === 'Categories' ? 'Lessons' : p}</Link>
               ))}
             </div>
-            <p className="text-xs text-slate-600">© {new Date().getFullYear()} Prince Mabandla</p>
+            <p className="text-xs text-slate-600">� {new Date().getFullYear()} Prince Mabandla</p>
           </div>
         </div>
       </footer>
