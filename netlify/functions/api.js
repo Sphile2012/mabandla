@@ -37,7 +37,7 @@ const supabase = createClient(
 );
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
-const ADMIN_EMAIL = 'lusindisomabandla72@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@princemath.co.za';
 
 // ─── Express app ──────────────────────────────────────────────────────────────
 const app = express();
