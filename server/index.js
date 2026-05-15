@@ -258,9 +258,9 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
   const { grade, tier, amount } = req.body;
   if (!grade || !tier || !amount)
     return res.status(400).json({ error: 'Missing required fields' });
-  const merchantId = process.env.PAYFAST_MERCHANT_ID || '33954157';
-  const merchantKey = process.env.PAYFAST_MERCHANT_KEY || 'f5dfdtf71uqh2';
-  const passphrase = process.env.PAYFAST_PASSPHRASE || 'Lusindiso.1974';
+  const merchantId = process.env.PAYFAST_MERCHANT_ID;
+  const merchantKey = process.env.PAYFAST_MERCHANT_KEY;
+  const passphrase = process.env.PAYFAST_PASSPHRASE || '';
   const isSandbox = process.env.PAYFAST_SANDBOX === 'true';
   const paymentUrl = isSandbox
     ? 'https://sandbox.payfast.co.za/eng/process'
@@ -362,7 +362,7 @@ app.post('/api/functions/getApkDownload', (req, res) => {
 app.post('/api/payfast-webhook', express.urlencoded({ extended: true }), async (req, res) => {
   try {
     const raw = req.body;
-    const passphrase = process.env.PAYFAST_PASSPHRASE || 'Lusindiso.1974';
+    const passphrase = process.env.PAYFAST_PASSPHRASE || '';
     const sigParams = new URLSearchParams();
     for (const key of Object.keys(raw).filter(k => k !== 'signature').sort()) {
       sigParams.append(key, String(raw[key]).trim());

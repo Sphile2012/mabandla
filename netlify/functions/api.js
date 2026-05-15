@@ -262,9 +262,9 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const merchantId = process.env.PAYFAST_MERCHANT_ID || '33954157';
-  const merchantKey = process.env.PAYFAST_MERCHANT_KEY || 'f5dfdtf71uqh2';
-  const passphrase = process.env.PAYFAST_PASSPHRASE || 'Lusindiso.1974';
+  const merchantId = process.env.PAYFAST_MERCHANT_ID;
+  const merchantKey = process.env.PAYFAST_MERCHANT_KEY;
+  const passphrase = process.env.PAYFAST_PASSPHRASE || '';
   const isSandbox = process.env.PAYFAST_SANDBOX === 'true';
   const paymentUrl = isSandbox
     ? 'https://sandbox.payfast.co.za/eng/process'
@@ -435,7 +435,7 @@ app.post('/api/payfast-webhook', express.urlencoded({ extended: true }), async (
     }
 
     const raw = req.body;
-    const passphrase = process.env.PAYFAST_PASSPHRASE || 'Lusindiso.1974';
+    const passphrase = process.env.PAYFAST_PASSPHRASE || '';
     const receivedSignature = raw['signature'] || '';
 
     // Build signature string
