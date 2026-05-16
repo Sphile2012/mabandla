@@ -165,10 +165,10 @@ export default function Home() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "'Orbitron',sans-serif", textShadow: '0 0 20px rgba(124,58,237,0.3)' }}>Latest Lessons</h2>
-              <p className="mt-1" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter',sans-serif' }}>Recently uploaded video lessons</p>
+              <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Orbitron,sans-serif", textShadow: '0 0 20px rgba(124,58,237,0.3)' }}>Latest Lessons</h2>
+              <p className="mt-1" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "Inter,sans-serif" }}>Recently uploaded video lessons</p>
             </div>
-            <Link to={createPageUrl('Categories')} className="text-sm flex items-center gap-1 font-medium transition-all hover:scale-105" style={{ color: '#a78bfa', fontFamily: "'Inter',sans-serif", filter: 'drop-shadow(0 0 8px rgba(167,139,250,0.5))' }}>
+            <Link to={createPageUrl('Categories')} className="text-sm flex items-center gap-1 font-medium transition-all hover:scale-105" style={{ color: '#a78bfa', fontFamily: "Inter,sans-serif", filter: 'drop-shadow(0 0 8px rgba(167,139,250,0.5))' }}>
               See all <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
