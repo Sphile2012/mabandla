@@ -86,11 +86,11 @@ export default function ChangePassword() {
           style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)' }}>
 
           {/* Error/Success Messages */}
-          <motion.div initial={{ height: 0, opacity: 0 }} 
-            animate={{ height: 'auto', opacity: 1 }} 
+          <motion.div initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="mb-5 overflow-hidden">
-            
+
             {error && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                 className="mb-5 overflow-hidden">
@@ -133,7 +133,7 @@ export default function ChangePassword() {
                     className={inputClass}
                     style={{ ...inputStyle, paddingLeft: '2.5rem', paddingRight: '1rem' }}
                     onFocus={(e) => (e.target.style.borderColor = focusBorder)}
-                    onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}}
+                    onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                   />
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function ChangePassword() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Check Your Email</h3>
               <p className="text-slate-400 text-sm mb-4">
-                We've sent a password change link to your email address. 
+                We've sent a password change link to your email address.
                 Click the link in the email to create a new password.
               </p>
               <div className="space-y-2">
