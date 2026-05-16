@@ -58,8 +58,8 @@ export default function Home() {
         {/* Maths background image */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1509228468518-180dd4864904?w=1920&q=80"
-            alt="Calculus and Geometry background"
+            src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1920&q=80"
+            alt="Mathematics background"
             className="w-full h-full object-cover"
           />
           {/* Dark overlay so text is readable */}
