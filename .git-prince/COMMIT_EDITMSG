@@ -1,1 +1,1 @@
-security: remove ALL hardcoded PayFast credentials - use env vars only
+fix: make fonts visible in all input fields and improve cross-browser compatibility

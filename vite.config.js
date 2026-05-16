@@ -16,5 +16,19 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+    host: true, // Allow access from network for testing on other devices
+    port: 5173,
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false, // Reduce bundle size for production
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
+  // Ensure public assets are properly copied
+  publicDir: 'public',
 });
