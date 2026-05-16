@@ -148,9 +148,8 @@ export default function OTPVerify() {
                   value={digit}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className={`w-11 h-14 md:w-13 md:h-16 text-center text-xl md:text-2xl font-bold rounded-xl border-2 transition-all outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 ${
-                    digit ? 'border-violet-400 bg-violet-50' : 'border-slate-200 bg-white'
-                  }`}
+                  className={`w-11 h-14 md:w-13 md:h-16 text-center text-xl md:text-2xl font-bold rounded-xl border-2 transition-all outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 text-slate-900 ${digit ? 'border-violet-400 bg-violet-50' : 'border-slate-200 bg-white'
+                    }`}
                 />
               ))}
             </div>
