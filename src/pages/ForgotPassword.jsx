@@ -57,7 +57,7 @@ export default function ForgotPassword() {
     }
   };
 
-  const inputClass = "w-full h-12 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all";
+  const inputClass = "w-full h-12 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 outline-none transition-all";
   const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' };
   const focusBorder = 'rgba(124,58,237,0.7)';
 
@@ -156,8 +156,8 @@ export default function ForgotPassword() {
                 ) : (
                   <>Send Reset Code <ArrowRight className="w-4 h-4" /></>
                 )}
-                </button>
-              </form>
+              </button>
+            </form>
           ) : (
             <div className="text-center space-y-4">
               <p className="text-slate-300 text-sm">

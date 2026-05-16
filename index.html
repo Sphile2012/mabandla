@@ -2,45 +2,179 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon-192.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
+    
+    <!-- Viewport - optimized for all devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    
+    <!-- IE compatibility -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="referrer" content="no-referrer-when-downgrade" />
+    
+    <!-- Security & Privacy -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="theme-color" content="#7c3aed" />
-
-    <!-- PWA -->
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    
+    <!-- Format Detection -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="email=no" />
+    
+    <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="MathTutor" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Prince Math" />
+    <meta name="application-name" content="Prince Math Academy" />
+    <meta name="msapplication-TileColor" content="#7c3aed" />
+    <meta name="msapplication-TileImage" content="/icon-192.png" />
+    <meta name="msapplication-config" content="/manifest.json" />
+    
+    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://princemath.co.za" />
+    
     <!-- SEO for Google -->
     <meta name="description" content="Grade 10-12 Mathematics video lessons by Prince Mabandla. Learn Algebra, Calculus, Trigonometry and more at your own pace." />
     <meta name="keywords" content="mathematics, grade 10, grade 11, grade 12, maths tutor, South Africa, Prince Mabandla, video lessons" />
     <meta name="author" content="Prince Mabandla" />
     <meta name="robots" content="index, follow" />
-
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    
+    <!-- Language & Locale -->
+    <meta http-equiv="content-language" content="en" />
+    <meta name="language" content="English" />
+    
     <!-- Open Graph (WhatsApp, Facebook previews) -->
-    <meta property="og:title" content="MathTutor — Grade 10-12 Mathematics" />
+    <meta property="og:title" content="Prince Math Academy — Grade 10-12 Mathematics" />
     <meta property="og:description" content="Expert video lessons for Grade 10-12 Mathematics by Prince Mabandla." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://princemath.co.za" />
-
+    <meta property="og:image" content="https://princemath.co.za/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:site_name" content="Prince Math Academy" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Prince Math Academy — Grade 10-12 Mathematics" />
+    <meta name="twitter:description" content="Expert video lessons for Grade 10-12 Mathematics by Prince Mabandla." />
+    <meta name="twitter:image" content="https://princemath.co.za/icon-512.png" />
+    
     <title>Prince Math Academy — Grade 10-12 Mathematics</title>
-    <!-- Premium fonts -->
+    
+    <!-- Premium fonts with preconnect for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    
+    <!-- Early connection to API -->
+    <link rel="preconnect" href="/api" />
+    <link rel="dns-prefetch" href="/api" />
+    
+    <!-- Critical CSS for initial render -->
+    <style>
+      /* Critical above-the-fold styles */
+      *, *::before, *::after { box-sizing: border-box; }
+      html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #080d1a;
+        color: #e2e8f0;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Loading spinner */
+      .app-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #080d1a 0%, #1a1a2e 100%);
+      }
+      .app-loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(124, 58, 237, 0.3);
+        border-top-color: #7c3aed;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- No-JS fallback -->
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: sans-serif;">
+        <h1>Prince Math Academy</h1>
+        <p>This application requires JavaScript to run. Please enable JavaScript in your browser settings.</p>
+        <p>Grade 10-12 Mathematics video lessons by Prince Mabandla.</p>
+      </div>
+    </noscript>
+    
+    <div id="root">
+      <!-- Loading state shown before React hydrates -->
+      <div class="app-loading" id="loading-spinner">
+        <div class="app-loading-spinner"></div>
+      </div>
+    </div>
+    
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Service Worker Registration with error handling -->
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js');
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('[SW] ServiceWorker registration successful with scope: ', registration.scope);
+              
+              // Hide loading spinner when page is ready
+              const spinner = document.getElementById('loading-spinner');
+              if (spinner) {
+                setTimeout(function() {
+                  spinner.style.display = 'none';
+                }, 500);
+              }
+            })
+            .catch(function(error) {
+              console.log('[SW] ServiceWorker registration failed: ', error);
+            });
+          
+          // Handle service worker updates
+          navigator.serviceWorker.addEventListener('controllerchange', function() {
+            console.log('[SW] New service worker activated, page will reload');
+          });
         });
+      } else {
+        // Hide loading spinner for non-SW browsers
+        const spinner = document.getElementById('loading-spinner');
+        if (spinner) {
+          setTimeout(function() {
+            spinner.style.display = 'none';
+          }, 500);
+        }
       }
     </script>
   </body>
