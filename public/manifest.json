@@ -5,12 +5,17 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#080d1a",
   "theme_color": "#7c3aed",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "lang": "en",
-  "categories": ["education"],
+  "categories": [
+    "education"
+  ],
   "icons": [
     {
       "src": "/icon.svg",
@@ -31,14 +36,24 @@
       "short_name": "Lessons",
       "description": "Browse all video lessons",
       "url": "/Categories",
-      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any"
+        }
+      ]
     },
     {
       "name": "My Dashboard",
       "short_name": "Dashboard",
       "description": "View your progress",
       "url": "/StudentDashboard",
-      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any"
+        }
+      ]
     }
   ],
   "screenshots": [
