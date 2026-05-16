@@ -1,1 +1,1 @@
-fix: make fonts visible in all input fields and improve cross-browser compatibility
+Remove sensitive credentials from .env.example

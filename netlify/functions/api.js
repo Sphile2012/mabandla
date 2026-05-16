@@ -37,7 +37,7 @@ const supabase = createClient(
 );
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@princemath.co.za';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'poomeigh503@gmail.com';
 
 // ─── Express app ──────────────────────────────────────────────────────────────
 const app = express();
@@ -148,7 +148,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // ─── Entity CRUD ──────────────────────────────────────────────────────────────
-const ALLOWED_ENTITIES = ['Video', 'Favorite', 'Comment', 'XPEvent', 'Notification', 'Message', 'User'];
+const ALLOWED_ENTITIES = ['Video', 'Favorite', 'Comment', 'XPEvent', 'Notification', 'Message', 'User', 'Announcement'];
 const TABLE = (name) => name.toLowerCase() + 's'; // Video → videos
 
 // GET /api/entities/:entity

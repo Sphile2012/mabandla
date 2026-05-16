@@ -122,9 +122,6 @@ export default function Home() {
               <Link to={createPageUrl('DownloadApp')} className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all" style={{ background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)', color: '#22d3ee' }}>
                 <span>📱</span> Add to Home Screen
               </Link>
-              <span className="inline-flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                <span>🚀</span> Android App — Coming Soon
-              </span>
             </div>
           </motion.div>
 

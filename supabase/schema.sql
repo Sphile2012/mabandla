@@ -100,6 +100,20 @@ create table if not exists messages (
   created_date   timestamptz default now()
 );
 
+-- ── Announcements ─────────────────────────────────────────────────────────────
+create table if not exists announcements (
+  id             text primary key default gen_random_uuid()::text,
+  title          text not null,
+  content        text not null,
+  priority       text default 'normal', -- normal, important, urgent
+  is_active      boolean default true,
+  is_deleted     boolean default false,
+  deleted_at     timestamptz,
+  created_by     text,
+  created_at     timestamptz default now(),
+  created_date   timestamptz default now()
+);
+
 -- ── Storage bucket ────────────────────────────────────────────────────────────
 -- Create a public bucket called "prince-math" in Supabase Storage dashboard,
 -- or run:
@@ -114,3 +128,4 @@ alter table comments disable row level security;
 alter table xpevents disable row level security;
 alter table notifications disable row level security;
 alter table messages disable row level security;
+alter table announcements disable row level security;

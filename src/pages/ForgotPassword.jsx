@@ -49,6 +49,8 @@ export default function ForgotPassword() {
       console.error('Forgot password error:', err);
       if (err.name === 'TypeError') {
         setError('Network error — please check your connection and try again.');
+      } else if (err.message?.includes('fetch')) {
+        setError('Unable to connect to server. Please ensure the backend is running on port 3001.');
       } else {
         setError(err.message || 'Failed to send reset code. Please try again.');
       }
