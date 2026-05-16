@@ -53,9 +53,30 @@ export default function Login() {
           password: formData.password
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Login failed');
 
+      if (!res.ok) {
+        const contentType = res.headers.get('content-type');
+        let errorMessage = 'Login failed';
+
+        if (contentType && contentType.includes('application/json')) {
+          const data = await res.json();
+          errorMessage = data.error || data.message || errorMessage;
+        } else {
+          errorMessage = `Server error (${res.status})`;
+        }
+
+        if (res.status === 404) {
+          errorMessage = 'API endpoint not found. Please ensure the backend server is running.';
+        } else if (res.status === 401) {
+          errorMessage = 'Invalid email or password. Please check your credentials.';
+        } else if (res.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const data = await res.json();
       setToken(data.token);
       toast.success('Welcome back!');
 
@@ -66,43 +87,61 @@ export default function Login() {
         navigate(returnUrl, { replace: true });
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      console.error('Login error:', err);
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setError('Unable to connect to server. Please ensure the backend is running on port 3001 or check your network connection.');
+      } else {
+        setError(err.message || 'Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 flex flex-col items-center justify-center px-4 py-10">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden" style={{ background: '#080d1a' }}>
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <img
+          src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1920&q=80"
+          alt="Mathematics background"
+          className="w-full h-full object-cover"
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(8,5,30,0.92) 0%, rgba(15,10,46,0.88) 40%, rgba(10,22,40,0.90) 100%)' }} />
+        {/* Violet tint */}
+        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(ellipse at 30% 50%,rgba(124,58,237,0.25) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(37,99,235,0.15) 0%,transparent 60%)' }} />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to={createPageUrl('Home')}>
-            <div className="w-14 h-14 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <GraduationCap className="w-7 h-7 text-white" />
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 32px rgba(124,58,237,0.45)' }}>
+              <GraduationCap className="w-8 h-8 text-white" />
             </div>
           </Link>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Welcome Back</h1>
-          <p className="text-slate-500 mt-1.5 text-sm">Sign in to continue learning</p>
+          <h1 className="text-3xl font-bold text-white mb-1">Welcome Back</h1>
+          <p className="text-slate-400 text-sm">Sign in to continue learning</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 md:p-8">
+        <div className="rounded-2xl p-6 md:p-8 border border-white/10" style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)' }}>
           {error && (
-            <div className="mb-5 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+            <div className="mb-5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl px-4 py-3 text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="email" className="text-sm font-medium">Email or Username</Label>
-              <Input
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Email or Username</label>
+              <input
                 id="email"
                 type="text"
                 placeholder="you@example.com or your username"
@@ -115,7 +154,10 @@ export default function Login() {
                     username: value.includes('@') ? '' : value
                   }));
                 }}
-                className="mt-1.5"
+                className="w-full h-12 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all mt-1.5 px-4"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                onFocus={(e) => e.target.style.borderColor = 'rgba(124,58,237,0.7)'}
+                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
                 required
                 autoFocus
               />
@@ -123,18 +165,21 @@ export default function Login() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                <Link to={createPageUrl('ForgotPassword')} className="text-sm text-violet-600 hover:text-violet-700 font-medium">
+                <label htmlFor="password" className="text-sm font-medium text-slate-300">Password</label>
+                <Link to={createPageUrl('ForgotPassword')} className="text-sm text-violet-400 hover:text-violet-300 font-medium">
                   Forgot password?
                 </Link>
               </div>
-              <Input
+              <input
                 id="password"
                 type="password"
                 placeholder="Your password"
                 value={formData.password}
                 onChange={set('password')}
-                className="mt-1.5"
+                className="w-full h-12 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all mt-1.5 px-4"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                onFocus={(e) => e.target.style.borderColor = 'rgba(124,58,237,0.7)'}
+                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
                 required
               />
             </div>
@@ -142,21 +187,22 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 h-11 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all"
+              className="w-full mt-2 h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:pointer-events-none"
+              style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 4px 20px rgba(124,58,237,0.4)' }}
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
+                <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Signing in...
-                </span>
+                </>
               ) : 'Sign In'}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-sm text-slate-500 mt-5">
+        <p className="text-center text-sm text-slate-400 mt-5">
           Don't have an account?{' '}
-          <Link to={createPageUrl('Register')} className="text-violet-600 hover:text-violet-700 font-semibold">
+          <Link to={createPageUrl('Register')} className="text-violet-400 hover:text-violet-300 font-semibold">
             Create one free
           </Link>
         </p>

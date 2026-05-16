@@ -2,13 +2,13 @@
 import { prince } from '@/api/princeClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { 
-  Upload, 
-  Video, 
-  Image as ImageIcon, 
-  X, 
-  Save, 
-  Trash2, 
+import {
+  Upload,
+  Video,
+  Image as ImageIcon,
+  X,
+  Save,
+  Trash2,
   Edit2,
   Plus,
   Clock,
@@ -16,6 +16,8 @@ import {
   AlertCircle,
   CheckCircle,
   MoreVertical,
+  Megaphone,
+  RotateCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +50,9 @@ export default function AdminUpload() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [activeTab, setActiveTab] = useState('videos'); // 'videos' or 'announcements'
+  const [announcementDialogOpen, setAnnouncementDialogOpen] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -58,6 +63,11 @@ export default function AdminUpload() {
     duration: '',
     video_url: '',
     thumbnail_url: '',
+  });
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: '',
+    content: '',
+    priority: 'normal',
   });
   const [uploading, setUploading] = useState({ video: false, thumbnail: false });
   const queryClient = useQueryClient();
@@ -74,6 +84,12 @@ export default function AdminUpload() {
   const { data: allUsers = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => prince.entities.User.list(),
+    enabled: user?.role === 'admin',
+  });
+
+  const { data: announcements = [], isLoading: announcementsLoading } = useQuery({
+    queryKey: ['announcements'],
+    queryFn: () => prince.entities.Announcement.list('-created_date', 100),
     enabled: user?.role === 'admin',
   });
 
@@ -125,10 +141,89 @@ export default function AdminUpload() {
     onError: (error) => toast.error(error.message || 'Delete failed'),
   });
 
+  const createAnnouncementMutation = useMutation({
+    mutationFn: (data) => prince.entities.Announcement.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['announcements'] });
+      toast.success('Announcement posted successfully!');
+      setAnnouncementForm({ title: '', content: '', priority: 'normal' });
+      setEditingAnnouncement(null);
+      setAnnouncementDialogOpen(false);
+    },
+    onError: (error) => toast.error(error.message || 'Failed to post announcement'),
+  });
+
+  const updateAnnouncementMutation = useMutation({
+    mutationFn: ({ id, data }) => prince.entities.Announcement.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['announcements'] });
+      toast.success('Announcement updated successfully!');
+      setAnnouncementForm({ title: '', content: '', priority: 'normal' });
+      setEditingAnnouncement(null);
+      setAnnouncementDialogOpen(false);
+    },
+    onError: (error) => toast.error(error.message || 'Failed to update announcement'),
+  });
+
+  const deleteAnnouncementMutation = useMutation({
+    mutationFn: (id) => prince.entities.Announcement.update(id, { is_deleted: true, deleted_at: new Date().toISOString() }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['announcements'] });
+      toast.success('Announcement deleted.');
+    },
+    onError: (error) => toast.error(error.message || 'Failed to delete announcement'),
+  });
+
+  const restoreAnnouncementMutation = useMutation({
+    mutationFn: (id) => prince.entities.Announcement.update(id, { is_deleted: false, deleted_at: null }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['announcements'] });
+      toast.success('Announcement restored successfully!');
+    },
+    onError: (error) => toast.error(error.message || 'Failed to restore announcement'),
+  });
+
   const resetForm = () => {
     setFormData({ title: '', description: '', grade: '', tier: 'Standard', topic: '', customTopic: '', duration: '', video_url: '', thumbnail_url: '' });
     setEditingVideo(null);
     setIsDialogOpen(false);
+  };
+
+  const resetAnnouncementForm = () => {
+    setAnnouncementForm({ title: '', content: '', priority: 'normal' });
+    setEditingAnnouncement(null);
+    setAnnouncementDialogOpen(false);
+  };
+
+  const handleAnnouncementSubmit = (e) => {
+    e.preventDefault();
+    if (!announcementForm.title || !announcementForm.content) {
+      toast.error('Please fill in title and content');
+      return;
+    }
+
+    const data = {
+      title: announcementForm.title,
+      content: announcementForm.content,
+      priority: announcementForm.priority,
+      is_active: true,
+    };
+
+    if (editingAnnouncement) {
+      updateAnnouncementMutation.mutate({ id: editingAnnouncement.id, data });
+    } else {
+      createAnnouncementMutation.mutate(data);
+    }
+  };
+
+  const openEditAnnouncementDialog = (announcement) => {
+    setEditingAnnouncement(announcement);
+    setAnnouncementForm({
+      title: announcement.title || '',
+      content: announcement.content || '',
+      priority: announcement.priority || 'normal',
+    });
+    setAnnouncementDialogOpen(true);
   };
 
   const handleFileUpload = async (file, type) => {
@@ -205,22 +300,63 @@ export default function AdminUpload() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-600 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Video className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                {activeTab === 'videos' ? (
+                  <Video className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                ) : (
+                  <Megaphone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                )}
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-800">Video Management</h1>
-                <p className="text-xs sm:text-sm text-slate-500">{videos.length} lessons uploaded</p>
+                <h1 className="text-lg sm:text-xl font-bold text-slate-800">
+                  {activeTab === 'videos' ? 'Video Management' : 'Announcements'}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  {activeTab === 'videos' ? `${videos.length} lessons uploaded` : `${announcements.length} announcements`}
+                </p>
               </div>
             </div>
-            <Button
-              onClick={() => { resetForm(); setIsDialogOpen(true); }}
-              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-sm"
-              size="sm"
-            >
-              <Plus className="w-4 h-4 mr-1.5" />
-              <span className="hidden sm:inline">Upload Video</span>
-              <span className="sm:hidden">Upload</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={activeTab === 'videos' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('videos')}
+                className="text-sm"
+                size="sm"
+              >
+                <Video className="w-4 h-4 mr-1.5" />
+                Videos
+              </Button>
+              <Button
+                variant={activeTab === 'announcements' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('announcements')}
+                className="text-sm"
+                size="sm"
+              >
+                <Megaphone className="w-4 h-4 mr-1.5" />
+                Announcements
+              </Button>
+              {activeTab === 'videos' && (
+                <Button
+                  onClick={() => { resetForm(); setIsDialogOpen(true); }}
+                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-sm"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Upload Video</span>
+                  <span className="sm:hidden">Upload</span>
+                </Button>
+              )}
+              {activeTab === 'announcements' && (
+                <Button
+                  onClick={() => { resetAnnouncementForm(); setAnnouncementDialogOpen(true); }}
+                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-sm"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">New Announcement</span>
+                  <span className="sm:hidden">New</span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -230,71 +366,152 @@ export default function AdminUpload() {
         <AdminStats videos={videos} users={allUsers} />
 
         {/* Video List */}
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-          <div className="px-4 sm:px-6 py-4 border-b border-slate-100">
-            <h2 className="font-semibold text-slate-800">All Videos</h2>
-          </div>
-
-          {isLoading ? (
-            <div className="p-8 text-center text-slate-400">Loading videos...</div>
-          ) : videos.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
-              No videos uploaded yet. Click "Upload" to get started.
+        {activeTab === 'videos' && (
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-800">All Videos</h2>
             </div>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {videos.map((video) => (
-                <div key={video.id} className="flex items-center gap-3 px-4 sm:px-6 py-4 hover:bg-slate-50 transition-colors">
-                  {/* Thumbnail */}
-                  <div className="w-14 h-10 sm:w-20 sm:h-12 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-                    {video.thumbnail_url ? (
-                      <img src={video.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Video className="w-4 h-4 text-slate-400" />
+
+            {isLoading ? (
+              <div className="p-8 text-center text-slate-400">Loading videos...</div>
+            ) : videos.length === 0 ? (
+              <div className="p-12 text-center text-slate-500">
+                No videos uploaded yet. Click "Upload" to get started.
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {videos.map((video) => (
+                  <div key={video.id} className="flex items-center gap-3 px-4 sm:px-6 py-4 hover:bg-slate-50 transition-colors">
+                    {/* Thumbnail */}
+                    <div className="w-14 h-10 sm:w-20 sm:h-12 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
+                      {video.thumbnail_url ? (
+                        <img src={video.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Video className="w-4 h-4 text-slate-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2 flex-wrap">
+                        <p className="font-medium text-slate-800 text-sm truncate max-w-[160px] sm:max-w-xs">{video.title}</p>
+                        {video.video_url && <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />}
                       </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start gap-2 flex-wrap">
-                      <p className="font-medium text-slate-800 text-sm truncate max-w-[160px] sm:max-w-xs">{video.title}</p>
-                      {video.video_url && <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />}
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <Badge variant="secondary" className="text-xs py-0">{video.grade}</Badge>
+                        <Badge variant="outline" className="text-xs py-0">{video.tier}</Badge>
+                        {video.topic && <span className="text-xs text-slate-400 hidden sm:inline">{video.topic}</span>}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <Badge variant="secondary" className="text-xs py-0">{video.grade}</Badge>
-                      <Badge variant="outline" className="text-xs py-0">{video.tier}</Badge>
-                      {video.topic && <span className="text-xs text-slate-400 hidden sm:inline">{video.topic}</span>}
+
+                    {/* Stats - hidden on small mobile */}
+                    <div className="hidden md:flex items-center gap-4 text-xs text-slate-400 flex-shrink-0">
+                      <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" />{video.views || 0}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{video.duration || '--'}</span>
+                      <span>{format(new Date(video.created_date), 'MMM d, yy')}</span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(video)}>
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        onClick={() => setDeleteConfirm(video)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-                  {/* Stats - hidden on small mobile */}
-                  <div className="hidden md:flex items-center gap-4 text-xs text-slate-400 flex-shrink-0">
-                    <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" />{video.views || 0}</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{video.duration || '--'}</span>
-                    <span>{format(new Date(video.created_date), 'MMM d, yy')}</span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(video)}>
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => setDeleteConfirm(video)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+        {/* Announcements List */}
+        {activeTab === 'announcements' && (
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-800">All Announcements</h2>
             </div>
-          )}
-        </div>
+
+            {announcementsLoading ? (
+              <div className="p-8 text-center text-slate-400">Loading announcements...</div>
+            ) : announcements.length === 0 ? (
+              <div className="p-12 text-center text-slate-500">
+                No announcements yet. Click "New Announcement" to create one.
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {announcements.map((announcement) => (
+                  <div key={announcement.id} className={`flex items-start gap-3 px-4 sm:px-6 py-4 transition-colors ${announcement.is_deleted ? 'bg-red-50 opacity-60' : 'hover:bg-slate-50'}`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2 flex-wrap">
+                        <p className={`font-medium text-sm truncate max-w-[200px] sm:max-w-md ${announcement.is_deleted ? 'text-slate-500 line-through' : 'text-slate-800'}`}>
+                          {announcement.title}
+                        </p>
+                        <Badge
+                          variant={announcement.priority === 'urgent' ? 'destructive' : announcement.priority === 'important' ? 'default' : 'secondary'}
+                          className="text-xs py-0"
+                        >
+                          {announcement.priority}
+                        </Badge>
+                        {announcement.is_active && !announcement.is_deleted && (
+                          <Badge variant="outline" className="text-xs py-0 text-green-600 border-green-600">Active</Badge>
+                        )}
+                        {announcement.is_deleted && (
+                          <Badge variant="outline" className="text-xs py-0 text-red-600 border-red-600">Deleted</Badge>
+                        )}
+                      </div>
+                      <p className={`text-xs mt-1 line-clamp-2 ${announcement.is_deleted ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {announcement.content}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-2">
+                        {format(new Date(announcement.created_date), 'MMM d, yyyy HH:mm')}
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {!announcement.is_deleted && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditAnnouncementDialog(announcement)}>
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {announcement.is_deleted ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          onClick={() => restoreAnnouncementMutation.mutate(announcement.id)}
+                          disabled={restoreAnnouncementMutation.isPending}
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          onClick={() => deleteAnnouncementMutation.mutate(announcement.id)}
+                          disabled={deleteAnnouncementMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -446,6 +663,63 @@ export default function AdminUpload() {
               >
                 <Save className="w-4 h-4 mr-2" />
                 {createVideoMutation.isPending || updateVideoMutation.isPending ? 'Saving...' : editingVideo ? 'Update Video' : 'Upload Video'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Announcement Dialog */}
+      <Dialog open={announcementDialogOpen} onOpenChange={(open) => { if (!open) resetAnnouncementForm(); setAnnouncementDialogOpen(open); }}>
+        <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingAnnouncement ? 'Edit Announcement' : 'New Announcement'}</DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleAnnouncementSubmit} className="space-y-5">
+            <div>
+              <Label htmlFor="announcement-title">Title *</Label>
+              <Input
+                id="announcement-title"
+                value={announcementForm.title}
+                onChange={(e) => setAnnouncementForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="e.g., Important: Exam Schedule Update"
+                className="mt-1.5"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="announcement-content">Content *</Label>
+              <Textarea
+                id="announcement-content"
+                value={announcementForm.content}
+                onChange={(e) => setAnnouncementForm(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="Enter your announcement message..."
+                className="mt-1.5 min-h-[120px]"
+              />
+            </div>
+
+            <div>
+              <Label>Priority</Label>
+              <Select value={announcementForm.priority} onValueChange={(v) => setAnnouncementForm(prev => ({ ...prev, priority: v }))}>
+                <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="important">Important</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button type="button" variant="outline" onClick={resetAnnouncementForm}>Cancel</Button>
+              <Button
+                type="submit"
+                disabled={createAnnouncementMutation.isPending || updateAnnouncementMutation.isPending}
+                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {createAnnouncementMutation.isPending || updateAnnouncementMutation.isPending ? 'Saving...' : editingAnnouncement ? 'Update Announcement' : 'Post Announcement'}
               </Button>
             </div>
           </form>
