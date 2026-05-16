@@ -114,3 +114,15 @@ const entities = {
 
 export const apiClient = { auth, entities, functions, integrations };
 export { setToken, getToken };
+
+export function getApiBaseUrl() {
+  return BASE_URL;
+}
+
+export async function parseJsonBody(res) {
+  try {
+    return await res.json();
+  } catch (e) {
+    return {};
+  }
+}
