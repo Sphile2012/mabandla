@@ -22,11 +22,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false, // Reduce bundle size for production
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: process.env.NODE_ENV === 'production',
-      },
+    minify: 'esbuild',
+    esbuildOptions: {
+      drop: process.env.NODE_ENV === 'production' ? ['console'] : [],
     },
   },
   // Ensure public assets are properly copied
