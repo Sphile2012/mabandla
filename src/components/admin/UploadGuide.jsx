@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Video, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react';
+import { Video, CheckCircle, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function UploadGuide() {

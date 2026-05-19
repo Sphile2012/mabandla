@@ -1,10 +1,9 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { motion } from 'framer-motion';
-import { Download, Smartphone, Monitor, CheckCircle, Shield, Apple, Globe, ExternalLink, Loader2 } from 'lucide-react';
+import { Download, Smartphone, Monitor, CheckCircle, Shield, Apple, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from 'sonner';
 
 const platforms = [
   {

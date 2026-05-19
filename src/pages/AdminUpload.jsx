@@ -15,7 +15,6 @@ import {
   Eye,
   AlertCircle,
   CheckCircle,
-  MoreVertical,
   Megaphone,
   RotateCcw,
 } from 'lucide-react';

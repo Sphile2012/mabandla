@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Video, Users, Eye, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function AdminStats({ videos, users }) {
   const totalViews = videos.reduce((sum, v) => sum + (v.views || 0), 0);

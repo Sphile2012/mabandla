@@ -16,8 +16,6 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
-  // Render immediately — auth loads in background
-  // Pages handle their own auth state via prince.auth.me()
   return (
     <Routes>
       <Route path="/" element={
@@ -43,12 +41,11 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-
   return (
     <ErrorBoundary>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
-          <Router>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AuthenticatedApp />
           </Router>
           <Toaster />

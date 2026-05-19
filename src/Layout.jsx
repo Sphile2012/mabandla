@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Grid3X3, Heart, Upload, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Building2, Shield, Download, Bell } from 'lucide-react';
+import { Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Shield, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -33,7 +33,6 @@ function checkAccess(user) {
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     prince.auth.me().then(u => {
@@ -77,7 +76,7 @@ export default function Layout({ children, currentPageName }) {
                   <span style={{color:'#e2e8f0'}}>Prince</span>
                   <span style={{background:'linear-gradient(135deg,#a78bfa,#60a5fa,#22d3ee)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}> Math</span>
                 </div>
-                <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.2em',textTransform:'uppercase',marginTop:'2px'}}>Academy · Grade 10–12</div>
+                <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.2em',textTransform:'uppercase',marginTop:'2px'}}>Academy ï¿½ Grade 10ï¿½12</div>
               </div>
             </Link>
 
@@ -242,7 +241,7 @@ export default function Layout({ children, currentPageName }) {
                 <Link key={p} to={createPageUrl(p)} className="hover:text-violet-400 transition-colors">{p === 'DownloadApp' ? 'Download App' : p === 'Categories' ? 'Lessons' : p}</Link>
               ))}
             </div>
-            <p className="text-xs text-slate-600">© {new Date().getFullYear()} Prince Mabandla</p>
+            <p className="text-xs text-slate-600">ï¿½ {new Date().getFullYear()} Prince Mabandla</p>
           </div>
         </div>
       </footer>

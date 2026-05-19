@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { prince } from '@/api/princeClient';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';

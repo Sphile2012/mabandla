@@ -8,7 +8,7 @@ import Leaderboard from '../components/dashboard/Leaderboard';
 import { motion } from 'framer-motion';
 import {
   BookOpen, Play, Clock, Star, TrendingUp, Award,
-  CheckCircle, Lock, ChevronRight, GraduationCap, Calendar
+  CheckCircle, Lock, ChevronRight, GraduationCap
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';

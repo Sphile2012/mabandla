@@ -2,9 +2,8 @@
 import { prince } from '@/api/princeClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Search, Grid, List, X, SlidersHorizontal, BookOpen } from 'lucide-react';
+import { Search, Grid, List, X, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import VideoCard from '../components/videos/VideoCard';
 import GradeCard from '@/components/videos/GradeCard';
 
