@@ -16,17 +16,17 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-    host: true, // Allow access from network for testing on other devices
-    port: 5173,
+    host: '0.0.0.0',
+    port: 5000,
+    allowedHosts: true,
   },
   build: {
     outDir: 'dist',
-    sourcemap: false, // Reduce bundle size for production
+    sourcemap: false,
     minify: 'esbuild',
     esbuildOptions: {
       drop: process.env.NODE_ENV === 'production' ? ['console'] : [],
     },
   },
-  // Ensure public assets are properly copied
   publicDir: 'public',
 });
