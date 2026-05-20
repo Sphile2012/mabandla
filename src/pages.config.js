@@ -64,6 +64,7 @@ import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
 import Messages from './pages/Messages';
 import OTPVerify from './pages/OTPVerify';
+import ParentPortal from './pages/ParentPortal';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Pricing from './pages/Pricing';
 import Profile from './pages/Profile';
@@ -95,6 +96,7 @@ export const PAGES = {
     "Login": Login,
     "Messages": Messages,
     "OTPVerify": OTPVerify,
+    "ParentPortal": ParentPortal,
     "PaymentSuccess": PaymentSuccess,
     "Pricing": Pricing,
     "Profile": Profile,
