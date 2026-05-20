@@ -83,7 +83,7 @@ export default function Home() {
               background: 'linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.25))',
               border: '1px solid rgba(139,92,246,0.4)',
               color: '#c4b5fd',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Poppins, sans-serif',
               boxShadow: '0 0 30px rgba(139,92,246,0.3), inset 0 0 20px rgba(139,92,246,0.1)'
             }}>
               <Sparkles className="w-4 h-4" style={{ color: '#22d3ee', filter: 'drop-shadow(0 0 12px rgba(34,211,238,0.9))' }} />
@@ -92,7 +92,7 @@ export default function Home() {
 
             {/* Premium headline */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-tight" style={{
-              fontFamily: "Playfair Display, Georgia, serif",
+              fontFamily: "Orbitron, sans-serif",
               letterSpacing: '-0.02em',
               textShadow: '0 0 50px rgba(139,92,246,0.4), 0 0 100px rgba(139,92,246,0.2)'
             }}>
@@ -104,7 +104,7 @@ export default function Home() {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 filter: 'drop-shadow(0 0 30px rgba(245,158,11,0.6))',
-                fontFamily: "Playfair Display, Georgia, serif"
+                fontFamily: "Orbitron, sans-serif"
               }}>
                 With Confidence
               </span>
@@ -113,7 +113,7 @@ export default function Home() {
             {/* Premium description */}
             <p className="text-lg md:text-xl max-w-3xl mx-auto mb-12 leading-relaxed" style={{
               color: 'rgba(255,255,255,0.85)',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Poppins, sans-serif',
               textShadow: '0 2px 8px rgba(0,0,0,0.4)'
             }}>
               Expertly crafted video lessons by{' '}
@@ -121,7 +121,7 @@ export default function Home() {
                 color: '#22d3ee',
                 fontWeight: '600',
                 filter: 'drop-shadow(0 0 15px rgba(34,211,238,0.8))',
-                fontFamily: "Playfair Display, Georgia, serif"
+                fontFamily: "Orbitron, sans-serif"
               }}>Prince Mabandla</span>{' '}
               for Grade 10, 11 & 12 Mathematics. Transform your understanding with our innovative approach.
             </p>
@@ -134,7 +134,7 @@ export default function Home() {
                     <Button size="lg" className="px-10 h-14 text-base font-semibold rounded-2xl border-0 transition-all hover:scale-105" style={{
                       background: 'linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6)',
                       boxShadow: '0 10px 40px rgba(139,92,246,0.5), 0 0 30px rgba(139,92,246,0.3), inset 0 0 20px rgba(255,255,255,0.1)',
-                      fontFamily: 'Inter, sans-serif'
+                      fontFamily: 'Poppins, sans-serif'
                     }}>
                       <Play className="w-5 h-5 mr-2" fill="currentColor" />
                       Browse Lessons
@@ -145,7 +145,7 @@ export default function Home() {
                       borderColor: 'rgba(139,92,246,0.4)',
                       color: 'white',
                       background: 'rgba(139,92,246,0.1)',
-                      fontFamily: 'Inter, sans-serif',
+                      fontFamily: 'Poppins, sans-serif',
                       boxShadow: '0 0 25px rgba(139,92,246,0.2)'
                     }}>
                       View Pricing <ArrowRight className="w-5 h-5 ml-2" />
@@ -158,7 +158,7 @@ export default function Home() {
                     <Button size="lg" className="px-10 h-14 text-base font-semibold rounded-2xl border-0 transition-all hover:scale-105" style={{
                       background: 'linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6)',
                       boxShadow: '0 10px 40px rgba(139,92,246,0.5), 0 0 30px rgba(139,92,246,0.3), inset 0 0 20px rgba(255,255,255,0.1)',
-                      fontFamily: 'Inter, sans-serif'
+                      fontFamily: 'Poppins, sans-serif'
                     }}>
                       Start Free 3-Day Trial <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
@@ -167,7 +167,7 @@ export default function Home() {
                     borderColor: 'rgba(139,92,246,0.4)',
                     color: 'white',
                     background: 'rgba(139,92,246,0.1)',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'Poppins, sans-serif',
                     boxShadow: '0 0 25px rgba(139,92,246,0.2)'
                   }}>
                     Sign In
@@ -182,7 +182,7 @@ export default function Home() {
                 background: 'linear-gradient(135deg, rgba(34,211,238,0.2), rgba(59,130,246,0.2))',
                 border: '1px solid rgba(34,211,238,0.4)',
                 color: '#22d3ee',
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: 'Poppins, sans-serif',
                 boxShadow: '0 0 25px rgba(34,211,238,0.4), inset 0 0 15px rgba(34,211,238,0.1)'
               }}>
                 <span>📱</span> Add to Home Screen
@@ -208,12 +208,12 @@ export default function Home() {
                   filter: 'drop-shadow(0 0 12px rgba(167,139,250,0.8))'
                 }} />
                 <div className="text-3xl font-bold text-white" style={{
-                  fontFamily: "Playfair Display, Georgia, serif",
+                  fontFamily: "Orbitron, sans-serif",
                   textShadow: '0 0 20px rgba(255,255,255,0.4)'
                 }}>{stat.value}</div>
                 <div className="text-xs mt-1" style={{
                   color: 'rgba(255,255,255,0.5)',
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'Poppins, sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em'
                 }}>{stat.label}</div>
@@ -228,18 +228,18 @@ export default function Home() {
         <div className="flex items-center justify-between mb-10">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2" style={{
-              fontFamily: "Playfair Display, Georgia, serif",
+              fontFamily: "Orbitron, sans-serif",
               textShadow: '0 0 30px rgba(139,92,246,0.4)'
             }}>Choose Your Grade</h2>
             <p style={{
               color: 'rgba(255,255,255,0.5)',
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "Poppins, sans-serif",
               fontSize: '1.1rem'
             }}>Select your grade to browse Mathematics lessons</p>
           </div>
           <Link to={createPageUrl('Categories')} className="text-sm flex items-center gap-1 font-medium transition-all hover:scale-105" style={{
             color: '#a78bfa',
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Poppins, sans-serif",
             filter: 'drop-shadow(0 0 12px rgba(167,139,250,0.6))'
           }}>
             View all <ArrowRight className="w-4 h-4" />
@@ -258,18 +258,18 @@ export default function Home() {
           <div className="flex items-center justify-between mb-10">
             <div>
               <h2 className="text-3xl font-bold text-white mb-2" style={{
-                fontFamily: "Playfair Display, Georgia, serif",
+                fontFamily: "Orbitron, sans-serif",
                 textShadow: '0 0 30px rgba(139,92,246,0.4)'
               }}>Latest Lessons</h2>
               <p style={{
                 color: 'rgba(255,255,255,0.5)',
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "Poppins, sans-serif",
                 fontSize: '1.1rem'
               }}>Recently uploaded video lessons</p>
             </div>
             <Link to={createPageUrl('Categories')} className="text-sm flex items-center gap-1 font-medium transition-all hover:scale-105" style={{
               color: '#a78bfa',
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "Poppins, sans-serif",
               filter: 'drop-shadow(0 0 12px rgba(167,139,250,0.6))'
             }}>
               See all <ArrowRight className="w-4 h-4" />
@@ -297,14 +297,14 @@ export default function Home() {
           <div className="relative flex flex-col md:flex-row items-center justify-between gap-10">
             <div className="flex-1">
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-4" style={{
-                fontFamily: "Playfair Display, Georgia, serif",
+                fontFamily: "Orbitron, sans-serif",
                 textShadow: '0 0 30px rgba(255,255,255,0.3)'
               }}>
                 Ready to Excel in Mathematics?
               </h3>
               <p style={{
                 color: 'rgba(255,255,255,0.7)',
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "Poppins, sans-serif",
                 fontSize: '1.1rem',
                 lineHeight: '1.7'
               }}>
@@ -316,7 +316,7 @@ export default function Home() {
                 <Button size="lg" className="px-10 h-14 text-base font-semibold rounded-2xl border-0 whitespace-nowrap" style={{
                   background: 'linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6)',
                   boxShadow: '0 10px 40px rgba(139,92,246,0.5), 0 0 30px rgba(139,92,246,0.3), inset 0 0 20px rgba(255,255,255,0.1)',
-                  fontFamily: 'Inter, sans-serif'
+                  fontFamily: 'Poppins, sans-serif'
                 }}>
                   Subscribe Now <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
@@ -325,7 +325,7 @@ export default function Home() {
               <Button size="lg" onClick={() => prince.auth.redirectToLogin(window.location.href)} className="px-10 h-14 text-base font-semibold rounded-2xl border-0 whitespace-nowrap" style={{
                 background: 'linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6)',
                 boxShadow: '0 10px 40px rgba(139,92,246,0.5), 0 0 30px rgba(139,92,246,0.3), inset 0 0 20px rgba(255,255,255,0.1)',
-                fontFamily: 'Inter, sans-serif'
+                fontFamily: 'Poppins, sans-serif'
               }}>
                 Register / Sign In <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
