@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  LineChart, Line, CartesianGrid, Legend, PieChart, Pie, Cell
+  LineChart, Line, CartesianGrid, PieChart, Pie, Cell
 } from 'recharts';
 import { TrendingUp, BarChart2, PieChart as PieIcon } from 'lucide-react';
 

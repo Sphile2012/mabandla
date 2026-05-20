@@ -3,6 +3,8 @@ import { prince } from '@/api/princeClient';
 
 const AuthContext = createContext();
 
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -10,10 +12,42 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings, setAppPublicSettings] = useState({});
+  const [lastActivity, setLastActivity] = useState(Date.now());
 
   useEffect(() => {
     checkAppState();
+    setupActivityTracker();
   }, []);
+
+  const setupActivityTracker = () => {
+    const updateActivity = () => setLastActivity(Date.now());
+
+    // Track user activity
+    window.addEventListener('mousemove', updateActivity);
+    window.addEventListener('keydown', updateActivity);
+    window.addEventListener('click', updateActivity);
+    window.addEventListener('scroll', updateActivity);
+
+    return () => {
+      window.removeEventListener('mousemove', updateActivity);
+      window.removeEventListener('keydown', updateActivity);
+      window.removeEventListener('click', updateActivity);
+      window.removeEventListener('scroll', updateActivity);
+    };
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const checkSession = setInterval(() => {
+      const now = Date.now();
+      if (now - lastActivity > SESSION_TIMEOUT) {
+        logout();
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(checkSession);
+  }, [isAuthenticated, lastActivity]);
 
   const checkAppState = async () => {
     try {
@@ -22,6 +56,7 @@ export const AuthProvider = ({ children }) => {
       const currentUser = await prince.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
+      setLastActivity(Date.now());
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
@@ -33,6 +68,7 @@ export const AuthProvider = ({ children }) => {
   const logout = (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
+    setLastActivity(0);
     prince.auth.logout(shouldRedirect ? window.location.href : undefined);
   };
 

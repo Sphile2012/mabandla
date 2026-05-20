@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { prince } from '@/api/princeClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { MessageCircle, Send, Search, ArrowLeft, Lock, UserCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';

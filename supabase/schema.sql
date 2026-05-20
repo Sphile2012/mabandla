@@ -21,6 +21,11 @@ create table if not exists users (
   account_holder        text,
   account_number        text,
   account_type          text,
+  xp                    integer default 0,
+  level                 integer default 1,
+  current_streak        integer default 0,
+  longest_streak        integer default 0,
+  last_activity_date    timestamptz,
   created_at            timestamptz default now(),
   created_date          timestamptz default now()
 );
@@ -114,6 +119,126 @@ create table if not exists announcements (
   created_date   timestamptz default now()
 );
 
+-- ── Badges ─────────────────────────────────────────────────────────────────────
+create table if not exists badges (
+  id          text primary key default gen_random_uuid()::text,
+  name        text not null unique,
+  description text,
+  icon        text,
+  category    text, -- achievement, streak, milestone, special
+  xp_reward   integer default 0,
+  requirement text, -- description of how to earn
+  created_at  timestamptz default now(),
+  created_date timestamptz default now()
+);
+
+-- ── User Badges ───────────────────────────────────────────────────────────────
+create table if not exists user_badges (
+  id          text primary key default gen_random_uuid()::text,
+  user_email  text not null,
+  badge_id    text not null,
+  earned_at   timestamptz default now(),
+  created_date timestamptz default now()
+);
+
+-- ── Video Progress ─────────────────────────────────────────────────────────────
+create table if not exists video_progress (
+  id              text primary key default gen_random_uuid()::text,
+  user_email      text not null,
+  video_id        text not null,
+  progress        integer default 0, -- percentage 0-100
+  last_position   integer default 0, -- seconds
+  completed       boolean default false,
+  completed_at    timestamptz,
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now(),
+  created_date    timestamptz default now()
+);
+
+-- ── Daily Challenges ───────────────────────────────────────────────────────────
+create table if not exists daily_challenges (
+  id              text primary key default gen_random_uuid()::text,
+  title           text not null,
+  description     text,
+  xp_reward       integer default 10,
+  question_text   text,
+  answer_text     text,
+  date            date unique not null,
+  is_active       boolean default true,
+  created_at       timestamptz default now(),
+  created_date    timestamptz default now()
+);
+
+-- ── Daily Challenge Submissions ─────────────────────────────────────────────────
+create table if not exists daily_challenge_submissions (
+  id              text primary key default gen_random_uuid()::text,
+  user_email      text not null,
+  challenge_id    text not null,
+  answer          text,
+  is_correct      boolean,
+  xp_earned       integer default 0,
+  submitted_at    timestamptz default now(),
+  created_date    timestamptz default now()
+);
+
+-- ── Study Groups ───────────────────────────────────────────────────────────────
+create table if not exists study_groups (
+  id              text primary key default gen_random_uuid()::text,
+  name            text not null,
+  description     text,
+  creator_email   text not null,
+  max_members     integer default 10,
+  created_at      timestamptz default now(),
+  created_date    timestamptz default now()
+);
+
+-- ── Study Group Members ─────────────────────────────────────────────────────────
+create table if not exists study_group_members (
+  id              text primary key default gen_random_uuid()::text,
+  group_id        text not null,
+  user_email      text not null,
+  joined_at       timestamptz default now(),
+  created_date    timestamptz default now()
+);
+
+-- ── Forum Posts ────────────────────────────────────────────────────────────────
+create table if not exists forum_posts (
+  id              text primary key default gen_random_uuid()::text,
+  topic           text not null,
+  user_email      text not null,
+  user_name       text,
+  title           text not null,
+  content         text,
+  upvotes         integer default 0,
+  is_pinned       boolean default false,
+  created_at      timestamptz default now(),
+  created_date    timestamptz default now()
+);
+
+-- ── Forum Replies ─────────────────────────────────────────────────────────────
+create table if not exists forum_replies (
+  id              text primary key default gen_random_uuid()::text,
+  post_id         text not null,
+  user_email      text not null,
+  user_name       text,
+  content         text,
+  upvotes         integer default 0,
+  created_at      timestamptz default now(),
+  created_date    timestamptz default now()
+);
+
+-- ── Feedback ────────────────────────────────────────────────────────────────────
+create table if not exists feedback (
+  id              text primary key default gen_random_uuid()::text,
+  user_email      text,
+  type            text, -- bug, feature, general
+  subject         text,
+  message         text not null,
+  status          text default 'open', -- open, in_progress, resolved
+  created_at      timestamptz default now(),
+  created_date    timestamptz default now()
+);
+
 -- ── Storage bucket ────────────────────────────────────────────────────────────
 -- Create a public bucket called "prince-math" in Supabase Storage dashboard,
 -- or run:
@@ -129,3 +254,13 @@ alter table xpevents disable row level security;
 alter table notifications disable row level security;
 alter table messages disable row level security;
 alter table announcements disable row level security;
+alter table badges disable row level security;
+alter table user_badges disable row level security;
+alter table video_progress disable row level security;
+alter table daily_challenges disable row level security;
+alter table daily_challenge_submissions disable row level security;
+alter table study_groups disable row level security;
+alter table study_group_members disable row level security;
+alter table forum_posts disable row level security;
+alter table forum_replies disable row level security;
+alter table feedback disable row level security;

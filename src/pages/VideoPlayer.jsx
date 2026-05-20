@@ -9,7 +9,6 @@ import {
   Play, 
   Heart, 
   Share2, 
-  ArrowLeft, 
   Clock, 
   Eye, 
   Calendar,

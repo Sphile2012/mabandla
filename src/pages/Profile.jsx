@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { prince } from '@/api/princeClient';
 import { motion } from 'framer-motion';
-import { User, Building2, Save, CheckCircle, Shield, LogOut, CreditCard } from 'lucide-react';
+import { User, Building2, Save, CheckCircle, Shield, LogOut, CreditCard, Award, Flame, TrendingUp, Trophy } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,9 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { getUserBadges, getXPToNextLevel } from '@/lib/gamification';
+import { useQuery } from '@tanstack/react-query';
 
-const banks = ['FNB','Standard Bank','ABSA','Nedbank','Capitec','African Bank','Discovery Bank','TymeBank','Investec'];
-const grades = ['Grade 10','Grade 11','Grade 12'];
+const banks = ['FNB', 'Standard Bank', 'ABSA', 'Nedbank', 'Capitec', 'African Bank', 'Discovery Bank', 'TymeBank', 'Investec'];
+const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 
 // Reusable dark section card — plain function, no forwardRef needed
 function Section({ sectionRef = null, icon, title, desc, children }) {
@@ -93,6 +95,14 @@ export default function Profile() {
   const trialActive = user.trial_end_date && new Date(user.trial_end_date) > now;
   const subActive = user.subscription_active && user.subscription_end_date && new Date(user.subscription_end_date) > now;
 
+  const { data: badges = [] } = useQuery({
+    queryKey: ['user-badges', user?.email],
+    queryFn: () => getUserBadges(user?.email),
+    enabled: !!user?.email,
+  });
+
+  const xpToNextLevel = getXPToNextLevel(user?.xp || 0);
+
   return (
     <div className="min-h-screen pb-12" style={{ background: '#080d1a' }}>
       {/* Header */}
@@ -104,12 +114,53 @@ export default function Profile() {
           </div>
           <h1 className="text-2xl font-bold text-white mb-1">{user.full_name}</h1>
           <p className="text-slate-400 text-sm mb-3">{user.email}</p>
-          <div className="flex items-center justify-center gap-2 flex-wrap">
+          <div className="flex items-center justify-center gap-2 flex-wrap mb-4">
             {user.grade && <Badge variant="outline" className="bg-white/10 text-slate-200 border-white/15">{user.grade}</Badge>}
             {trialActive && <Badge variant="warning" className="">Trial Active</Badge>}
             {subActive && <Badge variant="success" className="">{user.subscription_tier} · Active</Badge>}
             {!trialActive && !subActive && user.subscription_tier && <Badge variant="destructive" className="">Subscription Expired</Badge>}
           </div>
+
+          {/* XP and Stats */}
+          <div className="flex items-center justify-center gap-6 mb-4">
+            <div className="text-center">
+              <div className="flex items-center gap-1 justify-center text-violet-400">
+                <TrendingUp className="w-4 h-4" />
+                <span className="text-2xl font-bold">{user.xp || 0}</span>
+              </div>
+              <p className="text-xs text-slate-500">Total XP</p>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center gap-1 justify-center text-cyan-400">
+                <Award className="w-4 h-4" />
+                <span className="text-2xl font-bold">Level {user.level || 1}</span>
+              </div>
+              <p className="text-xs text-slate-500">{xpToNextLevel} XP to next</p>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center gap-1 justify-center text-orange-400">
+                <Flame className="w-4 h-4" />
+                <span className="text-2xl font-bold">{user.current_streak || 0}</span>
+              </div>
+              <p className="text-xs text-slate-500">Day Streak</p>
+            </div>
+          </div>
+
+          {/* Badges */}
+          {badges.length > 0 && (
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {badges.slice(0, 6).map(badge => (
+                <div key={badge.id} className="w-10 h-10 rounded-full flex items-center justify-center bg-violet-500/20 border border-violet-500/30" title={badge.name}>
+                  <Award className="w-5 h-5 text-violet-300" />
+                </div>
+              ))}
+              {badges.length > 6 && (
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 border border-white/20">
+                  <span className="text-sm text-slate-400">+{badges.length - 6}</span>
+                </div>
+              )}
+            </div>
+          )}
         </motion.div>
       </div>
 
