@@ -21,6 +21,7 @@ const navItems = [
   { name: 'Worked Examples', icon: CheckCircle, page: 'WorkedExamples' },
   { name: 'Forum', icon: ForumIcon, page: 'Forum' },
   { name: 'Study Groups', icon: Users, page: 'StudyGroups' },
+  { name: 'Certificates', icon: Award, page: 'Certificates', requiresAuth: true },
   { name: 'Parent Portal', icon: Baby, page: 'ParentPortal', requiresAuth: true },
   { name: 'Pricing', icon: CreditCard, page: 'Pricing' },
   { name: 'About', icon: Info, page: 'About' },

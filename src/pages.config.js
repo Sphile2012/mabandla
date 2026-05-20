@@ -50,6 +50,7 @@
 import About from './pages/About';
 import AdminUpload from './pages/AdminUpload';
 import Categories from './pages/Categories';
+import Certificates from './pages/Certificates';
 import ChangePassword from './pages/ChangePassword';
 import CompleteProfile from './pages/CompleteProfile';
 import DownloadApp from './pages/DownloadApp';
@@ -82,6 +83,7 @@ export const PAGES = {
     "About": About,
     "AdminUpload": AdminUpload,
     "Categories": Categories,
+    "Certificates": Certificates,
     "ChangePassword": ChangePassword,
     "CompleteProfile": CompleteProfile,
     "DownloadApp": DownloadApp,
