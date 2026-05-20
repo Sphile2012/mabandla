@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Search, Grid, List, X, BookOpen } from 'lucide-react';
+import { Search, Grid, List, X, BookOpen, SlidersHorizontal, ArrowUpDown, Clock, Eye, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoCard from '../components/videos/VideoCard';
 import GradeCard from '@/components/videos/GradeCard';
 
@@ -18,6 +23,10 @@ export default function Categories() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedTier, setSelectedTier] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
+  const [maxDuration, setMaxDuration] = useState(60);
+  const [minViews, setMinViews] = useState(0);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -59,7 +68,26 @@ export default function Categories() {
     const matchesGrade = !selectedGrade || video.grade === selectedGrade;
     const matchesTopic = !selectedTopic || video.topic === selectedTopic;
     const matchesTier = !selectedTier || video.tier === selectedTier;
-    return matchesSearch && matchesGrade && matchesTopic && matchesTier;
+    const matchesDuration = !maxDuration || maxDuration === 60 || (video.duration_minutes || 0) <= maxDuration;
+    const matchesViews = !minViews || (video.views || 0) >= minViews;
+    return matchesSearch && matchesGrade && matchesTopic && matchesTier && matchesDuration && matchesViews;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.created_date) - new Date(a.created_date);
+      case 'oldest':
+        return new Date(a.created_date) - new Date(b.created_date);
+      case 'most_viewed':
+        return (b.views || 0) - (a.views || 0);
+      case 'least_viewed':
+        return (a.views || 0) - (b.views || 0);
+      case 'duration_asc':
+        return (a.duration_minutes || 0) - (b.duration_minutes || 0);
+      case 'duration_desc':
+        return (b.duration_minutes || 0) - (a.duration_minutes || 0);
+      default:
+        return 0;
+    }
   });
 
   const gradeVideoCounts = grades.reduce((acc, g) => {
@@ -72,15 +100,15 @@ export default function Categories() {
     ? [...new Set(videos.filter(v => v.grade === selectedGrade).map(v => v.topic).filter(Boolean))]
     : topics;
 
-  const clearAll = () => { setSelectedGrade(null); setSelectedTopic(null); setSelectedTier(null); setSearchQuery(''); };
-  const hasFilters = selectedGrade || selectedTopic || selectedTier || searchQuery;
+  const clearAll = () => { setSelectedGrade(null); setSelectedTopic(null); setSelectedTier(null); setSearchQuery(''); setMaxDuration(60); setMinViews(0); };
+  const hasFilters = selectedGrade || selectedTopic || selectedTier || searchQuery || maxDuration !== 60 || minViews > 0;
 
   return (
     <div className="min-h-screen" style={{ background: '#080d1a' }}>
       {/* Header */}
       <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          {/* Search + view toggle */}
+          {/* Search + view toggle + filters */}
           <div className="flex items-center gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -96,6 +124,28 @@ export default function Categories() {
                 </button>
               )}
             </div>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[140px] h-10 bg-white/5 border-white/10 text-white">
+                <ArrowUpDown className="w-4 h-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+                <SelectItem value="most_viewed">Most Viewed</SelectItem>
+                <SelectItem value="least_viewed">Least Viewed</SelectItem>
+                <SelectItem value="duration_asc">Duration: Short</SelectItem>
+                <SelectItem value="duration_desc">Duration: Long</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={() => setIsFilterDialogOpen(true)}
+              variant="outline"
+              className={`h-10 ${maxDuration !== 60 || minViews > 0 ? 'border-violet-500 text-violet-400' : 'border-white/10 text-slate-400'}`}
+            >
+              <SlidersHorizontal className="w-4 h-4 mr-2" />
+              Filters
+            </Button>
             <div className="flex items-center gap-1 p-1 rounded-lg border border-white/10 bg-white/5">
               <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
                 <Grid className="w-4 h-4" />
@@ -215,6 +265,65 @@ export default function Categories() {
           </div>
         )}
       </div>
+
+      {/* Advanced Filter Dialog */}
+      <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
+        <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle>Advanced Filters</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Duration Filter */}
+            <div>
+              <Label className="flex items-center gap-2 mb-3">
+                <Clock className="w-4 h-4" />
+                Max Duration: {maxDuration === 60 ? 'Any' : `${maxDuration} min`}
+              </Label>
+              <Slider
+                value={[maxDuration]}
+                onValueChange={(v) => setMaxDuration(v[0])}
+                min={5}
+                max={60}
+                step={5}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-slate-400 mt-1">
+                <span>5 min</span>
+                <span>60+ min</span>
+              </div>
+            </div>
+
+            {/* Views Filter */}
+            <div>
+              <Label className="flex items-center gap-2 mb-3">
+                <Eye className="w-4 h-4" />
+                Minimum Views: {minViews === 0 ? 'Any' : minViews}
+              </Label>
+              <Slider
+                value={[minViews]}
+                onValueChange={(v) => setMinViews(v[0])}
+                min={0}
+                max={1000}
+                step={50}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-slate-400 mt-1">
+                <span>0</span>
+                <span>1000+</span>
+              </div>
+            </div>
+
+            {/* Reset Button */}
+            <Button
+              onClick={() => { setMaxDuration(60); setMinViews(0); }}
+              variant="outline"
+              className="w-full"
+            >
+              Reset Filters
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
