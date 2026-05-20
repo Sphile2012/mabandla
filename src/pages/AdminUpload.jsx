@@ -100,6 +100,18 @@ export default function AdminUpload() {
     enabled: user?.role === 'admin',
   });
 
+  const { data: xpEvents = [] } = useQuery({
+    queryKey: ['xp-events'],
+    queryFn: () => prince.entities.XPEvent.list('-created_date', 500),
+    enabled: user?.role === 'admin',
+  });
+
+  const { data: videoProgress = [] } = useQuery({
+    queryKey: ['video-progress'],
+    queryFn: () => prince.entities.VideoProgress.list('-created_date', 500),
+    enabled: user?.role === 'admin',
+  });
+
   const createVideoMutation = useMutation({
     mutationFn: async (data) => {
       await prince.functions.invoke('validateVideoUpload', {
@@ -370,7 +382,7 @@ export default function AdminUpload() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Stats */}
-        <AdminStats videos={videos} users={allUsers} />
+        <AdminStats videos={videos} users={allUsers} xpEvents={xpEvents} videoProgress={videoProgress} />
 
         {/* Video List */}
         {activeTab === 'videos' && (

@@ -56,6 +56,7 @@ import DownloadApp from './pages/DownloadApp';
 import Favorites from './pages/Favorites';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
+import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
 import Messages from './pages/Messages';
 import OTPVerify from './pages/OTPVerify';
@@ -79,6 +80,7 @@ export const PAGES = {
     "Favorites": Favorites,
     "ForgotPassword": ForgotPassword,
     "Home": Home,
+    "Leaderboard": Leaderboard,
     "Login": Login,
     "Messages": Messages,
     "OTPVerify": OTPVerify,
