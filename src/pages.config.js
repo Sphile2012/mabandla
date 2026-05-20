@@ -70,6 +70,7 @@ import Profile from './pages/Profile';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import StudentDashboard from './pages/StudentDashboard';
+import StudyGroups from './pages/StudyGroups';
 import VideoPlayer from './pages/VideoPlayer';
 import WorkedExamples from './pages/WorkedExamples';
 import __Layout from './Layout.jsx';
@@ -99,6 +100,7 @@ export const PAGES = {
     "Register": Register,
     "ResetPassword": ResetPassword,
     "StudentDashboard": StudentDashboard,
+    "StudyGroups": StudyGroups,
     "VideoPlayer": VideoPlayer,
     "WorkedExamples": WorkedExamples,
 }
