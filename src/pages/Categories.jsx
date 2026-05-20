@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -8,7 +8,7 @@ import VideoCard from '../components/videos/VideoCard';
 import GradeCard from '@/components/videos/GradeCard';
 
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
-const topics = ['Algebra', 'Functions', 'Geometry', 'Statistics', 'Trigonometry', 'Calculus', 'Number Patterns', 'Finance', 'Probability', 'Analytical Geometry'];
+const topics = ['Algebra', 'Functions', 'Geometry', 'Trigonometry', 'Calculus', 'Number Patterns', 'Finance', 'Probability', 'Analytical Geometry'];
 const tiers = ['Standard', 'Premium'];
 
 export default function Categories() {

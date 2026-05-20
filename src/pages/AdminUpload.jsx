@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -40,9 +40,17 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import AdminStats from '../components/admin/AdminStats';
 
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@princemath.co.za';
+
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const tiers = ['Standard', 'Premium'];
-const topics = ['Algebra', 'Functions', 'Geometry', 'Statistics', 'Trigonometry', 'Calculus', 'Number Patterns', 'Finance', 'Probability', 'Analytical Geometry', 'Other'];
+const topics = ['Algebra', 'Functions', 'Geometry', 'Trigonometry', 'Calculus', 'Number Patterns', 'Finance', 'Probability', 'Analytical Geometry', 'Other'];
+
+function checkAccess(user) {
+  if (!user) return false;
+  if (user.email === ADMIN_EMAIL || user.role === 'admin' || user.role === 'teacher') return true;
+  return false;
+}
 
 export default function AdminUpload() {
   const [user, setUser] = useState(null);
@@ -277,7 +285,7 @@ export default function AdminUpload() {
     setIsDialogOpen(true);
   };
 
-  if (!user || user.role !== 'admin') {
+  if (!checkAccess(user)) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-md">
@@ -285,7 +293,7 @@ export default function AdminUpload() {
             <AlertCircle className="w-10 h-10 text-red-500" />
           </div>
           <h2 className="text-2xl font-bold text-slate-800 mb-3">Access Denied</h2>
-          <p className="text-slate-500">Only Prince (admin) can upload and manage video lessons.</p>
+          <p className="text-slate-500">Only teachers and admins can upload and manage video lessons.</p>
         </motion.div>
       </div>
     );
