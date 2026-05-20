@@ -67,6 +67,7 @@ import OTPVerify from './pages/OTPVerify';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Pricing from './pages/Pricing';
 import Profile from './pages/Profile';
+import PublicProfile from './pages/PublicProfile';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import StudentDashboard from './pages/StudentDashboard';
@@ -97,6 +98,7 @@ export const PAGES = {
     "PaymentSuccess": PaymentSuccess,
     "Pricing": Pricing,
     "Profile": Profile,
+    "PublicProfile": PublicProfile,
     "Register": Register,
     "ResetPassword": ResetPassword,
     "StudentDashboard": StudentDashboard,
