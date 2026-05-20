@@ -8,11 +8,12 @@ import Leaderboard from '../components/dashboard/Leaderboard';
 import { motion } from 'framer-motion';
 import {
   BookOpen, Play, Clock, Star, TrendingUp, Award,
-  CheckCircle, Lock, ChevronRight, GraduationCap
+  CheckCircle, Lock, ChevronRight, GraduationCap, Sparkles
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { createPageUrl } from '@/utils';
+import { getRecommendedVideos } from '@/lib/recommendations';
 
 const TOPICS_ORDER = [
   'Algebra', 'Number Patterns', 'Functions', 'Finance',
@@ -50,6 +51,12 @@ export default function StudentDashboard() {
     queryKey: ['video-progress', user?.email],
     queryFn: () => prince.entities.VideoProgress.filter({ user_email: user?.email }),
     enabled: !!user?.email,
+  });
+
+  const { data: recommendedVideos = [] } = useQuery({
+    queryKey: ['recommended-videos', user?.email, user?.grade],
+    queryFn: () => getRecommendedVideos(user?.email, user?.grade, 4),
+    enabled: !!user?.email && !!user?.grade,
   });
 
   const myXP = xpEvents.filter(e => e.user_email === user?.email).reduce((s, e) => s + (e.xp_amount || 0), 0);
@@ -200,6 +207,46 @@ export default function StudentDashboard() {
                         </div>
                         <Progress value={video.progress} className="h-1.5 mt-2" />
                         <p className="text-xs text-slate-400 mt-0.5">{video.progress}% complete</p>
+                      </div>
+                      <Badge variant={video.tier === 'Premium' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">{video.tier}</Badge>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Recommended for You */}
+        {recommendedVideos.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-slate-800 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-violet-600" />
+                  Recommended for You
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Based on your learning progress</p>
+              </div>
+              <Link to={createPageUrl('Categories')} className="text-xs text-violet-600 hover:underline font-medium">View all</Link>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {recommendedVideos.map((video) => {
+                const isFav = favoriteIds.has(video.id);
+                const locked = video.tier === 'Premium' && user.subscription_tier !== 'Premium' && !isSubscribed;
+                return (
+                  <Link key={video.id} to={`${createPageUrl('VideoPlayer')}?id=${video.id}`}>
+                    <div className="px-5 py-3.5 hover:bg-slate-50 transition-colors flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${locked ? 'bg-slate-100' : 'bg-violet-100'}`}>
+                        {locked ? <Lock className="w-4 h-4 text-slate-400" /> : <Play className="w-4 h-4 text-violet-600" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-700 truncate">{video.title}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {video.topic && <span className="text-xs text-slate-400">{video.topic}</span>}
+                          {video.duration && <span className="flex items-center gap-0.5 text-xs text-slate-400"><Clock className="w-3 h-3" />{video.duration}</span>}
+                          {isFav && <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />}
+                        </div>
                       </div>
                       <Badge variant={video.tier === 'Premium' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">{video.tier}</Badge>
                     </div>
