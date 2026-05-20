@@ -54,7 +54,10 @@ import ChangePassword from './pages/ChangePassword';
 import CompleteProfile from './pages/CompleteProfile';
 import DownloadApp from './pages/DownloadApp';
 import Favorites from './pages/Favorites';
+import Feedback from './pages/Feedback';
+import Flashcards from './pages/Flashcards';
 import ForgotPassword from './pages/ForgotPassword';
+import FormulaSheets from './pages/FormulaSheets';
 import Home from './pages/Home';
 import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
@@ -67,6 +70,7 @@ import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import StudentDashboard from './pages/StudentDashboard';
 import VideoPlayer from './pages/VideoPlayer';
+import WorkedExamples from './pages/WorkedExamples';
 import __Layout from './Layout.jsx';
 
 
@@ -78,7 +82,10 @@ export const PAGES = {
     "CompleteProfile": CompleteProfile,
     "DownloadApp": DownloadApp,
     "Favorites": Favorites,
+    "Feedback": Feedback,
+    "Flashcards": Flashcards,
     "ForgotPassword": ForgotPassword,
+    "FormulaSheets": FormulaSheets,
     "Home": Home,
     "Leaderboard": Leaderboard,
     "Login": Login,
@@ -91,6 +98,7 @@ export const PAGES = {
     "ResetPassword": ResetPassword,
     "StudentDashboard": StudentDashboard,
     "VideoPlayer": VideoPlayer,
+    "WorkedExamples": WorkedExamples,
 }
 
 export const pagesConfig = {
