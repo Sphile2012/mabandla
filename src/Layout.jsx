@@ -3,7 +3,7 @@ import { prince } from '@/api/princeClient';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Shield, Download, Moon, Sun, Trophy, BookOpen, RotateCw, MessageSquare, CheckCircle } from 'lucide-react';
+import { Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Shield, Download, Moon, Sun, Trophy, BookOpen, RotateCw, MessageSquare, CheckCircle, MessageSquare as ForumIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -19,6 +19,7 @@ const navItems = [
   { name: 'Formula Sheets', icon: BookOpen, page: 'FormulaSheets' },
   { name: 'Flashcards', icon: RotateCw, page: 'Flashcards' },
   { name: 'Worked Examples', icon: CheckCircle, page: 'WorkedExamples' },
+  { name: 'Forum', icon: ForumIcon, page: 'Forum' },
   { name: 'Pricing', icon: CreditCard, page: 'Pricing' },
   { name: 'About', icon: Info, page: 'About' },
   { name: 'Feedback', icon: MessageSquare, page: 'Feedback' },

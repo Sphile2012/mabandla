@@ -58,6 +58,7 @@ import Feedback from './pages/Feedback';
 import Flashcards from './pages/Flashcards';
 import ForgotPassword from './pages/ForgotPassword';
 import FormulaSheets from './pages/FormulaSheets';
+import Forum from './pages/Forum';
 import Home from './pages/Home';
 import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
@@ -86,6 +87,7 @@ export const PAGES = {
     "Flashcards": Flashcards,
     "ForgotPassword": ForgotPassword,
     "FormulaSheets": FormulaSheets,
+    "Forum": Forum,
     "Home": Home,
     "Leaderboard": Leaderboard,
     "Login": Login,
