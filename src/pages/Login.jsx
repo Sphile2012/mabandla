@@ -87,7 +87,7 @@ export default function Login() {
     } catch (err) {
       console.error('Login error:', err);
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        setError('Unable to connect to server. Please ensure the backend is running on port 3001 or check your network connection.');
+        setError('Unable to connect to server. If running locally, start the backend with "npm run dev:all". If using the deployed version, please wait for the deployment to complete.');
       } else {
         setError(err.message || 'Login failed. Please try again.');
       }
