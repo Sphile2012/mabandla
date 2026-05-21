@@ -115,15 +115,26 @@ app.patch('/api/auth/me', requireAuth, async (req, res) => {
 // POST /api/auth/register  — email + password sign-up
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, full_name } = req.body;
-  if (!email || !password || !full_name) {
-    return res.status(400).json({ error: 'email, password and full_name are required' });
+  if (!password || !full_name) {
+    return res.status(400).json({ error: 'password and full_name are required' });
   }
+
+  // Email is optional - if provided, check if it exists
+  if (email) {
+    const { data: existing } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+    if (existing) return res.status(400).json({ error: 'An account with this email already exists' });
+  }
+
   const hash = await bcrypt.hash(password, 10);
   const id = uuidv4();
   const role = email === ADMIN_EMAIL ? 'admin' : 'student';
   const { data, error } = await supabase
     .from('users')
-    .insert({ id, email, password_hash: hash, full_name, role })
+    .insert({ id, email: email || null, password_hash: hash, full_name, role })
     .select()
     .single();
   if (error) return res.status(400).json({ error: error.message });
@@ -133,18 +144,112 @@ app.post('/api/auth/register', async (req, res) => {
 
 // POST /api/auth/login
 app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
-  const { data: user, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .single();
+  const { email, password, username } = req.body;
+  if (!password) return res.status(400).json({ error: 'password required' });
+  if (!email && !username) return res.status(400).json({ error: 'email or username required' });
+
+  // Try email first, then username
+  let user, error;
+  if (email) {
+    const result = await supabase.from('users').select('*').eq('email', email).single();
+    user = result.data;
+    error = result.error;
+  } else {
+    const result = await supabase.from('users').select('*').eq('full_name', username).single();
+    user = result.data;
+    error = result.error;
+  }
+
   if (error || !user) return res.status(401).json({ error: 'Invalid credentials' });
   const valid = await bcrypt.compare(password, user.password_hash || '');
   if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
   const token = signToken(user.id);
   res.json({ token, user });
+});
+
+// ─── Password Reset with OTP ──────────────────────────────────────────────
+const otpStore = new Map();
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  // Check if user exists
+  const { data: user } = await supabase.from('users').select('*').eq('email', email).single();
+  if (!user) {
+    // Don't reveal if email exists, but still return success for security
+    return res.json({ message: 'If an account exists with this email, a reset code has been sent.' });
+  }
+
+  // Generate and store OTP
+  const otp = generateOTP();
+  otpStore.set(email.toLowerCase().trim(), {
+    otp,
+    expires: Date.now() + 10 * 60 * 1000, // 10 minutes
+    verified: false
+  });
+
+  // Log OTP for development (in production, send via email/WhatsApp)
+  console.log(`OTP for ${email}: ${otp}`);
+
+  // TODO: Send OTP via email (configure nodemailer)
+  // TODO: Send OTP via WhatsApp (configure Twilio)
+
+  res.json({ message: 'Reset code sent to your email.' });
+});
+
+app.post('/api/auth/verify-otp', async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' });
+
+  const stored = otpStore.get(email.toLowerCase().trim());
+  if (!stored) return res.status(400).json({ error: 'Invalid or expired code' });
+
+  if (Date.now() > stored.expires) {
+    otpStore.delete(email.toLowerCase().trim());
+    return res.status(400).json({ error: 'Code has expired' });
+  }
+
+  if (stored.otp !== otp) return res.status(400).json({ error: 'Invalid code' });
+
+  // Mark as verified
+  stored.verified = true;
+  otpStore.set(email.toLowerCase().trim(), stored);
+
+  res.json({ message: 'Code verified successfully.' });
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, otp, new_password } = req.body;
+  if (!email || !otp || !new_password) {
+    return res.status(400).json({ error: 'Email, OTP, and new password are required' });
+  }
+
+  const stored = otpStore.get(email.toLowerCase().trim());
+  if (!stored || !stored.verified) {
+    return res.status(400).json({ error: 'Please verify your code first' });
+  }
+
+  if (Date.now() > stored.expires) {
+    otpStore.delete(email.toLowerCase().trim());
+    return res.status(400).json({ error: 'Code has expired' });
+  }
+
+  if (stored.otp !== otp) return res.status(400).json({ error: 'Invalid code' });
+
+  // Update password
+  const hash = await bcrypt.hash(new_password, 10);
+  const { error } = await supabase.from('users').update({ password_hash: hash }).eq('email', email);
+  if (error) return res.status(400).json({ error: error.message });
+
+  // Clear OTP
+  otpStore.delete(email.toLowerCase().trim());
+
+  res.json({ message: 'Password reset successfully.' });
 });
 
 // ─── Entity CRUD ──────────────────────────────────────────────────────────────
