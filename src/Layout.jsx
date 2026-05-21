@@ -227,6 +227,13 @@ export default function Layout({ children, currentPageName }) {
                     </button>
                   </Link>
                 )}
+                {user && (
+                  <div className="pt-3 border-t border-white/10">
+                    <Button onClick={() => { prince.auth.logout('/'); setMobileMenuOpen(false); }} variant="outline" className="w-full rounded-xl border-red-700 text-red-400 hover:bg-red-500/10">
+                      <LogOut className="w-4 h-4 mr-2" /> Sign Out
+                    </Button>
+                  </div>
+                )}
                 {!user && (
                   <div className="space-y-2 pt-3 border-t border-white/10">
                     <Link to={createPageUrl('Register')} className="block" onClick={() => setMobileMenuOpen(false)}>

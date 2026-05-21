@@ -129,7 +129,7 @@ export default function Login() {
       id: 'dev-user-' + Date.now(),
       email: 'dev@example.com',
       full_name: 'Development User',
-      role: 'student',
+      role: 'admin',
       grade: 'Grade 10',
       phone_number: '+27812345678',
       subscription_tier: 'Premium',
