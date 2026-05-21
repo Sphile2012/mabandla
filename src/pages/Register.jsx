@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { setToken } from '@/api/client';
 
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const banks = ['FNB', 'Standard Bank', 'ABSA', 'Nedbank', 'Capitec', 'African Bank', 'Discovery Bank', 'TymeBank', 'Investec'];
@@ -41,8 +42,13 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (!formData.full_name || !formData.email || !formData.password || !formData.grade) {
-      setError('Please fill in all required fields (name, email, password, grade).');
+    if (!formData.full_name || !formData.password) {
+      setError('Please fill in your name and password.');
+      return;
+    }
+
+    if (!formData.grade) {
+      setError('Please select your grade level.');
       return;
     }
 
@@ -54,7 +60,7 @@ export default function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           full_name: formData.full_name,
-          email: formData.email,
+          email: formData.email || null,
           password: formData.password,
         }),
       });
@@ -62,8 +68,8 @@ export default function Register() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-      // Save token
-      localStorage.setItem('access_token', data.token);
+      // Save token using the centralized function
+      setToken(data.token);
 
       // Save extra profile data to complete after login
       sessionStorage.setItem('pendingRegistration', JSON.stringify({
@@ -87,6 +93,21 @@ export default function Register() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Temporary bypass for development/testing
+  const handleBypassRegister = () => {
+    const fakeToken = 'dev-bypass-token-' + Date.now();
+    const fakeUser = {
+      id: 'dev-user',
+      email: 'dev@example.com',
+      full_name: 'Development User',
+      role: 'student',
+      grade: 'Grade 10'
+    };
+    setToken(fakeToken);
+    toast.success('Development bypass registration successful');
+    navigate(createPageUrl('Home'), { replace: true });
   };
 
   return (
@@ -279,6 +300,15 @@ export default function Register() {
                   Creating account...
                 </span>
               ) : 'Create Account'}
+            </button>
+
+            {/* Temporary bypass button for development */}
+            <button
+              type="button"
+              onClick={handleBypassRegister}
+              className="w-full mt-3 h-10 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 transition-all border border-slate-600 hover:border-slate-400"
+            >
+              Bypass Registration (Development)
             </button>
           </form>
 

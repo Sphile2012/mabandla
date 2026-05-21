@@ -12,8 +12,7 @@
   <!-- Viewport - optimized for all devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <!-- Screen orientation - portrait by default, allow landscape if user chooses -->
-  <meta name="screen-orientation" content="portrait-primary" />
+  <!-- Note: Screen orientation is controlled via Screen Orientation API in JavaScript -->
 
   <!-- IE compatibility -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -41,6 +40,50 @@
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
+
+  <!-- Screen Orientation Lock Script -->
+  <script>
+    // Lock screen to portrait on mobile devices, but allow user to rotate if they choose
+    (function() {
+      function lockOrientation() {
+        if ('orientation' in screen && typeof screen.orientation === 'object') {
+          // Try to lock to portrait but don't force it - allow user choice
+          screen.orientation.lock('portrait-primary').catch(function(err) {
+            // Silently fail if lock is not supported or user denies
+            // This allows the user to rotate if they choose
+            console.log('Screen orientation lock not available or denied:', err.message);
+          });
+        }
+      }
+
+      // Only apply on mobile devices
+      function isMobile() {
+        return (
+          typeof window.orientation !== 'undefined' ||
+          navigator.userAgent.indexOf('IEMobile') !== -1 ||
+          /Mobi|Android|iPhone|iPad|iPod|BlackBerry|webOS/i.test(navigator.userAgent)
+        );
+      }
+
+      if (isMobile()) {
+        // Try to lock on load
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', lockOrientation);
+        } else {
+          lockOrientation();
+        }
+
+        // Also try on resize/orientation change
+        window.addEventListener('resize', function() {
+          setTimeout(lockOrientation, 100);
+        });
+
+        window.addEventListener('orientationchange', function() {
+          setTimeout(lockOrientation, 100);
+        });
+      }
+    })();
+  </script>
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://princemath.co.za" />

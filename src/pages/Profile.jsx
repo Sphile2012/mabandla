@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { prince } from '@/api/princeClient';
 import { motion } from 'framer-motion';
-import { User, Building2, Save, CheckCircle, Shield, LogOut, CreditCard, Award, Flame, TrendingUp, Trophy } from 'lucide-react';
+import { User, Building2, Save, CheckCircle, Shield, LogOut, CreditCard, Award, Flame, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

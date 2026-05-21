@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, ChevronRight, Search, Filter, CheckCircle } from 'lucide-react';
+import { BookOpen, ChevronRight, Search, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const WORKED_EXAMPLES = {

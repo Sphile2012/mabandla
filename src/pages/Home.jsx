@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { Play, ArrowRight, Sparkles, GraduationCap, BookOpen, TrendingUp, Award, Users, Target } from 'lucide-react';
+import { Play, ArrowRight, Sparkles, GraduationCap, BookOpen, Award, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import VideoCard from '../components/videos/VideoCard';
 import GradeCard from '../components/videos/GradeCard';

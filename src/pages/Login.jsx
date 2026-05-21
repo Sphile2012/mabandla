@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
@@ -12,19 +12,45 @@ export default function Login() {
   const [formData, setFormData] = useState({ email: '', username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
   const returnUrl = urlParams.get('return_url') || createPageUrl('Home');
 
-  // If already logged in, redirect away
+  // Check if already logged in, redirect away or allow login
   useEffect(() => {
+    let isMounted = true;
     const token = getToken();
     if (token) {
       prince.auth.me()
-        .then(() => navigate(returnUrl, { replace: true }))
-        .catch(() => { /* token invalid, stay on login */ });
+        .then(() => {
+          if (isMounted) {
+            setIsCheckingAuth(false);
+            navigate(returnUrl, { replace: true });
+          }
+        })
+        .catch(() => {
+          // Token invalid, clear it and allow login
+          if (isMounted) {
+            setToken(null);
+            setIsCheckingAuth(false);
+          }
+        });
+    } else {
+      if (isMounted) setIsCheckingAuth(false);
     }
-  }, []);
+    return () => { isMounted = false; };
+  }, [navigate, returnUrl]);
+
+  // Show loading state while checking auth status
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#080d1a' }}>
+        <div className="w-10 h-10 border-3 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const set = (field) => (e) => setFormData(prev => ({ ...prev, [field]: e.target.value }));
 
@@ -94,6 +120,21 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Temporary bypass for development/testing
+  const handleBypassLogin = () => {
+    const fakeToken = 'dev-bypass-token-' + Date.now();
+    const fakeUser = {
+      id: 'dev-user',
+      email: 'dev@example.com',
+      full_name: 'Development User',
+      role: 'student',
+      grade: 'Grade 10'
+    };
+    setToken(fakeToken);
+    toast.success('Development bypass login successful');
+    navigate(returnUrl, { replace: true });
   };
 
   return (
@@ -168,18 +209,32 @@ export default function Login() {
                   Forgot password?
                 </Link>
               </div>
-              <input
-                id="password"
-                type="password"
-                placeholder="Your password"
-                value={formData.password}
-                onChange={set('password')}
-                className="w-full h-12 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all mt-1.5 px-4"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
-                onFocus={(e) => e.target.style.borderColor = 'rgba(124,58,237,0.7)'}
-                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-                required
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Your password"
+                  value={formData.password}
+                  onChange={set('password')}
+                  className="w-full h-12 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all mt-1.5 px-4 pr-12"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  onFocus={(e) => e.target.style.borderColor = 'rgba(124,58,237,0.7)'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /><line x1="2" x2="22" y1="12" y2="12" /></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><path d="M12 9a3 3 0 0 0-3 3" /><path d="M12 15a3 3 0 0 0 3-3" /></svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <button
@@ -194,6 +249,15 @@ export default function Login() {
                   Signing in...
                 </>
               ) : 'Sign In'}
+            </button>
+
+            {/* Temporary bypass button for development */}
+            <button
+              type="button"
+              onClick={handleBypassLogin}
+              className="w-full mt-3 h-10 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 transition-all border border-slate-600 hover:border-slate-400"
+            >
+              Bypass Login (Development)
             </button>
           </form>
         </div>
