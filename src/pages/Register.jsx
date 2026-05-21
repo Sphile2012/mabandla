@@ -99,13 +99,24 @@ export default function Register() {
   const handleBypassRegister = () => {
     const fakeToken = 'dev-bypass-token-' + Date.now();
     const fakeUser = {
-      id: 'dev-user',
+      id: 'dev-user-' + Date.now(),
       email: 'dev@example.com',
       full_name: 'Development User',
       role: 'student',
-      grade: 'Grade 10'
+      grade: 'Grade 10',
+      phone_number: '+27812345678',
+      subscription_tier: 'Premium',
+      subscription_active: true,
+      subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      trial_end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      created_at: new Date().toISOString(),
+      created_date: new Date().toISOString()
     };
+
+    // Store token and user data
     setToken(fakeToken);
+    localStorage.setItem('user', JSON.stringify(fakeUser));
+
     toast.success('Development bypass registration successful');
     navigate(createPageUrl('Home'), { replace: true });
   };
