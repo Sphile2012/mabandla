@@ -46,7 +46,7 @@ const supabase = createClient(
 );
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'poomeigh503@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 
 // ΓöÇΓöÇΓöÇ Express app ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const app = express();
@@ -621,8 +621,7 @@ app.post('/api/functions/validateVideoUpload', requireAdmin, (req, res) => {
 
 // POST /api/functions/getApkDownload
 app.post('/api/functions/getApkDownload', (req, res) => {
-  const apkUrl = process.env.APK_DOWNLOAD_URL ||
-    'https://github.com/Sphile2012/math-mastery-hub-copy/releases/latest/download/MathTutor.apk';
+  const apkUrl = process.env.APK_DOWNLOAD_URL || '';
   res.json({
     success: true,
     appInfo: {

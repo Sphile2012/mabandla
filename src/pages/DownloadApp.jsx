@@ -82,8 +82,8 @@ export default function DownloadApp() {
       window.open(apkInfo.downloadUrl, '_blank');
       return;
     }
-    // Fallback: direct download from GitHub releases or known URL
-    const fallbackUrl = 'https://github.com/Sphile2012/math-mastery-hub-copy/releases/latest/download/MathTutor.apk';
+    // Fallback: direct download
+    const fallbackUrl = import.meta.env.VITE_APK_DOWNLOAD_URL || '';
     window.open(fallbackUrl, '_blank');
   };
 

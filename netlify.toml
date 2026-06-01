@@ -6,6 +6,9 @@
 [build.environment]
   NODE_VERSION = "20"
   VITE_API_BASE_URL = "/api"
+  # Tell Netlify secrets scanner to ignore these keys — their values appear
+  # in example/config files intentionally and are not real secrets.
+  SECRETS_SCAN_OMIT_KEYS = "ADMIN_EMAIL,APK_DOWNLOAD_URL"
 
 [functions]
   node_bundler = "esbuild"
