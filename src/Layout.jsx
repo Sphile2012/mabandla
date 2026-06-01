@@ -236,7 +236,7 @@ export default function Layout({ children, currentPageName }) {
                   </Link>
                   <Link to={createPageUrl('Register')}>
                     <button className="px-4 h-9 rounded-xl text-sm font-bold text-black transition-all hover:-translate-y-0.5"
-                      style={{ background: linear-gradient(135deg,#fde68a,), boxShadow: '0 4px 14px rgba(245,200,66,0.4)' }}>
+                      style={{ background: 'linear-gradient(135deg,#fde68a,#f5c842)', boxShadow: '0 4px 14px rgba(245,200,66,0.4)' }}>
                       Start Free Trial
                     </button>
                   </Link>
