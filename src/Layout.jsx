@@ -3,32 +3,47 @@ import { prince } from '@/api/princeClient';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Shield, Download, Moon, Sun, Trophy, BookOpen, RotateCw, MessageSquare, CheckCircle, MessageSquare as ForumIcon, Users, Baby, Award } from 'lucide-react';
+import {
+  Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap,
+  Info, CreditCard, MessageCircle, Shield, Download, Trophy,
+  BookOpen, RotateCw, MessageSquare, CheckCircle, Users, Baby, Award
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import NotificationBell from './components/notifications/NotificationBell';
-import { useTheme } from 'next-themes';
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@princemath.co.za';
+const GOLD = '#f5c842';
+const GOLD_DARK = '#d97706';
 
-const navItems = [
+const desktopNavItems = [
+  { name: 'Home', icon: Home, page: 'Home' },
+  { name: 'Lessons', icon: Grid3X3, page: 'Categories' },
+  { name: 'Leaderboard', icon: Trophy, page: 'Leaderboard' },
+  { name: 'Pricing', icon: CreditCard, page: 'Pricing' },
+  { name: 'About', icon: Info, page: 'About' },
+];
+
+const allNavItems = [
   { name: 'Home', icon: Home, page: 'Home' },
   { name: 'Lessons', icon: Grid3X3, page: 'Categories' },
   { name: 'Leaderboard', icon: Trophy, page: 'Leaderboard' },
   { name: 'Formula Sheets', icon: BookOpen, page: 'FormulaSheets' },
   { name: 'Flashcards', icon: RotateCw, page: 'Flashcards' },
   { name: 'Worked Examples', icon: CheckCircle, page: 'WorkedExamples' },
-  { name: 'Forum', icon: ForumIcon, page: 'Forum' },
+  { name: 'Forum', icon: MessageSquare, page: 'Forum' },
   { name: 'Study Groups', icon: Users, page: 'StudyGroups' },
-  { name: 'Certificates', icon: Award, page: 'Certificates', requiresAuth: true },
-  { name: 'Parent Portal', icon: Baby, page: 'ParentPortal', requiresAuth: true },
   { name: 'Pricing', icon: CreditCard, page: 'Pricing' },
   { name: 'About', icon: Info, page: 'About' },
-  { name: 'Feedback', icon: MessageSquare, page: 'Feedback' },
   { name: 'Favourites', icon: Heart, page: 'Favorites', requiresAuth: true },
   { name: 'Messages', icon: MessageCircle, page: 'Messages', requiresAuth: true },
   { name: 'Dashboard', icon: GraduationCap, page: 'StudentDashboard', requiresAuth: true },
+  { name: 'Certificates', icon: Award, page: 'Certificates', requiresAuth: true },
+  { name: 'Parent Portal', icon: Baby, page: 'ParentPortal', requiresAuth: true },
 ];
 
 function checkAccess(user) {
@@ -43,11 +58,8 @@ function checkAccess(user) {
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     prince.auth.me().then(u => {
       if (u && u.email === ADMIN_EMAIL && u.role !== 'admin') {
         prince.auth.updateMe({ role: 'admin' }).then(() => setUser({ ...u, role: 'admin' })).catch(() => setUser(u));
@@ -61,47 +73,54 @@ export default function Layout({ children, currentPageName }) {
   const isTeacher = user?.role === 'teacher';
   const hasAccess = checkAccess(user);
   const trialExpired = user && !hasAccess;
-
-  const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?';
+  const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen" style={{ background: '#0f0c07' }}>
+
       {/* Trial expired banner */}
       {trialExpired && (
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center py-2.5 px-4 text-sm font-medium">
-          ? Your free trial has ended. <Link to={createPageUrl('Pricing')} className="underline font-bold ml-1">Subscribe now to continue learning ?</Link>
+        <div className="text-center py-2.5 px-4 text-sm font-bold"
+          style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_DARK})`, color: '#0f0c07' }}>
+          ⏰ Your free trial has ended.{' '}
+          <Link to={createPageUrl('Pricing')} className="underline ml-1">Subscribe now →</Link>
         </div>
       )}
 
       {/* Navigation */}
-      <nav className="glass sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16">
+      <nav className="sticky top-0 z-50"
+        style={{ background: 'rgba(15,12,7,0.94)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(245,200,66,0.12)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+
             {/* Logo */}
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3 group">
-              <div className="relative">
-                <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb,#06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.5)' }}>
-                  <GraduationCap className="w-5 h-5 text-white" />
-                </div>
-                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full" style={{ background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' }} />
+            <Link to={createPageUrl('Home')} className="flex items-center gap-3 flex-shrink-0">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_DARK})`, boxShadow: '0 4px 16px rgba(245,200,66,0.4)' }}>
+                <GraduationCap className="w-5 h-5 text-black" />
               </div>
               <div className="hidden sm:block">
-                <div className="leading-none" style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '16px', fontWeight: '800', letterSpacing: '-0.03em' }}>
-                  <span style={{ color: '#e2e8f0' }}>Prince</span>
-                  <span style={{ background: 'linear-gradient(135deg,#a78bfa,#60a5fa,#22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}> Math</span>
+                <div className="font-black text-white leading-none" style={{ fontFamily: "'Sora',sans-serif", fontSize: '17px', letterSpacing: '-0.02em' }}>
+                  Prince <span style={{ color: GOLD }}>Math</span>
                 </div>
-                <div style={{ fontSize: '8px', color: '#475569', letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '2px' }}>Academy Grade 10-12</div>
+                <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: '9px' }}>
+                  Academy · Grade 10–12
+                </div>
               </div>
             </Link>
 
-            {/* Desktop Nav - Hidden */}
-            <div className="hidden items-center gap-1">
-              {navItems.map((item) => {
-                if (item.requiresAuth && !user) return null;
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center gap-0.5">
+              {desktopNavItems.map((item) => {
                 const isActive = currentPageName === item.page;
                 return (
                   <Link key={item.name} to={createPageUrl(item.page)}>
-                    <button className={`nav-link ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`}>
+                    <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all"
+                      style={{
+                        color: isActive ? GOLD : 'rgba(255,255,255,0.55)',
+                        background: isActive ? 'rgba(245,200,66,0.1)' : 'transparent',
+                        border: isActive ? '1px solid rgba(245,200,66,0.25)' : '1px solid transparent',
+                      }}>
                       <item.icon className="w-4 h-4" />
                       {item.name}
                     </button>
@@ -110,7 +129,8 @@ export default function Layout({ children, currentPageName }) {
               })}
               {(isAdmin || isTeacher) && (
                 <Link to={createPageUrl('AdminUpload')}>
-                  <button className={`nav-link ${currentPageName === 'AdminUpload' ? 'nav-link-active' : 'nav-link-inactive'}`} style={{ color: '#22d3ee' }}>
+                  <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium"
+                    style={{ color: '#22d3ee' }}>
                     <Shield className="w-4 h-4" />
                     {isAdmin ? 'Admin' : 'Teacher'}
                   </button>
@@ -118,86 +138,115 @@ export default function Layout({ children, currentPageName }) {
               )}
             </div>
 
-            {/* Right */}
+            {/* Right side */}
             <div className="flex items-center gap-2">
-              {mounted && (
-                <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="p-2 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
-                  title="Toggle theme"
-                >
-                  {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                </button>
-              )}
               {user && <NotificationBell user={user} />}
+
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 p-1.5 rounded-xl transition-all hover:bg-white/5">
-                      <Avatar className="w-8 h-8" style={{ ring: '2px solid rgba(124,58,237,0.5)' }}>
-                        <AvatarFallback style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', color: 'white', fontSize: '12px', fontWeight: '700' }}>
+                    <button className="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all hover:bg-white/5">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_DARK})`, color: '#0f0c07', fontSize: '12px', fontWeight: '800' }}>
                           {initials}
                         </AvatarFallback>
                       </Avatar>
+                      <span className="hidden sm:block text-sm font-semibold text-white max-w-[90px] truncate">
+                        {user.full_name?.split(' ')[0]}
+                      </span>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-60 rounded-2xl p-1" style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
-                    <div className="px-3 py-3 rounded-xl mb-1" style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(37,99,235,0.2))' }}>
-                      <p className="font-semibold text-white text-sm">{user.full_name}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{user.email}</p>
+                  <DropdownMenuContent align="end" className="w-64 rounded-2xl p-1"
+                    style={{ background: '#1a1508', border: '1px solid rgba(245,200,66,0.15)', boxShadow: '0 20px 60px rgba(0,0,0,0.7)' }}>
+
+                    {/* User header */}
+                    <div className="px-3 py-3 rounded-xl mb-1"
+                      style={{ background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.1)' }}>
+                      <p className="font-bold text-white text-sm">{user.full_name}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{user.email}</p>
                       {(isAdmin || isTeacher) && (
-                        <span className="inline-flex items-center gap-1 mt-1.5 text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(34,211,238,0.15)', color: '#22d3ee' }}>
+                        <span className="inline-flex items-center gap-1 mt-1.5 text-xs px-2 py-0.5 rounded-full font-semibold"
+                          style={{ background: 'rgba(34,211,238,0.15)', color: '#22d3ee' }}>
                           <Shield className="w-3 h-3" /> {isAdmin ? 'Admin' : 'Teacher'}
                         </span>
                       )}
                       {user.subscription_tier && !isAdmin && (
-                        <span className="inline-flex items-center gap-1 mt-1.5 text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(124,58,237,0.2)', color: '#a78bfa' }}>
+                        <span className="inline-flex items-center gap-1 mt-1.5 text-xs px-2 py-0.5 rounded-full font-semibold"
+                          style={{ background: 'rgba(245,200,66,0.15)', color: GOLD }}>
                           {user.subscription_tier} Plan
                         </span>
                       )}
                     </div>
+
                     <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Profile')} className="cursor-pointer rounded-xl text-slate-300 hover:text-white">
-                        <User className="w-4 h-4 mr-2 text-violet-400" /> My Profile
+                      <Link to={createPageUrl('Profile')} className="cursor-pointer rounded-xl"
+                        style={{ color: 'rgba(255,255,255,0.75)' }}>
+                        <User className="w-4 h-4 mr-2" style={{ color: GOLD }} /> My Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Favorites')} className="cursor-pointer rounded-xl text-slate-300 hover:text-white">
+                      <Link to={createPageUrl('Favorites')} className="cursor-pointer rounded-xl"
+                        style={{ color: 'rgba(255,255,255,0.75)' }}>
                         <Heart className="w-4 h-4 mr-2 text-rose-400" /> My Favourites
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('DownloadApp')} className="cursor-pointer rounded-xl text-slate-300 hover:text-white">
+                      <Link to={createPageUrl('StudentDashboard')} className="cursor-pointer rounded-xl"
+                        style={{ color: 'rgba(255,255,255,0.75)' }}>
+                        <GraduationCap className="w-4 h-4 mr-2" style={{ color: GOLD }} /> My Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('DownloadApp')} className="cursor-pointer rounded-xl"
+                        style={{ color: 'rgba(255,255,255,0.75)' }}>
                         <Download className="w-4 h-4 mr-2 text-green-400" /> Download App
                       </Link>
                     </DropdownMenuItem>
+
                     {(isAdmin || isTeacher) && (
                       <>
-                        <DropdownMenuSeparator style={{ background: 'rgba(255,255,255,0.08)' }} />
+                        <DropdownMenuSeparator style={{ background: 'rgba(245,200,66,0.1)' }} />
                         <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('AdminUpload')} className="cursor-pointer rounded-xl" style={{ color: '#22d3ee' }}>
+                          <Link to={createPageUrl('AdminUpload')} className="cursor-pointer rounded-xl"
+                            style={{ color: '#22d3ee' }}>
                             <Shield className="w-4 h-4 mr-2" /> {isAdmin ? 'Admin Panel' : 'Teacher Panel'}
                           </Link>
                         </DropdownMenuItem>
                       </>
                     )}
-                    <DropdownMenuSeparator style={{ background: 'rgba(255,255,255,0.08)' }} />
-                    <DropdownMenuItem onClick={() => prince.auth.logout('/')} className="cursor-pointer rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10">
+
+                    <DropdownMenuSeparator style={{ background: 'rgba(245,200,66,0.1)' }} />
+                    <DropdownMenuItem
+                      onClick={() => prince.auth.logout('/')}
+                      className="cursor-pointer rounded-xl"
+                      style={{ color: '#f87171' }}>
                       <LogOut className="w-4 h-4 mr-2" /> Sign Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="hidden items-center gap-2">
-                  <Link to={createPageUrl('Register')}>
-                    <Button className="btn-primary text-sm px-4 h-9 rounded-xl border-0">Start Free Trial</Button>
+                /* Not logged in — show Sign In + Register on desktop */
+                <div className="hidden md:flex items-center gap-2">
+                  <Link to={createPageUrl('Login')}>
+                    <button className="px-4 h-9 rounded-xl text-sm font-semibold transition-all hover:bg-white/5"
+                      style={{ color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(245,200,66,0.2)' }}>
+                      Sign In
+                    </button>
                   </Link>
-                  <Button onClick={() => prince.auth.redirectToLogin(window.location.href)} variant="outline" size="sm" className="rounded-xl h-9 text-slate-300 border-slate-700 hover:bg-white/5 hover:text-white">
-                    Sign In
-                  </Button>
+                  <Link to={createPageUrl('Register')}>
+                    <button className="px-4 h-9 rounded-xl text-sm font-bold text-black transition-all hover:-translate-y-0.5"
+                      style={{ background: `linear-gradient(135deg,#fde68a,${GOLD})`, boxShadow: '0 4px 14px rgba(245,200,66,0.4)' }}>
+                      Start Free Trial
+                    </button>
+                  </Link>
                 </div>
               )}
-              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-xl hover:bg-white/5 text-slate-400">
+
+              {/* Hamburger — always visible */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-xl transition-all hover:bg-white/5"
+                style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
@@ -207,32 +256,63 @@ export default function Layout({ children, currentPageName }) {
         {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} style={{ borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(8,13,26,0.98)' }}>
-              <div className="px-4 py-4 space-y-1">
-                {navItems.map((item) => {
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ borderTop: '1px solid rgba(245,200,66,0.1)', background: 'rgba(15,12,7,0.98)' }}>
+              <div className="px-4 py-4 space-y-1 max-h-[80vh] overflow-y-auto">
+                {allNavItems.map((item) => {
                   if (item.requiresAuth && !user) return null;
                   const isActive = currentPageName === item.page;
                   return (
                     <Link key={item.name} to={createPageUrl(item.page)} onClick={() => setMobileMenuOpen(false)}>
-                      <button className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`}>
-                        <item.icon className="w-5 h-5" />{item.name}
+                      <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all"
+                        style={{
+                          color: isActive ? GOLD : 'rgba(255,255,255,0.65)',
+                          background: isActive ? 'rgba(245,200,66,0.08)' : 'transparent',
+                        }}>
+                        <item.icon className="w-5 h-5" style={{ color: isActive ? GOLD : 'rgba(255,255,255,0.4)' }} />
+                        {item.name}
                       </button>
                     </Link>
                   );
                 })}
                 {(isAdmin || isTeacher) && (
                   <Link to={createPageUrl('AdminUpload')} onClick={() => setMobileMenuOpen(false)}>
-                    <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" style={{ color: '#22d3ee' }}>
-                      <Shield className="w-5 h-5" />{isAdmin ? 'Admin Panel' : 'Teacher Panel'}
+                    <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium"
+                      style={{ color: '#22d3ee' }}>
+                      <Shield className="w-5 h-5" />
+                      {isAdmin ? 'Admin Panel' : 'Teacher Panel'}
                     </button>
                   </Link>
                 )}
-                {!user && (
-                  <div className="space-y-2 pt-3 border-t border-white/10">
+
+                {/* Auth buttons in mobile menu */}
+                {user ? (
+                  <div className="pt-3 mt-2" style={{ borderTop: '1px solid rgba(245,200,66,0.1)' }}>
+                    <button
+                      onClick={() => { prince.auth.logout('/'); setMobileMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"
+                      style={{ color: '#f87171', background: 'rgba(248,113,113,0.08)' }}>
+                      <LogOut className="w-5 h-5" /> Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2 pt-3 mt-2" style={{ borderTop: '1px solid rgba(245,200,66,0.1)' }}>
                     <Link to={createPageUrl('Register')} className="block" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full btn-primary rounded-xl border-0">Start Free Trial</Button>
+                      <button className="w-full h-11 rounded-xl font-bold text-black text-sm"
+                        style={{ background: `linear-gradient(135deg,#fde68a,${GOLD})`, boxShadow: '0 4px 14px rgba(245,200,66,0.35)' }}>
+                        Start Free Trial
+                      </button>
                     </Link>
-                    <Button onClick={() => { prince.auth.redirectToLogin(window.location.href); setMobileMenuOpen(false); }} variant="outline" className="w-full rounded-xl border-slate-700 text-slate-300 hover:bg-white/5">Sign In</Button>
+                    <Link to={createPageUrl('Login')} className="block" onClick={() => setMobileMenuOpen(false)}>
+                      <button className="w-full h-11 rounded-xl font-semibold text-sm"
+                        style={{ color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(245,200,66,0.2)', background: 'transparent' }}>
+                        Sign In
+                      </button>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -241,30 +321,36 @@ export default function Layout({ children, currentPageName }) {
         </AnimatePresence>
       </nav>
 
-      {/* Main */}
+      {/* Main content */}
       <main className="min-h-[calc(100vh-4rem)]">{children}</main>
 
       {/* Footer */}
-      <footer style={{ background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <footer style={{ background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(245,200,66,0.08)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)' }}>
-                <GraduationCap className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_DARK})` }}>
+                <GraduationCap className="w-5 h-5 text-black" />
               </div>
               <div>
-                <div className="font-bold text-white" style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '16px', fontWeight: '800', letterSpacing: '-0.02em' }}>
-                  Prince<span style={{ background: 'linear-gradient(135deg,#a78bfa,#60a5fa,#22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}> Math</span> Academy
+                <div className="font-black text-white" style={{ fontFamily: "'Sora',sans-serif", fontSize: '15px' }}>
+                  Prince <span style={{ color: GOLD }}>Math</span> Academy
                 </div>
-                <p className="text-xs text-slate-500">Grade 10-12 Mathematics by Prince Mabandla</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Grade 10–12 Mathematics by Prince Mabandla</p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
               {['About', 'Pricing', 'DownloadApp', 'Categories'].map(p => (
-                <Link key={p} to={createPageUrl(p)} className="hover:text-violet-400 transition-colors">{p === 'DownloadApp' ? 'Download App' : p === 'Categories' ? 'Lessons' : p}</Link>
+                <Link key={p} to={createPageUrl(p)}
+                  className="transition-colors hover:text-yellow-400">
+                  {p === 'DownloadApp' ? 'Download App' : p === 'Categories' ? 'Lessons' : p}
+                </Link>
               ))}
             </div>
-            <p className="text-xs text-slate-600">� {new Date().getFullYear()} Prince Mabandla</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              © {new Date().getFullYear()} Prince Mabandla
+            </p>
           </div>
         </div>
       </footer>
