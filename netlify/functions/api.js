@@ -500,7 +500,7 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
   const paymentUrl = isSandbox
     ? 'https://sandbox.payfast.co.za/eng/process'
     : 'https://www.payfast.co.za/eng/process';
-  const appOrigin = process.env.APP_ORIGIN || 'https://princemath.co.za';
+  const appOrigin = process.env.APP_ORIGIN || '';
 
   const user = req.user;
   const nameParts = (user.full_name || 'Student User').trim().split(' ');

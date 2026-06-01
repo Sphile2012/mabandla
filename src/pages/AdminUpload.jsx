@@ -312,7 +312,7 @@ export default function AdminUpload() {
                   <Video className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                 ) : (
                   <Megaphone className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
-                )}}
+                )}
               </div>
               <div>
                 <h1 className="text-lg sm:text-xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>
