@@ -166,7 +166,7 @@ export default function ForgotPassword() {
                 We've sent a 6-digit reset code to your email address.
               </p>
               <button
-                onClick={() => navigate(createPageUrl('ResetPassword'), { state: { email } })}
+                onClick={() => navigate(createPageUrl('ResetPassword') + `?email=${encodeURIComponent(email.trim().toLowerCase())}`)}
                 className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0"
                 style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 4px 20px rgba(124,58,237,0.4)' }}>
                 Enter Reset Code <ArrowRight className="w-4 h-4" />

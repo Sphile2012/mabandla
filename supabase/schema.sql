@@ -114,6 +114,21 @@ create table if not exists announcements (
   created_date   timestamptz default now()
 );
 
+-- ── OTP Codes ─────────────────────────────────────────────────────────────────
+-- Used for password reset, email verification, and password change flows.
+create table if not exists otp_codes (
+  id          text primary key default gen_random_uuid()::text,
+  email       text not null,
+  otp_hash    text not null,
+  purpose     text not null,  -- 'password_reset' | 'email_verify' | 'password_change'
+  expires_at  timestamptz not null,
+  used        boolean default false,
+  created_at  timestamptz default now()
+);
+
+-- Index for fast lookup
+create index if not exists otp_codes_email_purpose_idx on otp_codes (email, purpose);
+
 -- ── Storage bucket ────────────────────────────────────────────────────────────
 -- Create a public bucket called "prince-math" in Supabase Storage dashboard,
 -- or run:
@@ -129,3 +144,4 @@ alter table xpevents disable row level security;
 alter table notifications disable row level security;
 alter table messages disable row level security;
 alter table announcements disable row level security;
+alter table otp_codes disable row level security;

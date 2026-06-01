@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { prince } from '@/api/princeClient';
 import { motion } from 'framer-motion';
-import { User, Building2, Save, CheckCircle, Shield, LogOut, CreditCard } from 'lucide-react';
+import { User, Building2, Save, CheckCircle, Shield, LogOut, CreditCard, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -231,6 +231,14 @@ export default function Profile() {
                 <><Save className="w-4 h-4" /> Save Changes</>
               )}
             </button>
+            <Link to={createPageUrl('ChangePassword')}>
+              <button
+                type="button"
+                className="h-11 px-6 rounded-xl font-semibold text-violet-400 border border-violet-500/30 hover:bg-violet-500/10 transition-all flex items-center gap-2"
+              >
+                <Lock className="w-4 h-4" /> Change Password
+              </button>
+            </Link>
             <button
               type="button"
               onClick={handleLogout}

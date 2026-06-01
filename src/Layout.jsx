@@ -52,11 +52,12 @@ export default function Layout({ children, currentPageName }) {
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?';
 
   return (
-    <div className="min-h-screen" style={{background:'#080d1a'}}>
+    <div className="min-h-screen" style={{background:'#0f0c07'}}>
       {/* Trial expired banner */}
       {trialExpired && (
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center py-2.5 px-4 text-sm font-medium">
-          ? Your free trial has ended. <Link to={createPageUrl('Pricing')} className="underline font-bold ml-1">Subscribe now to continue learning ?</Link>
+        <div className="text-center py-2.5 px-4 text-sm font-semibold" style={{ background: 'linear-gradient(135deg,#f5c842,#d4a017)', color: '#0f0c07' }}>
+          ‚è∞ Your free trial has ended.{' '}
+          <Link to={createPageUrl('Pricing')} className="underline font-bold ml-1">Subscribe now to continue learning ‚Üí</Link>
         </div>
       )}
 
@@ -77,7 +78,7 @@ export default function Layout({ children, currentPageName }) {
                   <span style={{color:'#e2e8f0'}}>Prince</span>
                   <span style={{background:'linear-gradient(135deg,#a78bfa,#60a5fa,#22d3ee)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}> Math</span>
                 </div>
-                <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.2em',textTransform:'uppercase',marginTop:'2px'}}>Academy ∑ Grade 10ñ12</div>
+                <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.2em',textTransform:'uppercase',marginTop:'2px'}}>Academy ÔøΩ Grade 10ÔøΩ12</div>
               </div>
             </Link>
 
@@ -242,7 +243,7 @@ export default function Layout({ children, currentPageName }) {
                 <Link key={p} to={createPageUrl(p)} className="hover:text-violet-400 transition-colors">{p === 'DownloadApp' ? 'Download App' : p === 'Categories' ? 'Lessons' : p}</Link>
               ))}
             </div>
-            <p className="text-xs text-slate-600">© {new Date().getFullYear()} Prince Mabandla</p>
+            <p className="text-xs text-slate-600">ÔøΩ {new Date().getFullYear()} Prince Mabandla</p>
           </div>
         </div>
       </footer>

@@ -5,6 +5,15 @@
  * Routes:
  *   GET  /api/auth/me
  *   PATCH /api/auth/me
+ *   POST /api/auth/register
+ *   POST /api/auth/login
+ *   POST /api/auth/forgot-password
+ *   POST /api/auth/verify-otp
+ *   POST /api/auth/reset-password
+ *   POST /api/auth/request-password-change
+ *   POST /api/auth/change-password
+ *   POST /api/auth/send-otp
+ *   POST /api/auth/verify-email
  *   GET  /api/entities/:entity
  *   GET  /api/entities/:entity/:id
  *   POST /api/entities/:entity
@@ -118,12 +127,20 @@ app.post('/api/auth/register', async (req, res) => {
   if (!email || !password || !full_name) {
     return res.status(400).json({ error: 'email, password and full_name are required' });
   }
+  // Check for existing user
+  const { data: existing } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', email.toLowerCase().trim())
+    .maybeSingle();
+  if (existing) return res.status(400).json({ error: 'An account with this email already exists.' });
+
   const hash = await bcrypt.hash(password, 10);
   const id = uuidv4();
-  const role = email === ADMIN_EMAIL ? 'admin' : 'student';
+  const role = email.toLowerCase().trim() === ADMIN_EMAIL ? 'admin' : 'student';
   const { data, error } = await supabase
     .from('users')
-    .insert({ id, email, password_hash: hash, full_name, role })
+    .insert({ id, email: email.toLowerCase().trim(), password_hash: hash, full_name, role })
     .select()
     .maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
@@ -138,13 +155,218 @@ app.post('/api/auth/login', async (req, res) => {
   const { data: user, error } = await supabase
     .from('users')
     .select('*')
-    .eq('email', email)
+    .eq('email', email.toLowerCase().trim())
     .maybeSingle();
-  if (error || !user) return res.status(401).json({ error: 'Invalid credentials' });
+  if (error || !user) return res.status(401).json({ error: 'Invalid email or password.' });
   const valid = await bcrypt.compare(password, user.password_hash || '');
-  if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+  if (!valid) return res.status(401).json({ error: 'Invalid email or password.' });
   const token = signToken(user.id);
   res.json({ token, user });
+});
+
+// ─── OTP helpers ──────────────────────────────────────────────────────────────
+function generateOtp() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+async function storeOtp(email, otp, purpose) {
+  // Delete any existing OTPs for this email+purpose
+  await supabase.from('otp_codes').delete().eq('email', email).eq('purpose', purpose);
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min
+  await supabase.from('otp_codes').insert({
+    id: uuidv4(),
+    email,
+    otp_hash: await bcrypt.hash(otp, 8),
+    purpose,
+    expires_at: expiresAt,
+    used: false,
+  });
+}
+
+async function verifyOtp(email, otp, purpose) {
+  const { data: record } = await supabase
+    .from('otp_codes')
+    .select('*')
+    .eq('email', email)
+    .eq('purpose', purpose)
+    .eq('used', false)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!record) return { valid: false, reason: 'No OTP found. Please request a new code.' };
+  if (new Date(record.expires_at) < new Date()) {
+    return { valid: false, reason: 'Code has expired. Please request a new one.' };
+  }
+  const match = await bcrypt.compare(otp, record.otp_hash);
+  if (!match) return { valid: false, reason: 'Invalid code. Please try again.' };
+
+  // Mark as used
+  await supabase.from('otp_codes').update({ used: true }).eq('id', record.id);
+  return { valid: true };
+}
+
+// Simple email sender — uses SMTP env vars if set, otherwise logs to console
+async function sendEmail(to, subject, htmlBody) {
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = parseInt(process.env.SMTP_PORT || '587');
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const fromEmail = process.env.SMTP_FROM || smtpUser || 'noreply@princemath.co.za';
+
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    // No SMTP configured — log OTP to console (dev mode)
+    console.log(`[EMAIL] To: ${to} | Subject: ${subject} | Body: ${htmlBody}`);
+    return;
+  }
+
+  // Use nodemailer if available, otherwise use raw SMTP via fetch to a mail API
+  try {
+    const nodemailer = await import('nodemailer');
+    const transporter = nodemailer.default.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: { user: smtpUser, pass: smtpPass },
+    });
+    await transporter.sendMail({ from: fromEmail, to, subject, html: htmlBody });
+  } catch (err) {
+    console.error('[EMAIL] Failed to send email:', err.message);
+    // Don't throw — OTP is still stored, user can check console in dev
+  }
+}
+
+function otpEmailHtml(otp, purpose) {
+  const purposeText = purpose === 'password_reset' ? 'reset your password' : 'verify your email';
+  return `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#0a0f2e;color:#fff;border-radius:16px;">
+      <h2 style="color:#a78bfa;margin-bottom:8px;">Prince Math Academy</h2>
+      <p style="color:#cbd5e1;margin-bottom:24px;">Use the code below to ${purposeText}:</p>
+      <div style="background:#1e1b4b;border:2px solid #7c3aed;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+        <span style="font-size:36px;font-weight:bold;letter-spacing:12px;color:#fff;">${otp}</span>
+      </div>
+      <p style="color:#94a3b8;font-size:13px;">This code expires in <strong>15 minutes</strong>. Do not share it with anyone.</p>
+      <p style="color:#64748b;font-size:12px;margin-top:16px;">If you didn't request this, you can safely ignore this email.</p>
+    </div>
+  `;
+}
+
+// POST /api/auth/forgot-password — send OTP to email for password reset
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required.' });
+
+  const normalised = email.toLowerCase().trim();
+  const { data: user } = await supabase.from('users').select('id, email').eq('email', normalised).maybeSingle();
+
+  // Always return success to prevent email enumeration
+  if (user) {
+    const otp = generateOtp();
+    await storeOtp(normalised, otp, 'password_reset');
+    await sendEmail(
+      normalised,
+      'Your Prince Math Academy Password Reset Code',
+      otpEmailHtml(otp, 'password_reset')
+    );
+  }
+
+  res.json({ success: true, message: 'If an account exists with that email, a reset code has been sent.' });
+});
+
+// POST /api/auth/verify-otp — verify OTP code (for password reset)
+app.post('/api/auth/verify-otp', async (req, res) => {
+  const { email, otp, purpose = 'password_reset' } = req.body;
+  if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required.' });
+
+  const result = await verifyOtp(email.toLowerCase().trim(), otp, purpose);
+  if (!result.valid) return res.status(400).json({ error: result.reason });
+
+  res.json({ success: true });
+});
+
+// POST /api/auth/reset-password — reset password using verified OTP
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, otp, new_password } = req.body;
+  if (!email || !otp || !new_password) {
+    return res.status(400).json({ error: 'Email, OTP and new_password are required.' });
+  }
+  if (new_password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  }
+
+  const normalised = email.toLowerCase().trim();
+
+  // Verify OTP (this also marks it used)
+  const result = await verifyOtp(normalised, otp, 'password_reset');
+  if (!result.valid) return res.status(400).json({ error: result.reason });
+
+  const hash = await bcrypt.hash(new_password, 10);
+  const { error } = await supabase.from('users').update({ password_hash: hash }).eq('email', normalised);
+  if (error) return res.status(500).json({ error: 'Failed to update password.' });
+
+  res.json({ success: true, message: 'Password reset successfully.' });
+});
+
+// POST /api/auth/request-password-change — authenticated user requests OTP to change password
+app.post('/api/auth/request-password-change', requireAuth, async (req, res) => {
+  const email = req.user.email;
+  const otp = generateOtp();
+  await storeOtp(email, otp, 'password_change');
+  await sendEmail(
+    email,
+    'Your Prince Math Academy Password Change Code',
+    otpEmailHtml(otp, 'password_change')
+  );
+  res.json({ success: true, message: 'A verification code has been sent to your email.' });
+});
+
+// POST /api/auth/change-password — authenticated user changes password with OTP
+app.post('/api/auth/change-password', requireAuth, async (req, res) => {
+  const { otp, new_password, current_password } = req.body;
+  if (!new_password) return res.status(400).json({ error: 'new_password is required.' });
+  if (new_password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+
+  // Verify current password if provided
+  if (current_password) {
+    const valid = await bcrypt.compare(current_password, req.user.password_hash || '');
+    if (!valid) return res.status(401).json({ error: 'Current password is incorrect.' });
+  }
+
+  // If OTP provided, verify it
+  if (otp) {
+    const result = await verifyOtp(req.user.email, otp, 'password_change');
+    if (!result.valid) return res.status(400).json({ error: result.reason });
+  }
+
+  const hash = await bcrypt.hash(new_password, 10);
+  const { error } = await supabase.from('users').update({ password_hash: hash }).eq('id', req.user.id);
+  if (error) return res.status(500).json({ error: 'Failed to update password.' });
+
+  res.json({ success: true, message: 'Password changed successfully.' });
+});
+
+// POST /api/auth/send-otp — send OTP for email verification after registration
+app.post('/api/auth/send-otp', requireAuth, async (req, res) => {
+  const email = req.user.email;
+  const otp = generateOtp();
+  await storeOtp(email, otp, 'email_verify');
+  await sendEmail(
+    email,
+    'Verify your Prince Math Academy email',
+    otpEmailHtml(otp, 'email_verify')
+  );
+  res.json({ success: true, message: 'Verification code sent.' });
+});
+
+// POST /api/auth/verify-email — verify email OTP after registration
+app.post('/api/auth/verify-email', requireAuth, async (req, res) => {
+  const { otp } = req.body;
+  if (!otp) return res.status(400).json({ error: 'OTP is required.' });
+
+  const result = await verifyOtp(req.user.email, otp, 'email_verify');
+  if (!result.valid) return res.status(400).json({ error: result.reason });
+
+  res.json({ success: true, message: 'Email verified.' });
 });
 
 // ─── Entity CRUD ──────────────────────────────────────────────────────────────
