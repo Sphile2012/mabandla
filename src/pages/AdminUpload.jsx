@@ -55,6 +55,8 @@ export default function AdminUpload() {
     priority: 'normal',
   });
   const [uploading, setUploading] = useState({ video: false, thumbnail: false });
+  const [grantAdminDialogOpen, setGrantAdminDialogOpen] = useState(false);
+  const [grantAdminEmail, setGrantAdminEmail] = useState('');
   const queryClient = useQueryClient();
 
   // No need for useEffect to fetch user — useAuth handles it
@@ -110,6 +112,30 @@ export default function AdminUpload() {
     }
     updateUserRoleMutation.mutate({ id, role });
   };
+
+  const grantAdminMutation = useMutation({
+    mutationFn: async (email) => {
+      const trimmedEmail = email.trim().toLowerCase();
+      const targetUser = allUsers.find(u => u.email?.toLowerCase() === trimmedEmail);
+      if (!targetUser) {
+        throw new Error('User not found with this email address.');
+      }
+      if (targetUser.role === 'admin') {
+        throw new Error('This user is already an admin.');
+      }
+      await prince.entities.User.update(targetUser.id, { role: 'admin' });
+      return targetUser;
+    },
+    onSuccess: (user) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success(`✅ Admin access granted to ${user.email}`);
+      setGrantAdminEmail('');
+      setGrantAdminDialogOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to grant admin access');
+    },
+  });
 
   const createVideoMutation = useMutation({
     mutationFn: async (data) => {
@@ -558,8 +584,16 @@ export default function AdminUpload() {
         {/* Users List */}
         {activeTab === 'users' && (
           <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-            <div className="px-4 sm:px-6 py-4 border-b border-slate-100">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-4">
               <h2 className="font-semibold text-slate-800">All Registered Users ({allUsers.length})</h2>
+              <Button
+                onClick={() => setGrantAdminDialogOpen(true)}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-sm text-white"
+                size="sm"
+              >
+                <Shield className="w-4 h-4 mr-1.5" />
+                Grant Admin Access
+              </Button>
             </div>
 
             {!allUsers || allUsers.length === 0 ? (
@@ -840,6 +874,58 @@ export default function AdminUpload() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Grant Admin Access Dialog */}
+      <Dialog open={grantAdminDialogOpen} onOpenChange={setGrantAdminDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Grant Admin Access</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Enter the email address of the user you want to make an admin.
+            </p>
+
+            <div>
+              <Label htmlFor="admin-email">User Email Address</Label>
+              <Input
+                id="admin-email"
+                type="email"
+                placeholder="user@example.com"
+                value={grantAdminEmail}
+                onChange={(e) => setGrantAdminEmail(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+
+            <div className="p-3 rounded-lg" style={{ background: 'rgba(59, 130, 246, 0.1)' }}>
+              <p className="text-xs text-slate-600">
+                💡 <strong>Tip:</strong> Make sure you know this person before granting admin access. They will have full control over users, videos, and announcements.
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-2 border-t">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setGrantAdminEmail('');
+                  setGrantAdminDialogOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => grantAdminMutation.mutate(grantAdminEmail)}
+                disabled={!grantAdminEmail.trim() || grantAdminMutation.isPending}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+              >
+                {grantAdminMutation.isPending ? 'Granting...' : 'Grant Admin Access'}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
