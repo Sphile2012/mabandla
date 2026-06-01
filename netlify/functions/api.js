@@ -194,6 +194,26 @@ async function storeOtp(email, otp, purpose) {
   });
 }
 
+// checkOtp: validates OTP without marking it as used (for step 1 of 2-step reset flow)
+async function checkOtp(email, otp, purpose) {
+  const { data: record } = await supabase
+    .from('otp_codes')
+    .select('*')
+    .eq('email', email)
+    .eq('purpose', purpose)
+    .eq('used', false)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!record) return { valid: false, reason: 'No OTP found. Please request a new code.' };
+  if (new Date(record.expires_at) < new Date()) {
+    return { valid: false, reason: 'Code has expired. Please request a new one.' };
+  }
+  const match = await bcrypt.compare(otp, record.otp_hash);
+  if (!match) return { valid: false, reason: 'Invalid code. Please try again.' };
+  return { valid: true };
+}
+
 async function verifyOtp(email, otp, purpose) {
   const { data: record } = await supabase
     .from('otp_codes')
@@ -311,12 +331,13 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   res.json({ success: true, message: 'If an account exists with that email, a reset code has been sent.' });
 });
 
-// POST /api/auth/verify-otp ΓÇö verify OTP code (for password reset)
+// POST /api/auth/verify-otp — checks OTP is valid WITHOUT marking it used
+// The actual mark-as-used happens in /auth/reset-password ΓÇö verify OTP code (for password reset)
 app.post('/api/auth/verify-otp', async (req, res) => {
   const { email, otp, purpose = 'password_reset' } = req.body;
   if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required.' });
 
-  const result = await verifyOtp(email.toLowerCase().trim(), otp, purpose);
+  const result = await checkOtp(email.toLowerCase().trim(), otp, purpose);
   if (!result.valid) return res.status(400).json({ error: result.reason });
 
   res.json({ success: true });
