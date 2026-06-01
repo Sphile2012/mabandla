@@ -43,13 +43,22 @@ export default function Register() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          full_name: formData.full_name,
-          email: formData.email,
+          full_name: formData.full_name.trim(),
+          email: formData.email.trim().toLowerCase(),
           password: formData.password,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registration failed');
+
+      let data = {};
+      try { data = await res.json(); } catch { /* non-JSON */ }
+
+      if (!res.ok) {
+        if (res.status === 400 && data.error?.includes('already exists')) {
+          throw new Error('An account with this email already exists. Please sign in instead.');
+        }
+        if (res.status === 500) throw new Error('Server error. Please try again in a moment.');
+        throw new Error(data.error || data.message || `Registration failed (${res.status})`);
+      }
 
       setToken(data.token);
       sessionStorage.setItem('pendingRegistration', JSON.stringify({
@@ -63,8 +72,8 @@ export default function Register() {
       toast.success('Account created! Setting up your profile...');
       navigate(createPageUrl('CompleteProfile'));
     } catch (err) {
-      if (err.name === 'TypeError') {
-        setError('Unable to connect. Please check your connection and try again.');
+      if (err.name === 'TypeError' || err.message?.includes('fetch') || err.message?.includes('Failed to fetch')) {
+        setError('Cannot reach the server. Please check your internet connection and try again.');
       } else {
         setError(err.message || 'Registration failed. Please try again.');
       }
@@ -126,6 +135,15 @@ export default function Register() {
             <div className="mb-5 rounded-xl px-4 py-3 text-sm"
               style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
               {error}
+              {error.includes('already exists') && (
+                <div className="mt-2">
+                  <Link to={createPageUrl('Login')}
+                    className="font-semibold underline"
+                    style={{ color: '#f5c842' }}>
+                    Sign in instead →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 

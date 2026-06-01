@@ -52,18 +52,19 @@ export default function Login() {
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
+        body: JSON.stringify({ email: formData.email.trim().toLowerCase(), password: formData.password }),
       });
 
+      let data = {};
+      try { data = await res.json(); } catch { /* non-JSON response */ }
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg = data.error || data.message || 'Login failed';
-        if (res.status === 401) throw new Error('Invalid email or password.');
-        if (res.status === 404) throw new Error('Server not reachable. Please try again.');
-        throw new Error(msg);
+        if (res.status === 401) throw new Error('Incorrect email or password. Please try again.');
+        if (res.status === 404) throw new Error('Account not found. Please check your email or register.');
+        if (res.status === 500) throw new Error('Server error. Please try again in a moment.');
+        throw new Error(data.error || data.message || `Login failed (${res.status})`);
       }
 
-      const data = await res.json();
       setToken(data.token);
       toast.success('Welcome back!');
       if (!data.user?.grade) {
@@ -72,8 +73,8 @@ export default function Login() {
         navigate(returnUrl, { replace: true });
       }
     } catch (err) {
-      if (err.name === 'TypeError') {
-        setError('Unable to connect. Please check your connection and try again.');
+      if (err.name === 'TypeError' || err.message?.includes('fetch') || err.message?.includes('Failed to fetch')) {
+        setError('Cannot reach the server. Please check your internet connection and try again.');
       } else {
         setError(err.message || 'Login failed. Please try again.');
       }
@@ -129,6 +130,15 @@ export default function Login() {
             <div className="mb-5 rounded-xl px-4 py-3 text-sm"
               style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
               {error}
+              {error.includes('not found') && (
+                <div className="mt-2">
+                  <Link to={createPageUrl('Register')}
+                    className="font-semibold underline"
+                    style={{ color: '#f5c842' }}>
+                    Create an account →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
