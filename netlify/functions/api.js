@@ -38,6 +38,7 @@ import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
+import nodemailer from 'nodemailer';
 
 // ΓöÇΓöÇΓöÇ Supabase client ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const supabase = createClient(
@@ -205,33 +206,18 @@ async function verifyOtp(email, otp, purpose) {
   await supabase.from('otp_codes').update({ used: true }).eq('id', record.id);
   return { valid: true };
 }
-// Email sender — tries Resend first, then SMTP, then logs to console
+// Email sender — tries SMTP (nodemailer), then logs OTP to console
+// To enable emails: set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in Netlify env vars
+// Or set RESEND_API_KEY for Resend (https://resend.com)
 async function sendEmail(to, subject, htmlBody) {
-  // Option 1: Resend API (set RESEND_API_KEY in Netlify env vars)
-  const resendKey = process.env.RESEND_API_KEY;
-  if (resendKey) {
-    try {
-      const { Resend } = await import('resend');
-      const resend = new Resend(resendKey);
-      const from = process.env.RESEND_FROM || 'Prince Math Academy <noreply@princemath.co.za>';
-      const { error } = await resend.emails.send({ from, to, subject, html: htmlBody });
-      if (error) throw new Error(error.message);
-      console.log(`[EMAIL] Sent via Resend to ${to}`);
-      return;
-    } catch (err) {
-      console.error('[EMAIL] Resend failed:', err.message);
-    }
-  }
-
-  // Option 2: SMTP via nodemailer
+  // Option 1: SMTP via nodemailer (static import — works with esbuild)
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = parseInt(process.env.SMTP_PORT || '587');
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
   if (smtpHost && smtpUser && smtpPass) {
     try {
-      const nodemailer = await import('nodemailer');
-      const transporter = nodemailer.default.createTransport({
+      const transporter = nodemailer.createTransport({
         host: smtpHost, port: smtpPort, secure: smtpPort === 465,
         auth: { user: smtpUser, pass: smtpPass },
       });
@@ -244,13 +230,11 @@ async function sendEmail(to, subject, htmlBody) {
     }
   }
 
-  // Option 3: Dev fallback — log OTP to console
+  // Option 2: Dev fallback — log OTP to console so you can test without email
   console.log(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
   const otpMatch = htmlBody.match(/letter-spacing:12px[^>]*>(\d{6})</);
   if (otpMatch) console.log(`[EMAIL DEV] *** OTP CODE: ${otpMatch[1]} ***`);
 }
-}
-
 function otpEmailHtml(otp, purpose) {
   const purposeText = purpose === 'password_reset' ? 'reset your password' : 'verify your email';
   return `
@@ -766,3 +750,4 @@ function generatePayfastSignature(data, passphrase) {
 
 // ΓöÇΓöÇΓöÇ Export ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export const handler = serverless(app);
+

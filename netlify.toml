@@ -15,7 +15,7 @@
 
 [functions.api]
   timeout = 26
-  external_node_modules = ["bcryptjs", "nodemailer", "resend"]
+  external_node_modules = ["bcryptjs", "nodemailer"]
 
 # ── Security & Cache Headers ──────────────────────────────────────────────────
 [[headers]]
