@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { GraduationCap, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { GraduationCap, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { getApiBaseUrl, parseJsonBody } from '@/api/client';
 

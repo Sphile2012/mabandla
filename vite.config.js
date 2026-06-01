@@ -16,8 +16,9 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-    host: true,
-    port: 5173,
+    host: '0.0.0.0',
+    port: 5000,
+    allowedHosts: true,
   },
   build: {
     outDir: 'dist',
@@ -26,15 +27,10 @@ export default defineConfig({
     target: ['es2015', 'chrome58', 'firefox57', 'safari11', 'edge18'],
     rollupOptions: {
       output: {
-        // Code splitting — break the 713KB bundle into smaller chunks
         manualChunks: {
-          // React core
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          // Animation
           'vendor-motion': ['framer-motion'],
-          // Query
           'vendor-query': ['@tanstack/react-query'],
-          // Date utilities
           'vendor-date': ['date-fns'],
         },
       },

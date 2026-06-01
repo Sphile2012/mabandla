@@ -3,7 +3,7 @@ import { prince } from '@/api/princeClient';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { GraduationCap, CheckCircle, ArrowRight, Sparkles, Building2, Shield } from 'lucide-react';
+import { CheckCircle, ArrowRight, Sparkles, Building2, Shield } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

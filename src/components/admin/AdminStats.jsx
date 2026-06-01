@@ -1,11 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Video, Users, Eye, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Video, Users, Eye, TrendingUp, Award, Flame, CreditCard, Activity } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
-export default function AdminStats({ videos, users }) {
+export default function AdminStats({ videos, users, xpEvents, videoProgress }) {
   const totalViews = videos.reduce((sum, v) => sum + (v.views || 0), 0);
   const avgViewsPerVideo = videos.length > 0 ? Math.round(totalViews / videos.length) : 0;
+
+  const students = users.filter(u => u.role !== 'admin');
+  const activeSubscriptions = students.filter(u => u.subscription_active).length;
+  const totalXP = students.reduce((sum, u) => sum + (u.xp || 0), 0);
+  const avgXPPerStudent = students.length > 0 ? Math.round(totalXP / students.length) : 0;
+  const activeStreaks = students.filter(u => u.current_streak > 0).length;
+  const totalVideoProgress = videoProgress.length;
+  const completedVideos = videoProgress.filter(vp => vp.completed).length;
 
   const stats = [
     {
@@ -17,7 +25,7 @@ export default function AdminStats({ videos, users }) {
     },
     {
       title: 'Total Students',
-      value: users.filter(u => u.role !== 'admin').length,
+      value: students.length,
       icon: Users,
       color: 'from-blue-500 to-cyan-500',
       bgColor: 'bg-blue-50',
@@ -36,6 +44,34 @@ export default function AdminStats({ videos, users }) {
       color: 'from-orange-500 to-amber-500',
       bgColor: 'bg-orange-50',
     },
+    {
+      title: 'Active Subscriptions',
+      value: activeSubscriptions,
+      icon: CreditCard,
+      color: 'from-green-500 to-emerald-600',
+      bgColor: 'bg-green-50',
+    },
+    {
+      title: 'Total XP Awarded',
+      value: totalXP.toLocaleString(),
+      icon: Award,
+      color: 'from-purple-500 to-pink-600',
+      bgColor: 'bg-purple-50',
+    },
+    {
+      title: 'Active Streaks',
+      value: activeStreaks,
+      icon: Flame,
+      color: 'from-red-500 to-orange-600',
+      bgColor: 'bg-red-50',
+    },
+    {
+      title: 'Videos Completed',
+      value: completedVideos,
+      icon: Activity,
+      color: 'from-cyan-500 to-blue-600',
+      bgColor: 'bg-cyan-50',
+    },
   ];
 
   return (
@@ -45,7 +81,7 @@ export default function AdminStats({ videos, users }) {
           key={stat.title}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
+          transition={{ delay: index * 0.05 }}
         >
           <Card className="border-slate-100 hover:shadow-lg transition-shadow">
             <CardContent className="p-6">

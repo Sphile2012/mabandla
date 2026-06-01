@@ -8,11 +8,12 @@ import Leaderboard from '../components/dashboard/Leaderboard';
 import { motion } from 'framer-motion';
 import {
   BookOpen, Play, Clock, Star, TrendingUp, Award,
-  CheckCircle, Lock, ChevronRight, GraduationCap, Calendar
+  CheckCircle, Lock, ChevronRight, GraduationCap, Sparkles
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { createPageUrl } from '@/utils';
+import { getRecommendedVideos } from '@/lib/recommendations';
 
 const TOPICS_ORDER = [
   'Algebra', 'Number Patterns', 'Functions', 'Finance',
@@ -46,6 +47,18 @@ export default function StudentDashboard() {
     enabled: !!user?.email,
   });
 
+  const { data: videoProgress = [] } = useQuery({
+    queryKey: ['video-progress', user?.email],
+    queryFn: () => prince.entities.VideoProgress.filter({ user_email: user?.email }),
+    enabled: !!user?.email,
+  });
+
+  const { data: recommendedVideos = [] } = useQuery({
+    queryKey: ['recommended-videos', user?.email, user?.grade],
+    queryFn: () => getRecommendedVideos(user?.email, user?.grade, 4),
+    enabled: !!user?.email && !!user?.grade,
+  });
+
   const myXP = xpEvents.filter(e => e.user_email === user?.email).reduce((s, e) => s + (e.xp_amount || 0), 0);
   const myEventCount = xpEvents.filter(e => e.user_email === user?.email).length;
 
@@ -69,6 +82,17 @@ export default function StudentDashboard() {
 
   // Recent / upcoming = last 5 videos sorted by created_date desc
   const recentVideos = [...videos].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, 5);
+
+  // Continue watching - videos with progress between 1 and 99
+  const continueWatching = videoProgress
+    .filter(vp => vp.progress > 0 && vp.progress < 100)
+    .map(vp => {
+      const video = videos.find(v => v.id === vp.video_id);
+      return video ? { ...video, progress: vp.progress, last_position: vp.last_position } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+    .slice(0, 5);
 
   const isSubscribed = user?.subscription_status === 'active' || user?.trial_end_date
     ? new Date(user.trial_end_date) > new Date()
@@ -151,6 +175,85 @@ export default function StudentDashboard() {
             </div>
             <Progress value={progressPct} className="h-3" />
             <p className="text-xs text-slate-500 mt-2">{watchedCount} of {totalVideos} lessons viewed</p>
+          </div>
+        )}
+
+        {/* Continue Watching */}
+        {continueWatching.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-slate-800">Continue Watching</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Pick up where you left off</p>
+              </div>
+              <Link to={createPageUrl('Categories')} className="text-xs text-violet-600 hover:underline font-medium">View all</Link>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {continueWatching.map((video) => {
+                const isFav = favoriteIds.has(video.id);
+                const locked = video.tier === 'Premium' && user.subscription_tier !== 'Premium' && !isSubscribed;
+                return (
+                  <Link key={video.id} to={`${createPageUrl('VideoPlayer')}?id=${video.id}&t=${video.last_position}`}>
+                    <div className="px-5 py-3.5 hover:bg-slate-50 transition-colors flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${locked ? 'bg-slate-100' : 'bg-violet-100'}`}>
+                        {locked ? <Lock className="w-4 h-4 text-slate-400" /> : <Play className="w-4 h-4 text-violet-600" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-700 truncate">{video.title}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {video.topic && <span className="text-xs text-slate-400">{video.topic}</span>}
+                          {video.duration && <span className="flex items-center gap-0.5 text-xs text-slate-400"><Clock className="w-3 h-3" />{video.duration}</span>}
+                          {isFav && <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />}
+                        </div>
+                        <Progress value={video.progress} className="h-1.5 mt-2" />
+                        <p className="text-xs text-slate-400 mt-0.5">{video.progress}% complete</p>
+                      </div>
+                      <Badge variant={video.tier === 'Premium' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">{video.tier}</Badge>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Recommended for You */}
+        {recommendedVideos.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-slate-800 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-violet-600" />
+                  Recommended for You
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Based on your learning progress</p>
+              </div>
+              <Link to={createPageUrl('Categories')} className="text-xs text-violet-600 hover:underline font-medium">View all</Link>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {recommendedVideos.map((video) => {
+                const isFav = favoriteIds.has(video.id);
+                const locked = video.tier === 'Premium' && user.subscription_tier !== 'Premium' && !isSubscribed;
+                return (
+                  <Link key={video.id} to={`${createPageUrl('VideoPlayer')}?id=${video.id}`}>
+                    <div className="px-5 py-3.5 hover:bg-slate-50 transition-colors flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${locked ? 'bg-slate-100' : 'bg-violet-100'}`}>
+                        {locked ? <Lock className="w-4 h-4 text-slate-400" /> : <Play className="w-4 h-4 text-violet-600" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-700 truncate">{video.title}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {video.topic && <span className="text-xs text-slate-400">{video.topic}</span>}
+                          {video.duration && <span className="flex items-center gap-0.5 text-xs text-slate-400"><Clock className="w-3 h-3" />{video.duration}</span>}
+                          {isFav && <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />}
+                        </div>
+                      </div>
+                      <Badge variant={video.tier === 'Premium' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">{video.tier}</Badge>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         )}
 
