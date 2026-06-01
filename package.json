@@ -98,6 +98,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "eslint-plugin-unused-imports": "^4.3.0",
+    "es-iterator-helpers": "^1.2.0",
     "globals": "^15.14.0",
     "pngjs": "^7.0.0",
     "postcss": "^8.5.3",
