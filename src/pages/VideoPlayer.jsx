@@ -5,32 +5,25 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { 
-  Play, 
-  Heart, 
-  Share2, 
-  Clock, 
-  Eye, 
-  Calendar,
-  ChevronRight
-} from 'lucide-react';
+import { Play, Heart, Share2, Clock, Eye, Calendar, ChevronRight, Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import CommentSection from '../components/comments/CommentSection';
 import VideoCard from '../components/videos/VideoCard';
+import { useAuth } from '@/lib/AuthContext';
+import { canWatchVideo, accessDeniedReason, isAdminOrTeacher } from '@/lib/access';
+
+const GOLD = '#f5c842';
+const GOLD_LIGHT = '#fde68a';
 
 export default function VideoPlayer() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   
   const urlParams = new URLSearchParams(window.location.search);
   const videoId = urlParams.get('id');
-
-  useEffect(() => {
-    prince.auth.me().then(setUser).catch(() => setUser(null));
-  }, []);
 
   const { data: video, isLoading: videoLoading } = useQuery({
     queryKey: ['video', videoId],
@@ -62,29 +55,9 @@ export default function VideoPlayer() {
   const favoriteVideoIds = favorites.map(f => f.video_id);
   const isFavorited = favoriteVideoIds.includes(videoId);
 
-  // Check if user has active access to watch this video
-  const hasAccess = () => {
-    if (!user || !video) return false;
-    if (user.role === 'admin') return true;
-    
-    const now = new Date();
-
-    // Check active trial
-    if (user.trial_end_date && new Date(user.trial_end_date) > now) return true;
-    
-    // Check active paid subscription (check end_date too if available)
-    if (user.subscription_active && user.subscription_tier && user.subscription_tier !== 'Trial') {
-      const notExpired = !user.subscription_end_date || new Date(user.subscription_end_date) > now;
-      if (notExpired) {
-        if (user.subscription_tier === 'Premium') return true;
-        if (user.subscription_tier === 'Standard' && (video.tier === 'Standard' || !video.tier)) return true;
-      }
-    }
-    
-    return false;
-  };
-
-  const canWatch = hasAccess();
+  // Centralised access control
+  const canWatch = canWatchVideo(user, video);
+  const denyReason = !canWatch ? accessDeniedReason(user, video) : null;
 
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {
@@ -225,36 +198,85 @@ export default function VideoPlayer() {
                   ) : (
                     <div className={`w-full h-full bg-gradient-to-br ${categoryColors[video.topic] || 'from-violet-600 to-purple-700'}`} />
                   )}
-                  <div className="absolute inset-0 bg-black/65 flex flex-col items-center justify-center text-center px-6">
-                    {!user ? (
+                  <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-center px-6">
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
+                      style={{ background: 'rgba(245,200,66,0.15)', border: '2px solid rgba(245,200,66,0.4)' }}>
+                      <Lock className="w-9 h-9" style={{ color: GOLD }} />
+                    </div>
+
+                    {denyReason === 'sign_in' && (
                       <>
-                        <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-5">
-                          <Play className="w-10 h-10 text-white ml-1" />
-                        </div>
                         <h3 className="text-2xl font-bold text-white mb-2">Sign In to Watch</h3>
-                        <p className="text-white/70 mb-6 max-w-md">Create a free account or sign in to access lessons.</p>
-                        <Button
-                          size="lg"
-                          onClick={() => prince.auth.redirectToLogin(window.location.href)}
-                          className="bg-white text-violet-700 hover:bg-white/90 font-semibold px-8"
-                        >
-                          Sign In / Register
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-5">
-                          <Play className="w-10 h-10 text-white ml-1" />
+                        <p className="mb-6" style={{ color: 'rgba(255,255,255,0.65)' }}>Create a free account and get 3 days free access.</p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Link to={createPageUrl('Register')}>
+                            <button className="px-6 h-11 rounded-xl font-bold text-black"
+                              style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})` }}>
+                              Start Free Trial
+                            </button>
+                          </Link>
+                          <Link to={createPageUrl('Login')}>
+                            <button className="px-6 h-11 rounded-xl font-semibold text-white"
+                              style={{ border: '1px solid rgba(245,200,66,0.4)', background: 'rgba(245,200,66,0.08)' }}>
+                              Sign In
+                            </button>
+                          </Link>
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-2">Subscribe to Watch</h3>
-                        <p className="text-white/70 mb-2 max-w-md">
-                          This is a <span className="font-semibold text-amber-300">{video.tier || 'Standard'}</span> lesson for <span className="font-semibold text-amber-300">{video.grade}</span>.
+                      </>
+                    )}
+
+                    {denyReason === 'trial_expired' && (
+                      <>
+                        <h3 className="text-2xl font-bold text-white mb-2">Trial Ended</h3>
+                        <p className="mb-2" style={{ color: 'rgba(255,255,255,0.65)' }}>Your 3-day free trial has expired.</p>
+                        <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                          Subscribe from <span style={{ color: GOLD }}>R100/month</span> to continue learning.
                         </p>
-                        <p className="text-white/60 text-sm mb-6">Subscribe to get full access to all lessons.</p>
                         <Link to={createPageUrl('Pricing')}>
-                          <Button size="lg" className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold px-8">
-                            View Pricing & Subscribe
-                          </Button>
+                          <button className="px-8 h-11 rounded-xl font-bold text-black"
+                            style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})` }}>
+                            View Plans
+                          </button>
+                        </Link>
+                      </>
+                    )}
+
+                    {denyReason === 'upgrade_to_premium' && (
+                      <>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Crown className="w-5 h-5" style={{ color: GOLD }} />
+                          <span className="font-bold text-white">Premium Lesson</span>
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Upgrade to Premium</h3>
+                        <p className="mb-2" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                          This is a <span style={{ color: GOLD }}>Premium</span> lesson — only available on the R150/month plan.
+                        </p>
+                        <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                          Your Standard plan gives you access to all Standard lessons.
+                        </p>
+                        <Link to={createPageUrl('Pricing')}>
+                          <button className="px-8 h-11 rounded-xl font-bold text-black"
+                            style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})` }}>
+                            Upgrade to Premium
+                          </button>
+                        </Link>
+                      </>
+                    )}
+
+                    {denyReason === 'no_subscription' && (
+                      <>
+                        <h3 className="text-2xl font-bold text-white mb-2">Subscribe to Watch</h3>
+                        <p className="mb-2" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                          This is a <span style={{ color: GOLD }}>{video.tier || 'Standard'}</span> lesson for <span style={{ color: GOLD }}>{video.grade}</span>.
+                        </p>
+                        <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                          Standard plan from <span style={{ color: GOLD }}>R100/month</span>
+                        </p>
+                        <Link to={createPageUrl('Pricing')}>
+                          <button className="px-8 h-11 rounded-xl font-bold text-black"
+                            style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})` }}>
+                            View Plans & Subscribe
+                          </button>
                         </Link>
                       </>
                     )}

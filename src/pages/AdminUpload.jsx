@@ -3,61 +3,33 @@ import { prince } from '@/api/princeClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
-  Upload,
-  Video,
-  Image as ImageIcon,
-  X,
-  Save,
-  Trash2,
-  Edit2,
-  Plus,
-  Clock,
-  Eye,
-  AlertCircle,
-  CheckCircle,
-  Megaphone,
-  RotateCcw,
-  FileText,
-  Users,
-  BarChart3,
-  ClipboardList,
+  Upload, Video, Image as ImageIcon, X, Save, Trash2, Edit2, Plus,
+  Clock, Eye, AlertCircle, CheckCircle, Megaphone, RotateCcw,
+  FileText, Users, BarChart3, ClipboardList, Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import AdminStats from '../components/admin/AdminStats';
+import { useAuth } from '@/lib/AuthContext';
+import { isAdminOrTeacher } from '@/lib/access';
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@princemath.co.za';
+const GOLD = '#f5c842';
+const GOLD_LIGHT = '#fde68a';
+const GOLD_DARK = '#d97706';
 
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const tiers = ['Standard', 'Premium'];
 const topics = ['Algebra', 'Functions', 'Geometry', 'Trigonometry', 'Calculus', 'Number Patterns', 'Finance', 'Probability', 'Analytical Geometry', 'Other'];
 
-function checkAccess(user) {
-  if (!user) return false;
-  if (user.email === ADMIN_EMAIL || user.role === 'admin' || user.role === 'teacher') return true;
-  return false;
-}
-
 export default function AdminUpload() {
-  const [user, setUser] = useState(null);
+  const { user, isLoadingAuth } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -83,9 +55,7 @@ export default function AdminUpload() {
   const [uploading, setUploading] = useState({ video: false, thumbnail: false });
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    prince.auth.me().then(setUser).catch(() => setUser(null));
-  }, []);
+  // No need for useEffect to fetch user — useAuth handles it
 
   const { data: videos = [], isLoading } = useQuery({
     queryKey: ['admin-videos'],
@@ -301,39 +271,54 @@ export default function AdminUpload() {
     setIsDialogOpen(true);
   };
 
-  if (!checkAccess(user)) {
+  if (isLoadingAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0f0c07' }}>
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: GOLD, borderTopColor: 'transparent' }} />
+      </div>
+    );
+  }
+
+  if (!isAdminOrTeacher(user)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#0f0c07' }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-md">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="w-10 h-10 text-red-500" />
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
+            <Shield className="w-10 h-10" style={{ color: '#f87171' }} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-3">Access Denied</h2>
-          <p className="text-slate-500">Only teachers and admins can upload and manage video lessons.</p>
+          <h2 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: "'Sora',sans-serif" }}>
+            Access Denied
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.5)' }}>
+            Only teachers and admins can upload and manage video lessons.
+          </p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen" style={{ background: '#0f0c07' }}>
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
+      <div style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(245,200,66,0.12)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-600 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})` }}>
                 {activeTab === 'videos' ? (
-                  <Video className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <Video className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                 ) : (
-                  <Megaphone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                )}
+                  <Megaphone className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
+                )}}
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-800">
+                <h1 className="text-lg sm:text-xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>
                   {activeTab === 'videos' ? 'Video Management' : 'Announcements'}
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-500">
+                <p className="text-xs sm:text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   {activeTab === 'videos' ? `${videos.length} lessons uploaded` : `${announcements.length} announcements`}
                 </p>
               </div>

@@ -55,7 +55,7 @@ export default function Home() {
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden" style={{ minHeight: '92vh', display: 'flex', alignItems: 'center' }}>
-        {/* Background */}
+        {/* Background photo — mathematics/calculus */}
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1509228468518-180dd4864904?w=1920&q=80"
@@ -63,8 +63,10 @@ export default function Home() {
             className="w-full h-full object-cover"
             loading="eager"
           />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg,rgba(15,12,7,0.94) 0%,rgba(26,21,8,0.91) 50%,rgba(15,12,7,0.94) 100%)' }} />
-          <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(ellipse at 25% 50%,rgba(245,200,66,0.1) 0%,transparent 55%),radial-gradient(ellipse at 75% 30%,rgba(212,160,23,0.07) 0%,transparent 55%)' }} />
+          {/* Dark overlay — lighter so photo is visible */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg,rgba(15,12,7,0.88) 0%,rgba(26,21,8,0.82) 50%,rgba(15,12,7,0.88) 100%)' }} />
+          {/* Gold glow */}
+          <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(ellipse at 25% 50%,rgba(245,200,66,0.12) 0%,transparent 55%),radial-gradient(ellipse at 75% 30%,rgba(212,160,23,0.08) 0%,transparent 55%)' }} />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 w-full">
