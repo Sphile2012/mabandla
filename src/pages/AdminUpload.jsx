@@ -27,6 +27,8 @@ const GOLD_DARK = '#d97706';
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const tiers = ['Standard', 'Premium'];
 const topics = ['Algebra', 'Functions', 'Geometry', 'Trigonometry', 'Calculus', 'Number Patterns', 'Finance', 'Probability', 'Analytical Geometry', 'Other'];
+const userRoles = ['student', 'teacher', 'admin'];
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@princemath.co.za';
 
 export default function AdminUpload() {
   const { user, isLoadingAuth } = useAuth();
@@ -57,34 +59,57 @@ export default function AdminUpload() {
 
   // No need for useEffect to fetch user — useAuth handles it
 
+  const isAdmin = user?.role === 'admin' || user?.email === ADMIN_EMAIL;
+  const canManagePage = isAdminOrTeacher(user);
+
   const { data: videos = [], isLoading } = useQuery({
     queryKey: ['admin-videos'],
     queryFn: () => prince.entities.Video.list('-created_date', 200),
+    enabled: canManagePage,
   });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => prince.entities.User.list(),
-    enabled: user?.role === 'admin',
+    enabled: canManagePage,
   });
 
   const { data: announcements = [], isLoading: announcementsLoading } = useQuery({
     queryKey: ['announcements'],
     queryFn: () => prince.entities.Announcement.list('-created_date', 100),
-    enabled: user?.role === 'admin',
+    enabled: canManagePage,
   });
 
   const { data: xpEvents = [] } = useQuery({
     queryKey: ['xp-events'],
     queryFn: () => prince.entities.XPEvent.list('-created_date', 500),
-    enabled: user?.role === 'admin',
+    enabled: canManagePage,
   });
 
   const { data: videoProgress = [] } = useQuery({
     queryKey: ['video-progress'],
     queryFn: () => prince.entities.VideoProgress.list('-created_date', 500),
-    enabled: user?.role === 'admin',
+    enabled: canManagePage,
   });
+
+  const updateUserRoleMutation = useMutation({
+    mutationFn: ({ id, role }) => prince.entities.User.update(id, { role }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('User role updated successfully.');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.error || error.message || 'Failed to update user role');
+    },
+  });
+
+  const handleUpdateUserRole = (id, role) => {
+    if (!isAdmin) {
+      toast.error('Only admins can change user roles.');
+      return;
+    }
+    updateUserRoleMutation.mutate({ id, role });
+  };
 
   const createVideoMutation = useMutation({
     mutationFn: async (data) => {
@@ -341,6 +366,15 @@ export default function AdminUpload() {
               >
                 <Megaphone className="w-4 h-4 mr-1.5" />
                 Announcements
+              </Button>
+              <Button
+                variant={activeTab === 'users' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('users')}
+                className="text-sm"
+                size="sm"
+              >
+                <Users className="w-4 h-4 mr-1.5" />
+                Users
               </Button>
               {activeTab === 'videos' && (
                 <Button

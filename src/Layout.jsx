@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -57,6 +57,7 @@ function checkAccess(user) {
 }
 
 export default function Layout({ children, currentPageName }) {
+  const navigate = useNavigate();
   const { user, logout, isLoadingAuth } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -68,7 +69,7 @@ export default function Layout({ children, currentPageName }) {
 
   const handleSignOut = () => {
     logout(false);
-    window.location.href = '/';
+    navigate(createPageUrl('Home'), { replace: true });
   };
 
   return (
