@@ -4,6 +4,7 @@
 	bare = false
 	logallrefupdates = true
 	ignorecase = true
+	autocrlf = false
 [remote "origin"]
 	url = https://github.com/Sphile2012/mabandla
 	fetch = +refs/heads/*:refs/remotes/origin/*
