@@ -220,39 +220,38 @@ export default function Home() {
           <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 rounded-full blur-3xl" style={{ background: 'rgba(245,200,66,0.08)' }} />
           <div className="relative flex flex-col items-center text-center md:items-start md:text-left md:flex-row md:justify-between gap-6 sm:gap-8">
             <div>
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-3" style={{
-                fontFamily: "'Sora',sans-serif' }}>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-3" style={{ fontFamily: "'Sora', sans-serif" }}>
                 Ready to Excel in Mathematics?
               </h3>
-            <p className="text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              Join our learning community and get access to all video lessons.
-            </p>
-          </div>
-          {user ? (
-            <Link to={createPageUrl('Pricing')} className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto px-6 sm:px-8 h-11 sm:h-12 rounded-2xl font-bold text-black text-sm sm:text-base flex items-center justify-center gap-2 whitespace-nowrap transition-all hover:-translate-y-0.5"
-                style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})`, boxShadow: '0 8px 28px rgba(245,200,66,0.4)' }}>
-                Subscribe Now <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </Link>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <Link to={createPageUrl('Register')} className="w-full sm:w-auto">
+              <p className="text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                Join our learning community and get access to all video lessons.
+              </p>
+            </div>
+            {user ? (
+              <Link to={createPageUrl('Pricing')} className="w-full sm:w-auto">
                 <button className="w-full sm:w-auto px-6 sm:px-8 h-11 sm:h-12 rounded-2xl font-bold text-black text-sm sm:text-base flex items-center justify-center gap-2 whitespace-nowrap transition-all hover:-translate-y-0.5"
                   style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})`, boxShadow: '0 8px 28px rgba(245,200,66,0.4)' }}>
-                  <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" /> Register Free
+                  Subscribe Now <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </Link>
-              <Link to={createPageUrl('Login')} className="w-full sm:w-auto">
-                <button className="w-full sm:w-auto px-6 sm:px-8 h-11 sm:h-12 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2 whitespace-nowrap transition-all hover:-translate-y-0.5"
-                  style={{ color: GOLD_LIGHT, border: '1px solid rgba(245,200,66,0.3)', background: 'rgba(245,200,66,0.06)' }}>
-                  <LogIn className="w-4 h-4 sm:w-5 sm:h-5" /> Sign In
-                </button>
-              </Link>
-            </div>
-          )}
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Link to={createPageUrl('Register')} className="w-full sm:w-auto">
+                  <button className="w-full sm:w-auto px-6 sm:px-8 h-11 sm:h-12 rounded-2xl font-bold text-black text-sm sm:text-base flex items-center justify-center gap-2 whitespace-nowrap transition-all hover:-translate-y-0.5"
+                    style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})`, boxShadow: '0 8px 28px rgba(245,200,66,0.4)' }}>
+                    <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" /> Register Free
+                  </button>
+                </Link>
+                <Link to={createPageUrl('Login')} className="w-full sm:w-auto">
+                  <button className="w-full sm:w-auto px-6 sm:px-8 h-11 sm:h-12 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2 whitespace-nowrap transition-all hover:-translate-y-0.5"
+                    style={{ color: GOLD_LIGHT, border: '1px solid rgba(245,200,66,0.3)', background: 'rgba(245,200,66,0.06)' }}>
+                    <LogIn className="w-4 h-4 sm:w-5 sm:h-5" /> Sign In
+                  </button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-    </div>
       </section >
     </div >
   );
