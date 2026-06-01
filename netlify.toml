@@ -10,7 +10,6 @@
 
 [functions]
   node_bundler = "esbuild"
-  # Use root node_modules â€” all dependencies are installed at root level
   included_files = ["netlify/functions/node_modules/**"]
 
 [functions.api]
@@ -18,7 +17,6 @@
   external_node_modules = ["bcryptjs", "nodemailer"]
   node_bundler = "esbuild"
 
-# â”€â”€ Security & Cache Headers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 [[headers]]
   for = "/*"
   [headers.values]
@@ -46,7 +44,6 @@
   [headers.values]
     Cache-Control = "public, max-age=3600"
 
-# â”€â”€ Redirects â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
@@ -64,4 +61,3 @@
   targetPort = 5173
   publish = "dist"
   autoLaunch = false
-
