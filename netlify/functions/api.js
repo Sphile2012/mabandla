@@ -205,35 +205,50 @@ async function verifyOtp(email, otp, purpose) {
   await supabase.from('otp_codes').update({ used: true }).eq('id', record.id);
   return { valid: true };
 }
-
-// Simple email sender ΓÇö uses SMTP env vars if set, otherwise logs to console
+// Email sender — tries Resend first, then SMTP, then logs to console
 async function sendEmail(to, subject, htmlBody) {
+  // Option 1: Resend API (set RESEND_API_KEY in Netlify env vars)
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) {
+    try {
+      const { Resend } = await import('resend');
+      const resend = new Resend(resendKey);
+      const from = process.env.RESEND_FROM || 'Prince Math Academy <noreply@princemath.co.za>';
+      const { error } = await resend.emails.send({ from, to, subject, html: htmlBody });
+      if (error) throw new Error(error.message);
+      console.log(`[EMAIL] Sent via Resend to ${to}`);
+      return;
+    } catch (err) {
+      console.error('[EMAIL] Resend failed:', err.message);
+    }
+  }
+
+  // Option 2: SMTP via nodemailer
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = parseInt(process.env.SMTP_PORT || '587');
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const fromEmail = process.env.SMTP_FROM || smtpUser || 'noreply@princemath.co.za';
-
-  if (!smtpHost || !smtpUser || !smtpPass) {
-    // No SMTP configured ΓÇö log OTP to console (dev mode)
-    console.log(`[EMAIL] To: ${to} | Subject: ${subject} | Body: ${htmlBody}`);
-    return;
+  if (smtpHost && smtpUser && smtpPass) {
+    try {
+      const nodemailer = await import('nodemailer');
+      const transporter = nodemailer.default.createTransport({
+        host: smtpHost, port: smtpPort, secure: smtpPort === 465,
+        auth: { user: smtpUser, pass: smtpPass },
+      });
+      const from = process.env.SMTP_FROM || smtpUser;
+      await transporter.sendMail({ from, to, subject, html: htmlBody });
+      console.log(`[EMAIL] Sent via SMTP to ${to}`);
+      return;
+    } catch (err) {
+      console.error('[EMAIL] SMTP failed:', err.message);
+    }
   }
 
-  // Use nodemailer if available, otherwise use raw SMTP via fetch to a mail API
-  try {
-    const nodemailer = await import('nodemailer');
-    const transporter = nodemailer.default.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: { user: smtpUser, pass: smtpPass },
-    });
-    await transporter.sendMail({ from: fromEmail, to, subject, html: htmlBody });
-  } catch (err) {
-    console.error('[EMAIL] Failed to send email:', err.message);
-    // Don't throw ΓÇö OTP is still stored, user can check console in dev
-  }
+  // Option 3: Dev fallback — log OTP to console
+  console.log(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
+  const otpMatch = htmlBody.match(/letter-spacing:12px[^>]*>(\d{6})</);
+  if (otpMatch) console.log(`[EMAIL DEV] *** OTP CODE: ${otpMatch[1]} ***`);
+}
 }
 
 function otpEmailHtml(otp, purpose) {
