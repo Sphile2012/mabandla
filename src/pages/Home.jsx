@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { prince } from '@/api/princeClient'; // still needed for entities via useQuery
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -81,7 +81,7 @@ export default function Home() {
 
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight text-white"
-              style={{ fontFamily: "'Sora',sans-serif", letterSpacing: '-0.02em' }}>
+              style={{ fontFamily: "'Sora', sans-serif", letterSpacing: '-0.02em' }}>
               Master{' '}
               <span style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD},${GOLD_DARK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 Mathematics
@@ -169,7 +169,7 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-3">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Choose Your Grade</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: "'Sora', sans-serif" }}>Choose Your Grade</h2>
             <p className="mt-1 text-xs sm:text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Select your grade to browse Mathematics lessons</p>
           </div>
           <Link to={createPageUrl('Categories')}
@@ -190,7 +190,7 @@ export default function Home() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-3">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Latest Lessons</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: "'Sora', sans-serif" }}>Latest Lessons</h2>
               <p className="mt-1 text-xs sm:text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Recently uploaded video lessons</p>
             </div>
             <Link to={createPageUrl('Categories')}
