@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -220,6 +220,11 @@ export default function Layout({ children, currentPageName }) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              ) : isLoadingAuth ? (
+                /* Show spinner while checking auth */
+                <div className="hidden md:flex items-center justify-center w-20">
+                  <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#f5c842', borderTopColor: 'transparent' }} />
+                </div>
               ) : (
                 /* Not logged in — show Sign In + Register on desktop */
                 <div className="hidden md:flex items-center gap-2">
@@ -231,7 +236,7 @@ export default function Layout({ children, currentPageName }) {
                   </Link>
                   <Link to={createPageUrl('Register')}>
                     <button className="px-4 h-9 rounded-xl text-sm font-bold text-black transition-all hover:-translate-y-0.5"
-                      style={{ background: `linear-gradient(135deg,#fde68a,${GOLD})`, boxShadow: '0 4px 14px rgba(245,200,66,0.4)' }}>
+                      style={{ background: linear-gradient(135deg,#fde68a,), boxShadow: '0 4px 14px rgba(245,200,66,0.4)' }}>
                       Start Free Trial
                     </button>
                   </Link>
