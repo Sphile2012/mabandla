@@ -18,6 +18,10 @@ import {
   MoreVertical,
   Megaphone,
   RotateCcw,
+  FileText,
+  Users,
+  BarChart3,
+  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

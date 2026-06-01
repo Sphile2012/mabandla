@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { GraduationCap } from 'lucide-react';
+import { GraduationCap, Sun, Moon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -14,6 +14,11 @@ export default function Login() {
   const [formData, setFormData] = useState({ email: '', username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [theme, setTheme] = useState('dark');
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   const urlParams = new URLSearchParams(window.location.search);
   const returnUrl = urlParams.get('return_url') || createPageUrl('Home');
@@ -99,7 +104,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden" style={{ background: theme === 'dark' ? '#080d1a' : '#f8fafc' }}>
       {/* Background image */}
       <div className="absolute inset-0">
         <img
@@ -121,11 +126,20 @@ export default function Login() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to={createPageUrl('Home')}>
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 32px rgba(124,58,237,0.45)' }}>
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link to={createPageUrl('Home')}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 32px rgba(124,58,237,0.45)' }}>
+                <GraduationCap className="w-8 h-8 text-white" />
+              </div>
+            </Link>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full transition-all hover:scale-110"
+              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5 text-white" /> : <Moon className="w-5 h-5 text-white" />}
+            </button>
+          </div>
           <h1 className="text-3xl font-bold text-white mb-1">Welcome Back</h1>
           <p className="text-slate-400 text-sm">Sign in to continue learning</p>
         </div>

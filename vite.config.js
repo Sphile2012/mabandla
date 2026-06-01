@@ -16,17 +16,30 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-    host: true, // Allow access from network for testing on other devices
+    host: true,
     port: 5173,
   },
   build: {
     outDir: 'dist',
-    sourcemap: false, // Reduce bundle size for production
+    sourcemap: false,
     minify: 'esbuild',
-    esbuildOptions: {
-      drop: process.env.NODE_ENV === 'production' ? ['console'] : [],
+    target: ['es2015', 'chrome58', 'firefox57', 'safari11', 'edge18'],
+    rollupOptions: {
+      output: {
+        // Code splitting — break the 713KB bundle into smaller chunks
+        manualChunks: {
+          // React core
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Animation
+          'vendor-motion': ['framer-motion'],
+          // Query
+          'vendor-query': ['@tanstack/react-query'],
+          // Date utilities
+          'vendor-date': ['date-fns'],
+        },
+      },
     },
+    chunkSizeWarningLimit: 600,
   },
-  // Ensure public assets are properly copied
   publicDir: 'public',
-});
+})

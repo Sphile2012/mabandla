@@ -2,7 +2,7 @@
 import { prince } from '@/api/princeClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Search, Grid, List, X, SlidersHorizontal, BookOpen } from 'lucide-react';
+import { Search, Grid, List, X, SlidersHorizontal, BookOpen, Sun, Moon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import VideoCard from '../components/videos/VideoCard';
@@ -19,7 +19,12 @@ export default function Categories() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedTier, setSelectedTier] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
+  const [theme, setTheme] = useState('dark');
   const queryClient = useQueryClient();
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     prince.auth.me().then(setUser).catch(() => setUser(null));
