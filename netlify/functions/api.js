@@ -224,7 +224,7 @@ async function sendEmail(to, subject, htmlBody) {
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey) {
     try {
-      const from = process.env.RESEND_FROM || 'Prince Math Academy <onboarding@resend.dev>';
+      const from = process.env.RESEND_FROM || 'Prince Math Academy <noreply@resend.dev>';
       const resp = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
