@@ -216,11 +216,33 @@ async function verifyOtp(email, otp, purpose) {
   await supabase.from('otp_codes').update({ used: true }).eq('id', record.id);
   return { valid: true };
 }
-// Email sender — tries SMTP (nodemailer), then logs OTP to console
-// To enable emails: set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in Netlify env vars
-// Or set RESEND_API_KEY for Resend (https://resend.com)
+// Email sender — tries Resend API first, then SMTP, then logs to console
+// Option A: Set RESEND_API_KEY in Netlify env vars (https://resend.com — free)
+// Option B: Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in Netlify env vars (Gmail etc)
 async function sendEmail(to, subject, htmlBody) {
-  // Option 1: SMTP via nodemailer (static import — works with esbuild)
+  // Option 1: Resend API via fetch (no package needed)
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) {
+    try {
+      const from = process.env.RESEND_FROM || 'Prince Math Academy <onboarding@resend.dev>';
+      const resp = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ from, to, subject, html: htmlBody }),
+      });
+      const result = await resp.json();
+      if (!resp.ok) throw new Error(result.message || 'Resend error');
+      console.log(`[EMAIL] Sent via Resend to ${to}, id: ${result.id}`);
+      return;
+    } catch (err) {
+      console.error('[EMAIL] Resend failed:', err.message);
+    }
+  }
+
+  // Option 2: SMTP via nodemailer
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = parseInt(process.env.SMTP_PORT || '587');
   const smtpUser = process.env.SMTP_USER;
@@ -240,7 +262,7 @@ async function sendEmail(to, subject, htmlBody) {
     }
   }
 
-  // Option 2: Dev fallback — log OTP to console so you can test without email
+  // Option 3: Dev fallback — log OTP to console
   console.log(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
   const otpMatch = htmlBody.match(/letter-spacing:12px[^>]*>(\d{6})</);
   if (otpMatch) console.log(`[EMAIL DEV] *** OTP CODE: ${otpMatch[1]} ***`);
