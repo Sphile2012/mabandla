@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import NotificationBell from './components/notifications/NotificationBell';
+import { useAuth } from '@/lib/AuthContext';
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@princemath.co.za';
 const GOLD = '#f5c842';
@@ -56,24 +57,19 @@ function checkAccess(user) {
 }
 
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
+  const { user, logout, isLoadingAuth } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    prince.auth.me().then(u => {
-      if (u && u.email === ADMIN_EMAIL && u.role !== 'admin') {
-        prince.auth.updateMe({ role: 'admin' }).then(() => setUser({ ...u, role: 'admin' })).catch(() => setUser(u));
-      } else {
-        setUser(u);
-      }
-    }).catch(() => setUser(null));
-  }, []);
 
   const isAdmin = user?.email === ADMIN_EMAIL || user?.role === 'admin';
   const isTeacher = user?.role === 'teacher';
   const hasAccess = checkAccess(user);
   const trialExpired = user && !hasAccess;
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+
+  const handleSignOut = () => {
+    logout(false);
+    window.location.href = '/';
+  };
 
   return (
     <div className="min-h-screen" style={{ background: '#0f0c07' }}>
@@ -217,7 +213,7 @@ export default function Layout({ children, currentPageName }) {
 
                     <DropdownMenuSeparator style={{ background: 'rgba(245,200,66,0.1)' }} />
                     <DropdownMenuItem
-                      onClick={() => prince.auth.logout('/')}
+                      onClick={handleSignOut}
                       className="cursor-pointer rounded-xl"
                       style={{ color: '#f87171' }}>
                       <LogOut className="w-4 h-4 mr-2" /> Sign Out
@@ -293,7 +289,7 @@ export default function Layout({ children, currentPageName }) {
                 {user ? (
                   <div className="pt-3 mt-2" style={{ borderTop: '1px solid rgba(245,200,66,0.1)' }}>
                     <button
-                      onClick={() => { prince.auth.logout('/'); setMobileMenuOpen(false); }}
+                      onClick={handleSignOut}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"
                       style={{ color: '#f87171', background: 'rgba(248,113,113,0.08)' }}>
                       <LogOut className="w-5 h-5" /> Sign Out

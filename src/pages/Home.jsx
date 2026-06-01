@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { prince } from '@/api/princeClient';
+﻿import React from 'react';
+import { prince } from '@/api/princeClient'; // still needed for entities via useQuery
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -8,6 +8,7 @@ import { Play, ArrowRight, Sparkles, GraduationCap, BookOpen, Award, Users, LogI
 import { Button } from '@/components/ui/button';
 import VideoCard from '../components/videos/VideoCard';
 import GradeCard from '../components/videos/GradeCard';
+import { useAuth } from '@/lib/AuthContext';
 
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const GOLD = '#f5c842';
@@ -15,12 +16,8 @@ const GOLD_LIGHT = '#fde68a';
 const GOLD_DARK = '#d97706';
 
 export default function Home() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    prince.auth.me().then(setUser).catch(() => setUser(null));
-  }, []);
 
   const { data: videos = [] } = useQuery({
     queryKey: ['videos'],
