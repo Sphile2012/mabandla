@@ -361,16 +361,18 @@ export default function AdminUpload() {
                 style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})` }}>
                 {activeTab === 'videos' ? (
                   <Video className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
-                ) : (
+                ) : activeTab === 'announcements' ? (
                   <Megaphone className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
+                ) : (
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                 )}
               </div>
               <div>
                 <h1 className="text-lg sm:text-xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>
-                  {activeTab === 'videos' ? 'Video Management' : 'Announcements'}
+                  {activeTab === 'videos' ? 'Video Management' : activeTab === 'announcements' ? 'Announcements' : 'User Management'}
                 </h1>
                 <p className="text-xs sm:text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  {activeTab === 'videos' ? `${videos.length} lessons uploaded` : `${announcements.length} announcements`}
+                  {activeTab === 'videos' ? `${videos.length} lessons uploaded` : activeTab === 'announcements' ? `${announcements.length} announcements` : `${allUsers.length} registered users`}
                 </p>
               </div>
             </div>
@@ -422,6 +424,17 @@ export default function AdminUpload() {
                   <Plus className="w-4 h-4 mr-1.5" />
                   <span className="hidden sm:inline">New Announcement</span>
                   <span className="sm:hidden">New</span>
+                </Button>
+              )}
+              {activeTab === 'users' && (
+                <Button
+                  onClick={() => setGrantAdminDialogOpen(true)}
+                  className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-sm text-white"
+                  size="sm"
+                >
+                  <Shield className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Grant Admin</span>
+                  <span className="sm:hidden">Admin</span>
                 </Button>
               )}
             </div>
