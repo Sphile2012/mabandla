@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm install && cd netlify/functions && npm install && cd ../.. && npm run build"
   publish = "dist"
   functions = "netlify/functions"
 
@@ -19,10 +19,13 @@
 
 [functions]
   node_bundler = "esbuild"
+  # Use root node_modules — all dependencies are installed at root level
+  included_files = ["netlify/functions/node_modules/**"]
 
 [functions.api]
   timeout = 26
   external_node_modules = ["bcryptjs", "nodemailer"]
+  node_bundler = "esbuild"
 
 # ── Security & Cache Headers ──────────────────────────────────────────────────
 [[headers]]
