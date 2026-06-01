@@ -2,16 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GraduationCap, Building2, Shield, ChevronDown } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { GraduationCap, Building2, Shield, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { setToken } from '@/api/client';
 
@@ -21,17 +14,11 @@ const banks = ['FNB', 'Standard Bank', 'ABSA', 'Nedbank', 'Capitec', 'African Ba
 export default function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    password: '',
-    phone_number: '',
-    grade: '',
-    bank_name: '',
-    account_holder: '',
-    account_number: '',
-    account_type: '',
+    full_name: '', email: '', password: '', phone_number: '',
+    grade: '', bank_name: '', account_holder: '', account_number: '', account_type: '',
   });
   const [showBanking, setShowBanking] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -41,17 +28,14 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (!formData.full_name || !formData.password) {
-      setError('Please fill in your name and password.');
+    if (!formData.full_name || !formData.email || !formData.password) {
+      setError('Please fill in your name, email and password.');
       return;
     }
-
     if (!formData.grade) {
       setError('Please select your grade level.');
       return;
     }
-
     setLoading(true);
     try {
       const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
@@ -60,18 +44,14 @@ export default function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           full_name: formData.full_name,
-          email: formData.email || null,
+          email: formData.email,
           password: formData.password,
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-      // Save token using the centralized function
       setToken(data.token);
-
-      // Save extra profile data to complete after login
       sessionStorage.setItem('pendingRegistration', JSON.stringify({
         phone_number: formData.phone_number,
         grade: formData.grade,
@@ -80,13 +60,11 @@ export default function Register() {
         account_number: formData.account_number,
         account_type: formData.account_type,
       }));
-
       toast.success('Account created! Setting up your profile...');
       navigate(createPageUrl('CompleteProfile'));
     } catch (err) {
-      console.error('Registration error:', err);
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        setError('Unable to connect to server. If running locally, start the backend with "npm run dev:all". If using the deployed version, please wait for the deployment to complete.');
+      if (err.name === 'TypeError') {
+        setError('Unable to connect. Please check your connection and try again.');
       } else {
         setError(err.message || 'Registration failed. Please try again.');
       }
@@ -95,55 +73,58 @@ export default function Register() {
     }
   };
 
-  // Temporary bypass for development/testing
-  const handleBypassRegister = () => {
-    const fakeToken = 'dev-bypass-token-' + Date.now();
-    const fakeUser = {
-      id: 'dev-user-' + Date.now(),
-      email: 'dev@example.com',
-      full_name: 'Development User',
-      role: 'student',
-      grade: 'Grade 10',
-      phone_number: '+27812345678',
-      subscription_tier: 'Premium',
-      subscription_active: true,
-      subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      trial_end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-      created_at: new Date().toISOString(),
-      created_date: new Date().toISOString()
-    };
-
-    // Store token and user data
-    setToken(fakeToken);
-    localStorage.setItem('user', JSON.stringify(fakeUser));
-
-    toast.success('Development bypass registration successful');
-    navigate(createPageUrl('Home'), { replace: true });
+  const inputStyle = {
+    background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(245,200,66,0.2)',
+    color: '#fef9e7',
+    width: '100%',
+    height: '48px',
+    borderRadius: '12px',
+    padding: '0 16px',
+    fontSize: '14px',
+    outline: 'none',
+    transition: 'border-color 0.2s',
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10" style={{ background: 'linear-gradient(135deg,#0a0f2e 0%,#0f1a4e 50%,#1a0a3e 100%)' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden"
+      style={{ background: '#0f0c07' }}>
+
+      {/* Background glow */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full"
+          style={{ background: 'radial-gradient(circle,rgba(245,200,66,0.07) 0%,transparent 70%)', filter: 'blur(40px)' }} />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <GraduationCap className="w-7 h-7 text-white" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Create Your Account</h1>
-          <p className="text-slate-300 mt-1.5 text-sm md:text-base">
-            Start your 3-day free trial � no credit card required
+          <Link to={createPageUrl('Home')}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'linear-gradient(135deg,#f5c842,#d97706)', boxShadow: '0 8px 28px rgba(245,200,66,0.35)' }}>
+              <GraduationCap className="w-7 h-7 text-black" />
+            </div>
+          </Link>
+          <h1 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>
+            Create Your Account
+          </h1>
+          <p className="mt-1.5 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            Start your 3-day free trial — no credit card required
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/10 p-6 md:p-8">
+        <div className="rounded-2xl p-6 md:p-8"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,200,66,0.15)', backdropFilter: 'blur(20px)' }}>
+
           {error && (
-            <div className="mb-5 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+            <div className="mb-5 rounded-xl px-4 py-3 text-sm"
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
               {error}
             </div>
           )}
@@ -151,69 +132,96 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
-              <Label htmlFor="full_name" className="text-sm font-medium text-slate-200">Full Name *</Label>
-              <Input
-                id="full_name"
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Full Name *
+              </label>
+              <input
+                type="text"
                 placeholder="e.g. Thabo Nkosi"
                 value={formData.full_name}
                 onChange={set('full_name')}
-                className="mt-1.5"
                 required
+                autoFocus
+                style={inputStyle}
+                onFocus={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.6)')}
+                onBlur={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.2)')}
               />
             </div>
 
             {/* Email */}
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-slate-200">Email Address *</Label>
-              <Input
-                id="email"
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Email Address *
+              </label>
+              <input
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={set('email')}
-                className="mt-1.5"
                 required
+                autoComplete="email"
+                style={inputStyle}
+                onFocus={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.6)')}
+                onBlur={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.2)')}
               />
             </div>
 
             {/* Password */}
             <div>
-              <Label htmlFor="password" className="text-sm font-medium text-slate-200">Password *</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Create a password"
-                value={formData.password}
-                onChange={set('password')}
-                className="mt-1.5"
-                required
-              />
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Password *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Create a password (min 6 chars)"
+                  value={formData.password}
+                  onChange={set('password')}
+                  required
+                  minLength={6}
+                  style={{ ...inputStyle, paddingRight: '48px' }}
+                  onFocus={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.6)')}
+                  onBlur={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.2)')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'rgba(255,255,255,0.4)' }}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             {/* Phone */}
             <div>
-              <Label htmlFor="phone" className="text-sm font-medium text-slate-200">Phone Number</Label>
-              <Input
-                id="phone"
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Phone Number
+              </label>
+              <input
                 type="tel"
                 placeholder="e.g. 0812345678"
                 value={formData.phone_number}
                 onChange={set('phone_number')}
-                className="mt-1.5"
+                style={inputStyle}
+                onFocus={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.6)')}
+                onBlur={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.2)')}
               />
             </div>
 
             {/* Grade */}
             <div>
-              <Label className="text-sm font-medium text-slate-200">Grade Level *</Label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Grade Level *
+              </label>
               <Select value={formData.grade} onValueChange={setSelect('grade')}>
-                <SelectTrigger className="mt-1.5">
+                <SelectTrigger className="mt-0 h-12 rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(245,200,66,0.2)', color: '#fef9e7' }}>
                   <SelectValue placeholder="Select your grade" />
                 </SelectTrigger>
                 <SelectContent>
-                  {grades.map(g => (
-                    <SelectItem key={g} value={g}>{g}</SelectItem>
-                  ))}
+                  {grades.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -223,13 +231,15 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setShowBanking(v => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors text-sm font-medium text-slate-700"
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors text-sm font-medium"
+                style={{ background: 'rgba(245,200,66,0.06)', border: '1px solid rgba(245,200,66,0.15)', color: 'rgba(255,255,255,0.7)' }}
               >
                 <span className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-violet-500" />
-                  Banking Details <span className="text-slate-400 font-normal">(optional)</span>
+                  <Building2 className="w-4 h-4" style={{ color: '#f5c842' }} />
+                  Banking Details <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>(optional)</span>
                 </span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showBanking ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 transition-transform ${showBanking ? 'rotate-180' : ''}`}
+                  style={{ color: 'rgba(255,255,255,0.4)' }} />
               </button>
 
               <AnimatePresence>
@@ -241,57 +251,54 @@ export default function Register() {
                     className="overflow-hidden"
                   >
                     <div className="pt-3 space-y-3">
-                      <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                        <Shield className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-xs text-amber-200">Your banking details are securely stored and only used for refunds.</p>
+                      <div className="flex items-start gap-2 rounded-xl p-3"
+                        style={{ background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.2)' }}>
+                        <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#f5c842' }} />
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                          Securely stored and only used for refunds. Never shared with third parties.
+                        </p>
                       </div>
 
-                      <div>
-                        <Label className="text-sm font-medium text-slate-200">Bank Name</Label>
-                        <Select value={formData.bank_name} onValueChange={setSelect('bank_name')}>
-                          <SelectTrigger className="mt-1.5">
-                            <SelectValue placeholder="Select your bank" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {banks.map(b => (
-                              <SelectItem key={b} value={b}>{b}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <Select value={formData.bank_name} onValueChange={setSelect('bank_name')}>
+                        <SelectTrigger className="h-12 rounded-xl"
+                          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(245,200,66,0.2)', color: '#fef9e7' }}>
+                          <SelectValue placeholder="Select your bank" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {banks.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
 
-                      <div>
-                        <Label className="text-sm font-medium text-slate-200">Account Holder Name</Label>
-                        <Input
-                          value={formData.account_holder}
-                          onChange={set('account_holder')}
-                          placeholder="Full name as per bank account"
-                          className="mt-1.5"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        placeholder="Account holder name"
+                        value={formData.account_holder}
+                        onChange={set('account_holder')}
+                        style={inputStyle}
+                        onFocus={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.6)')}
+                        onBlur={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.2)')}
+                      />
 
                       <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-sm font-medium text-slate-200">Account Number</Label>
-                          <Input
-                            value={formData.account_number}
-                            onChange={set('account_number')}
-                            placeholder="Account number"
-                            className="mt-1.5"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-slate-200">Account Type</Label>
-                          <Select value={formData.account_type} onValueChange={setSelect('account_type')}>
-                            <SelectTrigger className="mt-1.5">
-                              <SelectValue placeholder="Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Cheque">Cheque</SelectItem>
-                              <SelectItem value="Savings">Savings</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <input
+                          type="text"
+                          placeholder="Account number"
+                          value={formData.account_number}
+                          onChange={set('account_number')}
+                          style={inputStyle}
+                          onFocus={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.6)')}
+                          onBlur={(e) => (e.target.style.borderColor = 'rgba(245,200,66,0.2)')}
+                        />
+                        <Select value={formData.account_type} onValueChange={setSelect('account_type')}>
+                          <SelectTrigger className="h-12 rounded-xl"
+                            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(245,200,66,0.2)', color: '#fef9e7' }}>
+                            <SelectValue placeholder="Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Cheque">Cheque</SelectItem>
+                            <SelectItem value="Savings">Savings</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </motion.div>
@@ -303,33 +310,27 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 h-11 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all"
+              className="w-full mt-2 h-12 rounded-xl font-bold text-black flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:pointer-events-none"
+              style={{ background: 'linear-gradient(135deg,#fde68a,#f5c842)', boxShadow: '0 4px 20px rgba(245,200,66,0.4)' }}
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <>
+                  <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                   Creating account...
-                </span>
+                </>
               ) : 'Create Account'}
-            </button>
-
-            {/* Temporary bypass button for development */}
-            <button
-              type="button"
-              onClick={handleBypassRegister}
-              className="w-full mt-3 h-10 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 transition-all border border-slate-600 hover:border-slate-400"
-            >
-              Bypass Registration (Development)
             </button>
           </form>
 
           {/* Benefits */}
-          <div className="mt-6 pt-5 border-t border-white/10">
-            <p className="text-xs text-slate-400 text-center mb-3">What you get with your free trial:</p>
-            <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
+          <div className="mt-6 pt-5" style={{ borderTop: '1px solid rgba(245,200,66,0.1)' }}>
+            <p className="text-xs text-center mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              What you get with your free trial:
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {['3 days full access', 'All grade lessons', 'Ask questions', 'No credit card'].map(b => (
                 <div key={b} className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-violet-400 rounded-full flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#f5c842' }} />
                   {b}
                 </div>
               ))}
@@ -337,10 +338,11 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Sign In Link */}
-        <p className="text-center text-sm text-slate-400 mt-5">
+        <p className="text-center text-sm mt-5" style={{ color: 'rgba(255,255,255,0.45)' }}>
           Already have an account?{' '}
-          <Link to={createPageUrl('Login')} className="text-violet-400 hover:text-violet-300 font-semibold">
+          <Link to={createPageUrl('Login')}
+            className="font-semibold transition-colors hover:opacity-80"
+            style={{ color: '#f5c842' }}>
             Sign In
           </Link>
         </p>
