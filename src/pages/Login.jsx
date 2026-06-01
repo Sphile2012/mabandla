@@ -96,11 +96,11 @@ export default function Login() {
       {/* Background */}
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1920&q=80"
+          src="/math-bg.jpg"
           alt="Mathematics background"
-          className="w-full h-full object-cover opacity-30"
+          className="w-full h-full object-cover opacity-40"
         />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg,rgba(15,12,7,0.95) 0%,rgba(26,21,8,0.92) 50%,rgba(15,12,7,0.95) 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg,rgba(15,12,7,0.92) 0%,rgba(26,21,8,0.88) 50%,rgba(15,12,7,0.92) 100%)' }} />
         <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(ellipse at 30% 50%,rgba(245,200,66,0.08) 0%,transparent 60%)' }} />
       </div>
 

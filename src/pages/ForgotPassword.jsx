@@ -53,6 +53,8 @@ export default function ForgotPassword() {
       style={{ background: '#0f0c07' }}>
 
       <div className="fixed inset-0 pointer-events-none">
+        <img src="/math-bg.jpg" alt="" className="w-full h-full object-cover opacity-20" />
+        <div className="absolute inset-0" style={{ background: 'rgba(15,12,7,0.85)' }} />
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full"
           style={{ background: 'radial-gradient(circle,rgba(245,200,66,0.07) 0%,transparent 70%)', filter: 'blur(40px)' }} />
       </div>
