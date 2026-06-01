@@ -1,1 +1,1 @@
-chore: add es-iterator-helpers devDependency to fix eslint missing module error
+chore: remove temporary promote-admin script

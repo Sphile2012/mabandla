@@ -13,6 +13,10 @@ const FORMULAS = {
       { name: 'Exponent Rules', formula: 'a^m × a^n = a^(m+n)', description: 'Multiplication rule' },
       { name: 'Exponent Division', formula: 'a^m ÷ a^n = a^(m-n)', description: 'Division rule' },
       { name: 'Power of Power', formula: '(a^m)^n = a^(mn)', description: 'Nested exponents' },
+      { name: 'Negative Exponent', formula: 'a^(-n) = 1/a^n', description: 'Reciprocal rule' },
+      { name: 'Fractional Exponent', formula: 'a^(m/n) = ⁿ√(a^m)', description: 'Root form' },
+      { name: 'Zero Exponent', formula: 'a^0 = 1 (a ≠ 0)', description: 'Any number to power 0' },
+      { name: 'Factoring by Grouping', formula: 'ax + ay + bx + by = (a+b)(x+y)', description: 'Group terms' },
     ],
     'Geometry': [
       { name: 'Pythagorean Theorem', formula: 'a² + b² = c²', description: 'Right-angled triangles' },
@@ -21,18 +25,37 @@ const FORMULAS = {
       { name: 'Area of Circle', formula: 'A = πr²', description: 'π × radius²' },
       { name: 'Circumference', formula: 'C = 2πr', description: '2 × π × radius' },
       { name: 'Perimeter of Rectangle', formula: 'P = 2(l + w)', description: '2 × (length + width)' },
+      { name: 'Area of Trapezoid', formula: 'A = ½(a + b)h', description: 'Average of parallel sides × height' },
+      { name: 'Area of Parallelogram', formula: 'A = b × h', description: 'Base × height' },
+      { name: 'Volume of Cube', formula: 'V = s³', description: 'Side³' },
+      { name: 'Volume of Rectangular Prism', formula: 'V = l × w × h', description: 'Length × width × height' },
+      { name: 'Surface Area of Cube', formula: 'SA = 6s²', description: '6 × side²' },
     ],
     'Trigonometry': [
       { name: 'Sine', formula: 'sin θ = opposite / hypotenuse', description: 'SOH' },
       { name: 'Cosine', formula: 'cos θ = adjacent / hypotenuse', description: 'CAH' },
       { name: 'Tangent', formula: 'tan θ = opposite / adjacent', description: 'TOA' },
       { name: 'Pythagorean Identity', formula: 'sin²θ + cos²θ = 1', description: 'Fundamental identity' },
+      { name: 'Reciprocal Identity', formula: 'csc θ = 1/sin θ', description: 'Cosecant' },
+      { name: 'Secant Identity', formula: 'sec θ = 1/cos θ', description: 'Secant' },
+      { name: 'Cotangent Identity', formula: 'cot θ = 1/tan θ', description: 'Cotangent' },
+      { name: 'Quotient Identity', formula: 'tan θ = sin θ / cos θ', description: 'Tangent ratio' },
     ],
     'Finance': [
       { name: 'Simple Interest', formula: 'I = P × r × t', description: 'Principal × rate × time' },
       { name: 'Compound Interest', formula: 'A = P(1 + r/n)^(nt)', description: 'n = compounding periods' },
       { name: 'Profit', formula: 'Profit = Selling Price - Cost Price', description: 'Basic profit calculation' },
       { name: 'Loss', formula: 'Loss = Cost Price - Selling Price', description: 'When cost > selling' },
+      { name: 'Profit Percentage', formula: 'Profit% = (Profit/Cost Price) × 100', description: 'Profit as percentage' },
+      { name: 'Loss Percentage', formula: 'Loss% = (Loss/Cost Price) × 100', description: 'Loss as percentage' },
+      { name: 'Discount', formula: 'Discount = Marked Price - Selling Price', description: 'Price reduction' },
+      { name: 'VAT', formula: 'VAT = Price × VAT Rate', description: 'Value Added Tax' },
+    ],
+    'Statistics': [
+      { name: 'Mean', formula: 'x̄ = Σx / n', description: 'Average of values' },
+      { name: 'Median', formula: 'Middle value when sorted', description: 'Middle value' },
+      { name: 'Mode', formula: 'Most frequent value', description: 'Most common value' },
+      { name: 'Range', formula: 'Range = Max - Min', description: 'Difference between extremes' },
     ],
   },
   'Grade 11': {
@@ -43,12 +66,18 @@ const FORMULAS = {
       { name: 'Product of Roots', formula: 'αβ = c/a', description: 'For quadratic ax² + bx + c' },
       { name: 'Exponential Growth', formula: 'A = P(1 + r)^t', description: 'Growth over time' },
       { name: 'Exponential Decay', formula: 'A = P(1 - r)^t', description: 'Decay over time' },
+      { name: 'Logarithm Definition', formula: 'log_a(x) = y → a^y = x', description: 'Inverse of exponent' },
+      { name: 'Logarithm Rules', formula: 'log(ab) = log a + log b', description: 'Product rule' },
+      { name: 'Logarithm Quotient', formula: 'log(a/b) = log a - log b', description: 'Quotient rule' },
+      { name: 'Logarithm Power', formula: 'log(a^n) = n log a', description: 'Power rule' },
     ],
     'Functions': [
       { name: 'Linear Function', formula: 'f(x) = mx + c', description: 'Straight line' },
       { name: 'Quadratic Function', formula: 'f(x) = ax² + bx + c', description: 'Parabola' },
       { name: 'Exponential Function', formula: 'f(x) = a^x', description: 'Exponential curve' },
       { name: 'Inverse Function', formula: 'f⁻¹(x)', description: 'Reverse of f(x)' },
+      { name: 'Hyperbolic Function', formula: 'f(x) = a/x', description: 'Rectangular hyperbola' },
+      { name: 'Function Composition', formula: '(f ∘ g)(x) = f(g(x))', description: 'Composite function' },
     ],
     'Trigonometry': [
       { name: 'Sine Rule', formula: 'a/sin A = b/sin B = c/sin C', description: 'Any triangle' },
@@ -56,12 +85,26 @@ const FORMULAS = {
       { name: 'Area Rule', formula: 'Area = ½ab sin C', description: 'Triangle area' },
       { name: 'Double Angle', formula: 'sin 2θ = 2 sin θ cos θ', description: 'Double angle identity' },
       { name: 'Cosine Double Angle', formula: 'cos 2θ = cos²θ - sin²θ', description: 'Double angle' },
+      { name: 'Cosine Double Alt', formula: 'cos 2θ = 2cos²θ - 1', description: 'Alternative form' },
+      { name: 'Cosine Double Alt 2', formula: 'cos 2θ = 1 - 2sin²θ', description: 'Alternative form 2' },
+      { name: 'Tangent Double Angle', formula: 'tan 2θ = 2tan θ / (1 - tan²θ)', description: 'Double angle tangent' },
     ],
     'Analytical Geometry': [
       { name: 'Distance Formula', formula: 'd = √[(x₂-x₁)² + (y₂-y₁)²]', description: 'Between two points' },
       { name: 'Midpoint Formula', formula: 'M = ((x₁+x₂)/2, (y₁+y₂)/2)', description: 'Midpoint of segment' },
       { name: 'Gradient', formula: 'm = (y₂-y₁)/(x₂-x₁)', description: 'Slope of line' },
       { name: 'Equation of Line', formula: 'y - y₁ = m(x - x₁)', description: 'Point-slope form' },
+      { name: 'Slope-Intercept Form', formula: 'y = mx + c', description: 'Line equation' },
+      { name: 'Parallel Lines', formula: 'm₁ = m₂', description: 'Equal gradients' },
+      { name: 'Perpendicular Lines', formula: 'm₁ × m₂ = -1', description: 'Product = -1' },
+      { name: 'Inclination Angle', formula: 'tan θ = m', description: 'Angle with x-axis' },
+    ],
+    'Number Patterns': [
+      { name: 'Arithmetic Sequence', formula: 'T_n = a + (n-1)d', description: 'Linear pattern' },
+      { name: 'Arithmetic Sum', formula: 'S_n = n/2(2a + (n-1)d)', description: 'Sum of arithmetic series' },
+      { name: 'Geometric Sequence', formula: 'T_n = ar^(n-1)', description: 'Exponential pattern' },
+      { name: 'Geometric Sum', formula: 'S_n = a(r^n - 1)/(r - 1)', description: 'Sum of geometric series' },
+      { name: 'Sigma Notation', formula: 'Σ', description: 'Summation symbol' },
     ],
   },
   'Grade 12': {
@@ -73,6 +116,13 @@ const FORMULAS = {
       { name: 'Derivative (Quotient)', formula: 'd/dx(f/g) = (f\'g - fg\')/g²', description: 'Quotient rule' },
       { name: 'Chain Rule', formula: 'd/dx[f(g(x))] = f\'(g(x))·g\'(x)', description: 'Composite functions' },
       { name: 'Integration (Power)', formula: '∫x^n dx = x^(n+1)/(n+1) + C', description: 'Basic integration' },
+      { name: 'Derivative (e^x)', formula: 'd/dx(e^x) = e^x', description: 'Exponential derivative' },
+      { name: 'Derivative (ln x)', formula: 'd/dx(ln x) = 1/x', description: 'Natural log derivative' },
+      { name: 'Derivative (sin x)', formula: 'd/dx(sin x) = cos x', description: 'Sine derivative' },
+      { name: 'Derivative (cos x)', formula: 'd/dx(cos x) = -sin x', description: 'Cosine derivative' },
+      { name: 'Integration (e^x)', formula: '∫e^x dx = e^x + C', description: 'Exponential integral' },
+      { name: 'Integration (1/x)', formula: '∫(1/x) dx = ln|x| + C', description: 'Reciprocal integral' },
+      { name: 'Definite Integral', formula: '∫[a to b] f(x) dx = F(b) - F(a)', description: 'Area under curve' },
     ],
     'Trigonometry': [
       { name: 'Compound Angle', formula: 'sin(α+β) = sin α cos β + cos α sin β', description: 'Sum formula' },
@@ -80,17 +130,37 @@ const FORMULAS = {
       { name: 'Tangent Compound', formula: 'tan(α+β) = (tan α + tan β)/(1 - tan α tan β)', description: 'Sum formula' },
       { name: 'Sine Double Angle', formula: 'sin 2θ = 2 sin θ cos θ', description: 'Double angle' },
       { name: 'Cosine Double Angle', formula: 'cos 2θ = 2cos²θ - 1', description: 'Double angle' },
+      { name: 'Sine Difference', formula: 'sin(α-β) = sin α cos β - cos α sin β', description: 'Difference formula' },
+      { name: 'Cosine Difference', formula: 'cos(α-β) = cos α cos β + sin α sin β', description: 'Difference formula' },
+      { name: 'Tangent Difference', formula: 'tan(α-β) = (tan α - tan β)/(1 + tan α tan β)', description: 'Difference formula' },
+      { name: 'Sine Half Angle', formula: 'sin(θ/2) = ±√[(1-cos θ)/2]', description: 'Half angle formula' },
+      { name: 'Cosine Half Angle', formula: 'cos(θ/2) = ±√[(1+cos θ)/2]', description: 'Half angle formula' },
     ],
     'Geometry': [
       { name: 'Circle Equation', formula: '(x-a)² + (y-b)² = r²', description: 'Center (a,b), radius r' },
       { name: 'Tangent to Circle', formula: 'y = mx ± r√(1+m²)', description: 'Tangent line' },
       { name: 'Area of Circle Sector', formula: 'A = (θ/360) × πr²', description: 'θ in degrees' },
+      { name: 'Arc Length', formula: 'L = (θ/360) × 2πr', description: 'Length of arc' },
+      { name: 'Circle from Diameter', formula: '(x-a)² + (y-b)² = (d/2)²', description: 'Using diameter' },
     ],
     'Probability': [
       { name: 'Probability', formula: 'P(A) = n(A)/n(S)', description: 'Favorable / Total outcomes' },
       { name: 'Complementary', formula: 'P(A\') = 1 - P(A)', description: 'Not A' },
       { name: 'Union', formula: 'P(A ∪ B) = P(A) + P(B) - P(A ∩ B)', description: 'Addition rule' },
       { name: 'Independent Events', formula: 'P(A ∩ B) = P(A) × P(B)', description: 'Multiplication rule' },
+      { name: 'Conditional Probability', formula: 'P(A|B) = P(A ∩ B) / P(B)', description: 'Probability of A given B' },
+      { name: 'Mutually Exclusive', formula: 'P(A ∪ B) = P(A) + P(B)', description: 'Cannot occur together' },
+      { name: 'Expected Value', formula: 'E(X) = Σ[x × P(x)]', description: 'Average outcome' },
+    ],
+    'Euclidean Geometry': [
+      { name: 'Triangle Sum', formula: 'Sum of angles = 180°', description: 'Interior angles of triangle' },
+      { name: 'Quadrilateral Sum', formula: 'Sum of angles = 360°', description: 'Interior angles of quadrilateral' },
+      { name: 'Polygon Sum', formula: 'Sum = (n-2) × 180°', description: 'n-sided polygon' },
+      { name: 'Exterior Angle', formula: 'Exterior = Sum of opposite interiors', description: 'Triangle exterior angle' },
+      { name: 'Similar Triangles', formula: 'Corresponding sides proportional', description: 'AA, SAS, SSS similarity' },
+      { name: 'Circle Theorem 1', formula: 'Angle at center = 2 × Angle at circumference', description: 'Central angle theorem' },
+      { name: 'Circle Theorem 2', formula: 'Angle in semicircle = 90°', description: 'Thales theorem' },
+      { name: 'Circle Theorem 3', formula: 'Angles from same chord are equal', description: 'Chord theorem' },
     ],
   },
 };
@@ -105,11 +175,11 @@ export default function FormulaSheets() {
     setExpandedTopics(prev => ({ ...prev, [topic]: !prev[topic] }));
   };
 
-  const filteredFormulas = selectedTopic 
+  const filteredFormulas = selectedTopic
     ? FORMULAS[selectedGrade]?.[selectedTopic] || []
-    : Object.entries(FORMULAS[selectedGrade] || {}).flatMap(([topic, formulas]) => 
-        formulas.map(f => ({ ...f, topic }))
-      );
+    : Object.entries(FORMULAS[selectedGrade] || {}).flatMap(([topic, formulas]) =>
+      formulas.map(f => ({ ...f, topic }))
+    );
 
   const searchedFormulas = filteredFormulas.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -123,7 +193,7 @@ export default function FormulaSheets() {
         return `\n${topic}\n${'='.repeat(topic.length)}\n${formulas.map(f => `${f.name}: ${f.formula} - ${f.description}`).join('\n')}`;
       })
       .join('\n');
-    
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -165,11 +235,10 @@ export default function FormulaSheets() {
                 setSelectedTopic(null);
                 setExpandedTopics({});
               }}
-              className={`px-6 py-3 rounded-xl font-medium transition-all ${
-                selectedGrade === grade
+              className={`px-6 py-3 rounded-xl font-medium transition-all ${selectedGrade === grade
                   ? 'bg-violet-600 text-white'
                   : 'bg-white/5 text-slate-400 hover:bg-white/10'
-              }`}
+                }`}
             >
               {grade}
             </button>
@@ -216,7 +285,7 @@ export default function FormulaSheets() {
                     <ChevronRight className="w-5 h-5 text-slate-400" />
                   )}
                 </button>
-                
+
                 {expandedTopics[topic] && (
                   <div className="p-4 pt-0 border-t border-white/10">
                     {formulas.map((formula, index) => (
@@ -243,9 +312,9 @@ export default function FormulaSheets() {
               <ChevronRight className="w-4 h-4 rotate-180" />
               Back to all topics
             </button>
-            
+
             <h2 className="text-2xl font-bold text-white mb-6">{selectedTopic} Formulas</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {searchedFormulas.map((formula, index) => (
                 <motion.div

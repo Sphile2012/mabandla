@@ -109,8 +109,8 @@ export default function Categories() {
       <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {/* Search + view toggle + filters */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="flex-1 relative w-full">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <Input
                 placeholder="Search lessons, topics..."
@@ -124,35 +124,37 @@ export default function Categories() {
                 </button>
               )}
             </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[140px] h-10 bg-white/5 border-white/10 text-white">
-                <ArrowUpDown className="w-4 h-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-                <SelectItem value="most_viewed">Most Viewed</SelectItem>
-                <SelectItem value="least_viewed">Least Viewed</SelectItem>
-                <SelectItem value="duration_asc">Duration: Short</SelectItem>
-                <SelectItem value="duration_desc">Duration: Long</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={() => setIsFilterDialogOpen(true)}
-              variant="outline"
-              className={`h-10 ${maxDuration !== 60 || minViews > 0 ? 'border-violet-500 text-violet-400' : 'border-white/10 text-slate-400'}`}
-            >
-              <SlidersHorizontal className="w-4 h-4 mr-2" />
-              Filters
-            </Button>
-            <div className="flex items-center gap-1 p-1 rounded-lg border border-white/10 bg-white/5">
-              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
-                <Grid className="w-4 h-4" />
-              </button>
-              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
-                <List className="w-4 h-4" />
-              </button>
+            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[120px] sm:w-[140px] h-10 bg-white/5 border-white/10 text-white">
+                  <ArrowUpDown className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="most_viewed">Most Viewed</SelectItem>
+                  <SelectItem value="least_viewed">Least Viewed</SelectItem>
+                  <SelectItem value="duration_asc">Duration: Short</SelectItem>
+                  <SelectItem value="duration_desc">Duration: Long</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={() => setIsFilterDialogOpen(true)}
+                variant="outline"
+                className={`h-10 ${maxDuration !== 60 || minViews > 0 ? 'border-violet-500 text-violet-400' : 'border-white/10 text-slate-400'}`}
+              >
+                <SlidersHorizontal className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Filters</span>
+              </Button>
+              <div className="flex items-center gap-1 p-1 rounded-lg border border-white/10 bg-white/5">
+                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                  <Grid className="w-4 h-4" />
+                </button>
+                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -191,12 +193,12 @@ export default function Categories() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Grade cards when no filter */}
         {!selectedGrade && !searchQuery && !selectedTier && (
-          <div className="mb-12">
-            <h2 className="text-xl font-bold text-white mb-6">Browse by Grade</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mb-8 sm:mb-12">
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Browse by Grade</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {grades.map((grade, index) => (
                 <GradeCard key={grade} grade={grade} videoCount={gradeVideoCounts[grade]} index={index} />
               ))}
@@ -217,8 +219,8 @@ export default function Categories() {
         )}
 
         {/* Results count */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
+          <h2 className="text-base sm:text-lg font-bold text-white">
             {selectedGrade ? `${selectedGrade}${selectedTopic ? ` · ${selectedTopic}` : ''}` : searchQuery ? `Results for "${searchQuery}"` : 'All Lessons'}
           </h2>
           <span className="text-sm text-slate-500">{filteredVideos.length} {filteredVideos.length === 1 ? 'lesson' : 'lessons'}</span>
@@ -226,7 +228,7 @@ export default function Categories() {
 
         {/* Loading */}
         {isLoading ? (
-          <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+          <div className={`grid gap-4 sm:gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
             {[...Array(8)].map((_, i) => (
               <div key={i} className="rounded-2xl overflow-hidden border border-white/8 bg-white/4">
                 <div className="aspect-video skeleton" />
@@ -239,7 +241,7 @@ export default function Categories() {
             ))}
           </div>
         ) : filteredVideos.length > 0 ? (
-          <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1 max-w-3xl'}`}>
+          <div className={`grid gap-4 sm:gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1 max-w-3xl'}`}>
             {filteredVideos.map((video, i) => (
               <motion.div key={video.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.04, 0.4) }}>
                 <VideoCard
@@ -253,7 +255,7 @@ export default function Categories() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20">
+          <div className="text-center py-16 sm:py-20">
             <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
               <BookOpen className="w-8 h-8 text-slate-500" />
             </div>
