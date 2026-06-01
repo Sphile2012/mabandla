@@ -554,6 +554,81 @@ export default function AdminUpload() {
             )}
           </div>
         )}
+
+        {/* Users List */}
+        {activeTab === 'users' && (
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-800">All Registered Users ({allUsers.length})</h2>
+            </div>
+
+            {!allUsers || allUsers.length === 0 ? (
+              <div className="p-12 text-center text-slate-500">
+                No users registered yet.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50">
+                      <th className="text-left px-4 sm:px-6 py-3 font-semibold text-slate-700">Name</th>
+                      <th className="text-left px-4 sm:px-6 py-3 font-semibold text-slate-700">Email</th>
+                      <th className="text-left px-4 sm:px-6 py-3 font-semibold text-slate-700">Grade</th>
+                      <th className="text-left px-4 sm:px-6 py-3 font-semibold text-slate-700">Role</th>
+                      <th className="text-left px-4 sm:px-6 py-3 font-semibold text-slate-700">Status</th>
+                      <th className="text-center px-4 sm:px-6 py-3 font-semibold text-slate-700">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {allUsers.map((user) => (
+                      <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 sm:px-6 py-3 text-slate-800 font-medium">{user.full_name || 'N/A'}</td>
+                        <td className="px-4 sm:px-6 py-3 text-slate-600 text-xs sm:text-sm break-all">{user.email}</td>
+                        <td className="px-4 sm:px-6 py-3 text-slate-600">{user.grade || 'N/A'}</td>
+                        <td className="px-4 sm:px-6 py-3">
+                          <Select 
+                            value={user.role || 'student'}
+                            onValueChange={(newRole) => handleUpdateUserRole(user.id, newRole)}
+                          >
+                            <SelectTrigger className="h-8 w-28 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="student">Student</SelectItem>
+                              <SelectItem value="teacher">Teacher</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="px-4 sm:px-6 py-3">
+                          <Badge 
+                            variant={user.subscription_active ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {user.subscription_active ? 'Active' : user.trial_end_date && new Date(user.trial_end_date) > new Date() ? 'Trial' : 'Inactive'}
+                          </Badge>
+                        </td>
+                        <td className="px-4 sm:px-6 py-3 text-center">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(user.email);
+                              toast.success('Email copied!');
+                            }}
+                            className="text-xs h-7"
+                          >
+                            Copy Email
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Dialog */}
