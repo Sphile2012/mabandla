@@ -12,6 +12,8 @@
   <!-- Viewport - optimized for all devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
+  <!-- Note: Screen orientation is controlled via Screen Orientation API in JavaScript -->
+
   <!-- IE compatibility -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
@@ -39,24 +41,48 @@
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
 
+  <!-- Screen Orientation Lock Script -->
+  <script>
+    (function() {
+      function lockOrientation() {
+        if ('orientation' in screen && typeof screen.orientation === 'object') {
+          screen.orientation.lock('portrait-primary').catch(function(err) {
+            console.log('Screen orientation lock not available:', err.message);
+          });
+        }
+      }
+      function isMobile() {
+        return (
+          typeof window.orientation !== 'undefined' ||
+          navigator.userAgent.indexOf('IEMobile') !== -1 ||
+          /Mobi|Android|iPhone|iPad|iPod|BlackBerry|webOS/i.test(navigator.userAgent)
+        );
+      }
+      if (isMobile()) {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', lockOrientation);
+        } else {
+          lockOrientation();
+        }
+        window.addEventListener('orientationchange', function() {
+          setTimeout(lockOrientation, 100);
+        });
+      }
+    })();
+  </script>
+
   <!-- Canonical URL -->
   <link rel="canonical" href="https://princemath.co.za" />
 
-  <!-- SEO for Google -->
-  <meta name="description"
-    content="Grade 10-12 Mathematics video lessons by Prince Mabandla. Learn Algebra, Calculus, Trigonometry and more at your own pace." />
-  <meta name="keywords"
-    content="mathematics, grade 10, grade 11, grade 12, maths tutor, South Africa, Prince Mabandla, video lessons" />
+  <!-- SEO -->
+  <meta name="description" content="Grade 10-12 Mathematics video lessons by Prince Mabandla. Learn Algebra, Calculus, Trigonometry and more at your own pace." />
+  <meta name="keywords" content="mathematics, grade 10, grade 11, grade 12, maths tutor, South Africa, Prince Mabandla, video lessons" />
   <meta name="author" content="Prince Mabandla" />
   <meta name="robots" content="index, follow" />
-  <meta name="googlebot" content="index, follow" />
-  <meta name="bingbot" content="index, follow" />
-
-  <!-- Language & Locale -->
   <meta http-equiv="content-language" content="en" />
   <meta name="language" content="English" />
 
-  <!-- Open Graph (WhatsApp, Facebook previews) -->
+  <!-- Open Graph -->
   <meta property="og:title" content="Prince Math Academy — Grade 10-12 Mathematics" />
   <meta property="og:description" content="Expert video lessons for Grade 10-12 Mathematics by Prince Mabandla." />
   <meta property="og:type" content="website" />
@@ -75,34 +101,22 @@
 
   <title>Prince Math Academy — Grade 10-12 Mathematics</title>
 
-  <!-- Google Fonts — preload only what's used -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&family=Sora:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&family=Sora:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Early connection to API -->
   <link rel="preconnect" href="/api" />
   <link rel="dns-prefetch" href="/api" />
 
-  <!-- Critical CSS for initial render -->
+  <!-- Critical CSS -->
   <style>
-    /* Critical above-the-fold styles */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    html {
-      font-size: 16px;
-      -webkit-text-size-adjust: 100%;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: #080d1a;
       color: #e2e8f0;
@@ -110,50 +124,27 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Orbitron', 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-
-    #root {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Loading spinner */
+    #root { min-height: 100vh; display: flex; flex-direction: column; }
     .app-loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       min-height: 100vh;
       background: linear-gradient(135deg, #080d1a 0%, #1a1a2e 100%);
     }
-
     .app-loading-spinner {
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px;
       border: 4px solid rgba(124, 58, 237, 0.3);
       border-top-color: #7c3aed;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 
 <body>
-  <!-- No-JS fallback -->
   <noscript>
     <div style="padding: 2rem; text-align: center; font-family: sans-serif;">
       <h1>Prince Math Academy</h1>
@@ -163,7 +154,6 @@
   </noscript>
 
   <div id="root">
-    <!-- Loading state shown before React hydrates -->
     <div class="app-loading" id="loading-spinner">
       <div class="app-loading-spinner"></div>
     </div>
@@ -171,39 +161,22 @@
 
   <script type="module" src="/src/main.jsx"></script>
 
-  <!-- Service Worker Registration with error handling -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/sw.js')
           .then(function (registration) {
-            console.log('[SW] ServiceWorker registration successful with scope: ', registration.scope);
-
-            // Hide loading spinner when page is ready
+            console.log('[SW] Registered:', registration.scope);
             const spinner = document.getElementById('loading-spinner');
-            if (spinner) {
-              setTimeout(function () {
-                spinner.style.display = 'none';
-              }, 500);
-            }
+            if (spinner) setTimeout(function () { spinner.style.display = 'none'; }, 500);
           })
           .catch(function (error) {
-            console.log('[SW] ServiceWorker registration failed: ', error);
+            console.log('[SW] Registration failed:', error);
           });
-
-        // Handle service worker updates
-        navigator.serviceWorker.addEventListener('controllerchange', function () {
-          console.log('[SW] New service worker activated, page will reload');
-        });
       });
     } else {
-      // Hide loading spinner for non-SW browsers
       const spinner = document.getElementById('loading-spinner');
-      if (spinner) {
-        setTimeout(function () {
-          spinner.style.display = 'none';
-        }, 500);
-      }
+      if (spinner) setTimeout(function () { spinner.style.display = 'none'; }, 500);
     }
   </script>
 </body>

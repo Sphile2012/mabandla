@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calculator, X, History } from 'lucide-react';
+import { Calculator as CalculatorIcon, X, History } from 'lucide-react';
 
 export default function Calculator({ onClose }) {
   const [display, setDisplay] = useState('0');
@@ -180,7 +180,7 @@ export default function Calculator({ onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-violet-400" />
+            <CalculatorIcon className="w-5 h-5 text-violet-400" />
             <h2 className="text-white font-semibold">Scientific Calculator</h2>
           </div>
           <button

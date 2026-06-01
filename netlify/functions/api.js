@@ -1,5 +1,5 @@
-/**
- * Prince Math Academy — Netlify Serverless API
+﻿/**
+ * Prince Math Academy ΓÇö Netlify Serverless API
  * All backend logic lives here, deployed as a single Netlify Function.
  *
  * Routes:
@@ -39,7 +39,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 
-// ─── Supabase client ──────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Supabase client ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -48,13 +48,13 @@ const supabase = createClient(
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'poomeigh503@gmail.com';
 
-// ─── Express app ──────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Express app ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ─── Auth helpers ─────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Auth helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function signToken(userId) {
   return jwt.sign({ sub: userId }, JWT_SECRET, { expiresIn: '30d' });
 }
@@ -92,7 +92,7 @@ async function requireAdmin(req, res, next) {
   });
 }
 
-// ─── Auth routes ──────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Auth routes ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 // GET /api/auth/me
 app.get('/api/auth/me', requireAuth, (req, res) => {
@@ -121,7 +121,7 @@ app.patch('/api/auth/me', requireAuth, async (req, res) => {
   res.json(data);
 });
 
-// POST /api/auth/register  — email + password sign-up
+// POST /api/auth/register  ΓÇö email + password sign-up
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, full_name } = req.body;
   if (!email || !password || !full_name) {
@@ -164,7 +164,7 @@ app.post('/api/auth/login', async (req, res) => {
   res.json({ token, user });
 });
 
-// ─── OTP helpers ──────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ OTP helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function generateOtp() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
@@ -206,7 +206,7 @@ async function verifyOtp(email, otp, purpose) {
   return { valid: true };
 }
 
-// Simple email sender — uses SMTP env vars if set, otherwise logs to console
+// Simple email sender ΓÇö uses SMTP env vars if set, otherwise logs to console
 async function sendEmail(to, subject, htmlBody) {
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = parseInt(process.env.SMTP_PORT || '587');
@@ -215,7 +215,7 @@ async function sendEmail(to, subject, htmlBody) {
   const fromEmail = process.env.SMTP_FROM || smtpUser || 'noreply@princemath.co.za';
 
   if (!smtpHost || !smtpUser || !smtpPass) {
-    // No SMTP configured — log OTP to console (dev mode)
+    // No SMTP configured ΓÇö log OTP to console (dev mode)
     console.log(`[EMAIL] To: ${to} | Subject: ${subject} | Body: ${htmlBody}`);
     return;
   }
@@ -232,7 +232,7 @@ async function sendEmail(to, subject, htmlBody) {
     await transporter.sendMail({ from: fromEmail, to, subject, html: htmlBody });
   } catch (err) {
     console.error('[EMAIL] Failed to send email:', err.message);
-    // Don't throw — OTP is still stored, user can check console in dev
+    // Don't throw ΓÇö OTP is still stored, user can check console in dev
   }
 }
 
@@ -251,7 +251,7 @@ function otpEmailHtml(otp, purpose) {
   `;
 }
 
-// POST /api/auth/forgot-password — send OTP to email for password reset
+// POST /api/auth/forgot-password ΓÇö send OTP to email for password reset
 app.post('/api/auth/forgot-password', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required.' });
@@ -273,7 +273,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   res.json({ success: true, message: 'If an account exists with that email, a reset code has been sent.' });
 });
 
-// POST /api/auth/verify-otp — verify OTP code (for password reset)
+// POST /api/auth/verify-otp ΓÇö verify OTP code (for password reset)
 app.post('/api/auth/verify-otp', async (req, res) => {
   const { email, otp, purpose = 'password_reset' } = req.body;
   if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required.' });
@@ -284,7 +284,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
   res.json({ success: true });
 });
 
-// POST /api/auth/reset-password — reset password using verified OTP
+// POST /api/auth/reset-password ΓÇö reset password using verified OTP
 app.post('/api/auth/reset-password', async (req, res) => {
   const { email, otp, new_password } = req.body;
   if (!email || !otp || !new_password) {
@@ -307,7 +307,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
   res.json({ success: true, message: 'Password reset successfully.' });
 });
 
-// POST /api/auth/request-password-change — authenticated user requests OTP to change password
+// POST /api/auth/request-password-change ΓÇö authenticated user requests OTP to change password
 app.post('/api/auth/request-password-change', requireAuth, async (req, res) => {
   const email = req.user.email;
   const otp = generateOtp();
@@ -320,7 +320,7 @@ app.post('/api/auth/request-password-change', requireAuth, async (req, res) => {
   res.json({ success: true, message: 'A verification code has been sent to your email.' });
 });
 
-// POST /api/auth/change-password — authenticated user changes password with OTP
+// POST /api/auth/change-password ΓÇö authenticated user changes password with OTP
 app.post('/api/auth/change-password', requireAuth, async (req, res) => {
   const { otp, new_password, current_password } = req.body;
   if (!new_password) return res.status(400).json({ error: 'new_password is required.' });
@@ -345,7 +345,7 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
   res.json({ success: true, message: 'Password changed successfully.' });
 });
 
-// POST /api/auth/send-otp — send OTP for email verification after registration
+// POST /api/auth/send-otp ΓÇö send OTP for email verification after registration
 app.post('/api/auth/send-otp', requireAuth, async (req, res) => {
   const email = req.user.email;
   const otp = generateOtp();
@@ -358,7 +358,7 @@ app.post('/api/auth/send-otp', requireAuth, async (req, res) => {
   res.json({ success: true, message: 'Verification code sent.' });
 });
 
-// POST /api/auth/verify-email — verify email OTP after registration
+// POST /api/auth/verify-email ΓÇö verify email OTP after registration
 app.post('/api/auth/verify-email', requireAuth, async (req, res) => {
   const { otp } = req.body;
   if (!otp) return res.status(400).json({ error: 'OTP is required.' });
@@ -369,9 +369,9 @@ app.post('/api/auth/verify-email', requireAuth, async (req, res) => {
   res.json({ success: true, message: 'Email verified.' });
 });
 
-// ─── Entity CRUD ──────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Entity CRUD ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const ALLOWED_ENTITIES = ['Video', 'Favorite', 'Comment', 'XPEvent', 'Notification', 'Message', 'User', 'Announcement'];
-const TABLE = (name) => name.toLowerCase() + 's'; // Video → videos
+const TABLE = (name) => name.toLowerCase() + 's'; // Video ΓåÆ videos
 
 // GET /api/entities/:entity
 app.get('/api/entities/:entity', async (req, res) => {
@@ -433,7 +433,7 @@ app.post('/api/entities/:entity', requireAuth, async (req, res) => {
   res.status(201).json(normalise(data));
 });
 
-// PATCH /api/entities/:entity/:id — users can only edit their own records
+// PATCH /api/entities/:entity/:id ΓÇö users can only edit their own records
 app.patch('/api/entities/:entity/:id', requireAuth, async (req, res) => {
   const { entity, id } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) return res.status(404).json({ error: 'Unknown entity' });
@@ -454,7 +454,7 @@ app.patch('/api/entities/:entity/:id', requireAuth, async (req, res) => {
   res.json(normalise(data));
 });
 
-// DELETE /api/entities/:entity/:id — users can only delete their own records
+// DELETE /api/entities/:entity/:id ΓÇö users can only delete their own records
 app.delete('/api/entities/:entity/:id', requireAuth, async (req, res) => {
   const { entity, id } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) return res.status(404).json({ error: 'Unknown entity' });
@@ -475,7 +475,7 @@ app.delete('/api/entities/:entity/:id', requireAuth, async (req, res) => {
   res.status(204).end();
 });
 
-// ─── Functions ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Functions ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 // POST /api/functions/createPayFastPayment
 app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) => {
@@ -597,7 +597,7 @@ app.post('/api/functions/sendNewVideoNotifications', requireAdmin, async (req, r
       id: uuidv4(),
       user_email: u.email,
       video_id,
-      message: `📚 New ${grade} lesson: "${video_title}"`,
+      message: `≡ƒôÜ New ${grade} lesson: "${video_title}"`,
       is_read: false,
     });
     if (!error) count++;
@@ -626,7 +626,7 @@ app.post('/api/functions/getApkDownload', (req, res) => {
   res.json({
     success: true,
     appInfo: {
-      appName: 'Prince Math Academy — Grade 10-12 Mathematics',
+      appName: 'Prince Math Academy ΓÇö Grade 10-12 Mathematics',
       version: '1.0.0',
       downloadUrl: apkUrl,
       available: true,
@@ -637,7 +637,7 @@ app.post('/api/functions/getApkDownload', (req, res) => {
   });
 });
 
-// ─── PayFast Webhook ──────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ PayFast Webhook ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const PAYFAST_VALID_IPS = [
   '41.74.179.194', '41.74.179.195', '41.74.179.196', '41.74.179.197',
   '41.74.179.198', '41.74.179.199', '41.74.179.200', '41.74.179.201',
@@ -708,7 +708,7 @@ app.post('/api/payfast-webhook', express.urlencoded({ extended: true }), async (
   }
 });
 
-// ─── File Upload ──────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ File Upload ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } });
 
 app.post('/api/upload', requireAuth, upload.single('file'), async (req, res) => {
@@ -730,7 +730,7 @@ app.post('/api/upload', requireAuth, upload.single('file'), async (req, res) => 
   res.json({ file_url: publicUrl });
 });
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function normalise(row) {
   if (!row) return row;
   // Expose created_at as created_date for frontend compatibility
@@ -750,5 +750,5 @@ function generatePayfastSignature(data, passphrase) {
   return crypto.createHash('md5').update(finalString).digest('hex');
 }
 
-// ─── Export ───────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Export ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export const handler = serverless(app);

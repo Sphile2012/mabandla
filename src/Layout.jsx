@@ -3,7 +3,7 @@ import { prince } from '@/api/princeClient';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Shield, Download, Moon, Sun, Trophy, BookOpen, RotateCw, MessageSquare, CheckCircle, MessageSquare as ForumIcon, Users, Baby } from 'lucide-react';
+import { Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Shield, Download, Moon, Sun, Trophy, BookOpen, RotateCw, MessageSquare, CheckCircle, MessageSquare as ForumIcon, Users, Baby, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -21,6 +21,7 @@ const navItems = [
   { name: 'Worked Examples', icon: CheckCircle, page: 'WorkedExamples' },
   { name: 'Forum', icon: ForumIcon, page: 'Forum' },
   { name: 'Study Groups', icon: Users, page: 'StudyGroups' },
+  { name: 'Certificates', icon: Award, page: 'Certificates', requiresAuth: true },
   { name: 'Parent Portal', icon: Baby, page: 'ParentPortal', requiresAuth: true },
   { name: 'Pricing', icon: CreditCard, page: 'Pricing' },
   { name: 'About', icon: Info, page: 'About' },
@@ -93,8 +94,8 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </Link>
 
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-1">
+            {/* Desktop Nav - Hidden */}
+            <div className="hidden items-center gap-1">
               {navItems.map((item) => {
                 if (item.requiresAuth && !user) return null;
                 const isActive = currentPageName === item.page;
@@ -187,7 +188,7 @@ export default function Layout({ children, currentPageName }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="hidden sm:flex items-center gap-2">
+                <div className="hidden items-center gap-2">
                   <Link to={createPageUrl('Register')}>
                     <Button className="btn-primary text-sm px-4 h-9 rounded-xl border-0">Start Free Trial</Button>
                   </Link>
@@ -196,7 +197,7 @@ export default function Layout({ children, currentPageName }) {
                   </Button>
                 </div>
               )}
-              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-xl hover:bg-white/5 text-slate-400">
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-xl hover:bg-white/5 text-slate-400">
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
@@ -206,7 +207,7 @@ export default function Layout({ children, currentPageName }) {
         {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="md:hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(8,13,26,0.98)' }}>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} style={{ borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(8,13,26,0.98)' }}>
               <div className="px-4 py-4 space-y-1">
                 {navItems.map((item) => {
                   if (item.requiresAuth && !user) return null;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Trophy, Medal, Award, TrendingUp, Flame, Crown } from 'lucide-react';
+import { Trophy, Medal, Flame, Crown } from 'lucide-react';
 import { getLeaderboard } from '@/lib/gamification';
 
 export default function Leaderboard() {

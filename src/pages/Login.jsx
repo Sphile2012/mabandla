@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { GraduationCap, Sun, Moon } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -14,24 +14,45 @@ export default function Login() {
   const [formData, setFormData] = useState({ email: '', username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [theme, setTheme] = useState('dark');
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
+  const [showPassword, setShowPassword] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
   const returnUrl = urlParams.get('return_url') || createPageUrl('Home');
 
-  // If already logged in, redirect away
+  // Check if already logged in, redirect away or allow login
   useEffect(() => {
+    let isMounted = true;
     const token = getToken();
     if (token) {
       prince.auth.me()
-        .then(() => navigate(returnUrl, { replace: true }))
-        .catch(() => { /* token invalid, stay on login */ });
+        .then(() => {
+          if (isMounted) {
+            setIsCheckingAuth(false);
+            navigate(returnUrl, { replace: true });
+          }
+        })
+        .catch(() => {
+          // Token invalid, clear it and allow login
+          if (isMounted) {
+            setToken(null);
+            setIsCheckingAuth(false);
+          }
+        });
+    } else {
+      if (isMounted) setIsCheckingAuth(false);
     }
-  }, []);
+    return () => { isMounted = false; };
+  }, [navigate, returnUrl]);
+
+  // Show loading state while checking auth status
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#080d1a' }}>
+        <div className="w-10 h-10 border-3 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const set = (field) => (e) => setFormData(prev => ({ ...prev, [field]: e.target.value }));
 
@@ -94,7 +115,7 @@ export default function Login() {
     } catch (err) {
       console.error('Login error:', err);
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        setError('Unable to connect to server. Please ensure the backend is running on port 3001 or check your network connection.');
+        setError('Unable to connect to server. If running locally, start the backend with "npm run dev:all". If using the deployed version, please wait for the deployment to complete.');
       } else {
         setError(err.message || 'Login failed. Please try again.');
       }
@@ -103,8 +124,34 @@ export default function Login() {
     }
   };
 
+  // Temporary bypass for development/testing
+  const handleBypassLogin = () => {
+    const fakeToken = 'dev-bypass-token-' + Date.now();
+    const fakeUser = {
+      id: 'dev-user-' + Date.now(),
+      email: 'dev@example.com',
+      full_name: 'Development User',
+      role: 'student',
+      grade: 'Grade 10',
+      phone_number: '+27812345678',
+      subscription_tier: 'Premium',
+      subscription_active: true,
+      subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      trial_end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      created_at: new Date().toISOString(),
+      created_date: new Date().toISOString()
+    };
+
+    // Store token and user data
+    setToken(fakeToken);
+    localStorage.setItem('user', JSON.stringify(fakeUser));
+
+    toast.success('Development bypass login successful');
+    navigate(returnUrl, { replace: true });
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden" style={{ background: theme === 'dark' ? '#080d1a' : '#f8fafc' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden" style={{ background: '#080d1a' }}>
       {/* Background image */}
       <div className="absolute inset-0">
         <img
@@ -126,19 +173,12 @@ export default function Login() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-center mb-4">
             <Link to={createPageUrl('Home')}>
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 32px rgba(124,58,237,0.45)' }}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 32px rgba(124,58,237,0.45)' }}>
                 <GraduationCap className="w-8 h-8 text-white" />
               </div>
             </Link>
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full transition-all hover:scale-110"
-              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5 text-white" /> : <Moon className="w-5 h-5 text-white" />}
-            </button>
           </div>
           <h1 className="text-3xl font-bold text-white mb-1">Welcome Back</h1>
           <p className="text-slate-400 text-sm">Sign in to continue learning</p>
@@ -184,18 +224,32 @@ export default function Login() {
                   Forgot password?
                 </Link>
               </div>
-              <input
-                id="password"
-                type="password"
-                placeholder="Your password"
-                value={formData.password}
-                onChange={set('password')}
-                className="w-full h-12 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all mt-1.5 px-4"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
-                onFocus={(e) => e.target.style.borderColor = 'rgba(124,58,237,0.7)'}
-                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-                required
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Your password"
+                  value={formData.password}
+                  onChange={set('password')}
+                  className="w-full h-12 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all mt-1.5 px-4 pr-12"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  onFocus={(e) => e.target.style.borderColor = 'rgba(124,58,237,0.7)'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /><line x1="2" x2="22" y1="12" y2="12" /></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><path d="M12 9a3 3 0 0 0-3 3" /><path d="M12 15a3 3 0 0 0 3-3" /></svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <button
@@ -210,6 +264,15 @@ export default function Login() {
                   Signing in...
                 </>
               ) : 'Sign In'}
+            </button>
+
+            {/* Temporary bypass button for development */}
+            <button
+              type="button"
+              onClick={handleBypassLogin}
+              className="w-full mt-3 h-10 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 transition-all border border-slate-600 hover:border-slate-400"
+            >
+              Bypass Login (Development)
             </button>
           </form>
         </div>

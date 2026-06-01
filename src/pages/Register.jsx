@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { setToken } from '@/api/client';
 
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const banks = ['FNB', 'Standard Bank', 'ABSA', 'Nedbank', 'Capitec', 'African Bank', 'Discovery Bank', 'TymeBank', 'Investec'];
@@ -41,8 +42,13 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (!formData.full_name || !formData.email || !formData.password || !formData.grade) {
-      setError('Please fill in all required fields (name, email, password, grade).');
+    if (!formData.full_name || !formData.password) {
+      setError('Please fill in your name and password.');
+      return;
+    }
+
+    if (!formData.grade) {
+      setError('Please select your grade level.');
       return;
     }
 
@@ -54,7 +60,7 @@ export default function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           full_name: formData.full_name,
-          email: formData.email,
+          email: formData.email || null,
           password: formData.password,
         }),
       });
@@ -62,8 +68,8 @@ export default function Register() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-      // Save token
-      localStorage.setItem('access_token', data.token);
+      // Save token using the centralized function
+      setToken(data.token);
 
       // Save extra profile data to complete after login
       sessionStorage.setItem('pendingRegistration', JSON.stringify({
@@ -78,14 +84,45 @@ export default function Register() {
       toast.success('Account created! Setting up your profile...');
       navigate(createPageUrl('CompleteProfile'));
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setError('Unable to connect to server. If running locally, start the backend with "npm run dev:all". If using the deployed version, please wait for the deployment to complete.');
+      } else {
+        setError(err.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Temporary bypass for development/testing
+  const handleBypassRegister = () => {
+    const fakeToken = 'dev-bypass-token-' + Date.now();
+    const fakeUser = {
+      id: 'dev-user-' + Date.now(),
+      email: 'dev@example.com',
+      full_name: 'Development User',
+      role: 'student',
+      grade: 'Grade 10',
+      phone_number: '+27812345678',
+      subscription_tier: 'Premium',
+      subscription_active: true,
+      subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      trial_end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      created_at: new Date().toISOString(),
+      created_date: new Date().toISOString()
+    };
+
+    // Store token and user data
+    setToken(fakeToken);
+    localStorage.setItem('user', JSON.stringify(fakeUser));
+
+    toast.success('Development bypass registration successful');
+    navigate(createPageUrl('Home'), { replace: true });
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10" style={{background:'linear-gradient(135deg,#0a0f2e 0%,#0f1a4e 50%,#1a0a3e 100%)'}}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10" style={{ background: 'linear-gradient(135deg,#0a0f2e 0%,#0f1a4e 50%,#1a0a3e 100%)' }}>
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -206,7 +243,7 @@ export default function Register() {
                     <div className="pt-3 space-y-3">
                       <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
                         <Shield className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-amber-200">Your banking details are securely stored and only used for refunds.</p>
+                        <p className="text-xs text-amber-200">Your banking details are securely stored and only used for refunds.</p>
                       </div>
 
                       <div>
@@ -274,6 +311,15 @@ export default function Register() {
                   Creating account...
                 </span>
               ) : 'Create Account'}
+            </button>
+
+            {/* Temporary bypass button for development */}
+            <button
+              type="button"
+              onClick={handleBypassRegister}
+              className="w-full mt-3 h-10 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 transition-all border border-slate-600 hover:border-slate-400"
+            >
+              Bypass Registration (Development)
             </button>
           </form>
 

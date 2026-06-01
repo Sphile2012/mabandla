@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { prince } from '@/api/princeClient';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Trophy, Flame, Award, Star, Calendar, Clock, BookOpen, TrendingUp, Users, Shield, Eye, Download, Share2 } from 'lucide-react';
+import { Trophy, Flame, Star, BookOpen, Shield, Eye, Download, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
