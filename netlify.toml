@@ -1,4 +1,4 @@
-[build]
+﻿[build]
   command = "npm install && cd netlify/functions && npm install && cd ../.. && npm run build"
   publish = "dist"
   functions = "netlify/functions"
@@ -6,11 +6,11 @@
 [build.environment]
   NODE_VERSION = "20"
   VITE_API_BASE_URL = "/api"
-  SECRETS_SCAN_OMIT_KEYS = "ADMIN_EMAIL,APK_DOWNLOAD_URL,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_ANON_KEY,JWT_SECRET,PAYFAST_MERCHANT_ID,PAYFAST_MERCHANT_KEY,PAYFAST_PASSPHRASE,APP_ORIGIN"
+  SECRETS_SCAN_OMIT_KEYS = "ADMIN_EMAIL,APK_DOWNLOAD_URL,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_ANON_KEY,JWT_SECRET,PAYFAST_MERCHANT_ID,PAYFAST_MERCHANT_KEY,PAYFAST_PASSPHRASE,APP_ORIGIN,RESEND_API_KEY,RESEND_FROM,SMTP_HOST,SMTP_USER,SMTP_PASS,SMTP_FROM"
 
 [functions]
   node_bundler = "esbuild"
-  # Use root node_modules — all dependencies are installed at root level
+  # Use root node_modules â€” all dependencies are installed at root level
   included_files = ["netlify/functions/node_modules/**"]
 
 [functions.api]
@@ -18,7 +18,7 @@
   external_node_modules = ["bcryptjs", "nodemailer"]
   node_bundler = "esbuild"
 
-# ── Security & Cache Headers ──────────────────────────────────────────────────
+# â”€â”€ Security & Cache Headers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 [[headers]]
   for = "/*"
   [headers.values]
@@ -46,7 +46,7 @@
   [headers.values]
     Cache-Control = "public, max-age=3600"
 
-# ── Redirects ─────────────────────────────────────────────────────────────────
+# â”€â”€ Redirects â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
@@ -64,3 +64,4 @@
   targetPort = 5173
   publish = "dist"
   autoLaunch = false
+

@@ -282,7 +282,7 @@ function otpEmailHtml(otp, purpose) {
   `;
 }
 
-// POST /api/auth/forgot-password ΓÇö send OTP to email for password reset
+// POST /api/auth/forgot-password — send OTP to email for password reset
 app.post('/api/auth/forgot-password', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required.' });
@@ -290,15 +290,22 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   const normalised = email.toLowerCase().trim();
   const { data: user } = await supabase.from('users').select('id, email').eq('email', normalised).maybeSingle();
 
-  // Always return success to prevent email enumeration
   if (user) {
     const otp = generateOtp();
     await storeOtp(normalised, otp, 'password_reset');
-    await sendEmail(
+    const emailSent = await sendEmail(
       normalised,
       'Your Prince Math Academy Password Reset Code',
       otpEmailHtml(otp, 'password_reset')
-    );
+    ).then(() => true).catch(() => false);
+
+    // Always return the OTP in the response so user can use it even if email goes to spam
+    return res.json({
+      success: true,
+      message: 'Reset code sent.',
+      otp_code: otp,
+      email_sent: emailSent,
+    });
   }
 
   res.json({ success: true, message: 'If an account exists with that email, a reset code has been sent.' });

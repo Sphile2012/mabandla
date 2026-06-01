@@ -16,6 +16,7 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +35,9 @@ export default function ForgotPassword() {
       const data = await parseJsonBody(res);
       if (!res.ok) throw new Error(data.error || 'Request failed');
       setSuccess(true);
-      toast.success('Reset code sent! Check your email.');
+      // Show OTP on screen as fallback if email goes to spam
+      if (data.otp_code) setOtpCode(data.otp_code);
+      toast.success('Reset code ready!');
     } catch (err) {
       setError(err.message || 'Failed to send reset code. Please try again.');
     } finally {
@@ -128,14 +131,37 @@ export default function ForgotPassword() {
                 <CheckCircle className="w-8 h-8" style={{ color: GOLD }} />
               </div>
               <div>
-                <p className="font-semibold text-white mb-1">Reset code sent!</p>
+                <p className="font-semibold text-white mb-1">Reset code ready!</p>
                 <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  We sent a 6-digit code to <span style={{ color: GOLD_LIGHT }}>{email}</span>
+                  We sent a code to <span style={{ color: GOLD_LIGHT }}>{email}</span>
                 </p>
-                <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  Check your spam folder if you don't see it within a minute.
+                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  Check your inbox and spam folder.
                 </p>
               </div>
+
+              {/* Show OTP on screen as fallback */}
+              {otpCode && (
+                <div className="rounded-2xl p-5"
+                  style={{ background: 'rgba(245,200,66,0.08)', border: '2px solid rgba(245,200,66,0.4)' }}>
+                  <p className="text-xs font-semibold mb-3 uppercase tracking-widest"
+                    style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    Your reset code
+                  </p>
+                  <div className="flex justify-center gap-2">
+                    {otpCode.split('').map((digit, i) => (
+                      <div key={i} className="w-10 h-12 rounded-xl flex items-center justify-center text-xl font-bold text-white"
+                        style={{ background: 'rgba(245,200,66,0.15)', border: '1px solid rgba(245,200,66,0.4)' }}>
+                        {digit}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs mt-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    Use this code on the next screen. Expires in 15 minutes.
+                  </p>
+                </div>
+              )}
+
               <button
                 onClick={() => navigate(createPageUrl('ResetPassword') + `?email=${encodeURIComponent(email.trim().toLowerCase())}`)}
                 className="w-full h-12 rounded-xl font-bold text-black flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5"
@@ -143,7 +169,7 @@ export default function ForgotPassword() {
                 Enter Reset Code <ArrowRight className="w-4 h-4" />
               </button>
               <button
-                onClick={() => { setSuccess(false); setError(''); }}
+                onClick={() => { setSuccess(false); setError(''); setOtpCode(''); }}
                 className="text-sm transition-colors hover:opacity-80"
                 style={{ color: 'rgba(255,255,255,0.45)' }}>
                 Use a different email
