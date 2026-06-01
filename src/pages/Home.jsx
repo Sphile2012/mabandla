@@ -220,7 +220,7 @@ export default function Home() {
           <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 rounded-full blur-3xl" style={{ background: 'rgba(245,200,66,0.08)' }} />
           <div className="relative flex flex-col items-center text-center md:items-start md:text-left md:flex-row md:justify-between gap-6 sm:gap-8">
             <div>
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-3" style={{ fontFamily: "'Sora', sans-serif" }}>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-3" style={{ fontFamily: 'Sora, sans-serif' }}>
                 Ready to Excel in Mathematics?
               </h3>
               <p className="text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.55)' }}>
