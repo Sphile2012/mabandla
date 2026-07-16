@@ -24,7 +24,6 @@ const GOLD_DARK = '#d97706';
 const desktopNavItems = [
   { name: 'Home', icon: Home, page: 'Home' },
   { name: 'Lessons', icon: Grid3X3, page: 'Categories' },
-  { name: 'Announcements', icon: Megaphone, page: 'Announcements' },
   { name: 'Leaderboard', icon: Trophy, page: 'Leaderboard' },
   { name: 'Pricing', icon: CreditCard, page: 'Pricing' },
   { name: 'About', icon: Info, page: 'About' },
@@ -33,7 +32,6 @@ const desktopNavItems = [
 const allNavItems = [
   { name: 'Home', icon: Home, page: 'Home' },
   { name: 'Lessons', icon: Grid3X3, page: 'Categories' },
-  { name: 'Announcements', icon: Megaphone, page: 'Announcements' },
   { name: 'Leaderboard', icon: Trophy, page: 'Leaderboard' },
   { name: 'Formula Sheets', icon: BookOpen, page: 'FormulaSheets' },
   { name: 'Flashcards', icon: RotateCw, page: 'Flashcards' },

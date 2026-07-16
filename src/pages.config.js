@@ -49,7 +49,6 @@
  */
 import About from './pages/About';
 import AdminUpload from './pages/AdminUpload';
-import Announcements from './pages/Announcements';
 import Categories from './pages/Categories';
 import Certificates from './pages/Certificates';
 import ChangePassword from './pages/ChangePassword';
@@ -83,7 +82,6 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "About": About,
     "AdminUpload": AdminUpload,
-    "Announcements": Announcements,
     "Categories": Categories,
     "Certificates": Certificates,
     "ChangePassword": ChangePassword,
