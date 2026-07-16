@@ -392,46 +392,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Testimonial Highlight */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto p-8 rounded-2xl text-center"
-            style={{
-              background: `linear-gradient(135deg, ${ACCENT_SECONDARY}30, ${ACCENT_PRIMARY}30)`,
-              border: `2px solid ${ACCENT_PRIMARY}40`,
-              boxShadow: `0 12px 40px ${ACCENT_PRIMARY}30`,
-              backdropFilter: 'blur(10px)'
-            }}
-          >
-            <div className="mb-4">
-              <Star className="w-8 h-8 inline-block" style={{ color: ACCENT_GOLD, filter: `drop-shadow(0 0 10px ${ACCENT_GOLD})` }} />
-              <Star className="w-8 h-8 inline-block mx-1" style={{ color: ACCENT_GOLD, filter: `drop-shadow(0 0 10px ${ACCENT_GOLD})` }} />
-              <Star className="w-8 h-8 inline-block" style={{ color: ACCENT_GOLD, filter: `drop-shadow(0 0 10px ${ACCENT_GOLD})` }} />
-              <Star className="w-8 h-8 inline-block mx-1" style={{ color: ACCENT_GOLD, filter: `drop-shadow(0 0 10px ${ACCENT_GOLD})` }} />
-              <Star className="w-8 h-8 inline-block" style={{ color: ACCENT_GOLD, filter: `drop-shadow(0 0 10px ${ACCENT_GOLD})` }} />
-            </div>
-            <p style={{
-              fontFamily: 'Georgia, serif',
-              fontStyle: 'italic',
-              fontSize: '1.25rem',
-              color: TEXT_PRIMARY,
-              marginBottom: '1rem',
-              lineHeight: 1.7
-            }}>
-              "Prince Mabandla's teaching method is exceptional. His clear explanations and patient approach helped me improve from 45% to 78% in just 3 months!"
-            </p>
-            <div style={{
-              fontFamily: BODY_FONT,
-              fontWeight: 600,
-              color: TEXT_SECONDARY,
-              fontSize: '1rem'
-            }}>
-              — Thabo M., Grade 12 Student
-            </div>
-          </motion.div>
         </div>
       </section>
 
