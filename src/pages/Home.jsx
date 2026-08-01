@@ -121,10 +121,22 @@ export default function Home() {
               fontFamily: BODY_FONT,
               fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
               color: TEXT_GRAY,
-              marginBottom: '3rem',
+              marginBottom: '0.5rem',
               letterSpacing: '0.05em'
             }}>
               Learn. Practice. Master.
+            </p>
+
+            {/* Teacher Credit */}
+            <p style={{
+              fontFamily: BODY_FONT,
+              fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
+              color: PURPLE_SECONDARY,
+              marginBottom: '3rem',
+              letterSpacing: '0.02em',
+              fontWeight: 600
+            }}>
+              with Prince Mabandla
             </p>
 
             {/* CTA Buttons */}
