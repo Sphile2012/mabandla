@@ -176,13 +176,13 @@ export default function WorkedExamples() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-[#080d1a]">
       {/* Header */}
-      <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-16 z-20 border-b border-white/8 bg-[rgba(8,13,26,0.95)] backdrop-blur-[20px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Orbitron',sans-serif" }}>
+              <h1 className="text-3xl font-bold text-white mb-2 font-[family-name:Orbitron,sans-serif]">
                 <BookOpen className="w-8 h-8 inline mr-3 text-violet-400" />
                 Worked Examples
               </h1>

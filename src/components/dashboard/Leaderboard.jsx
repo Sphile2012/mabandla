@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Crown, Medal } from 'lucide-react';
-import { getLevel } from './XPCard';
+import { getLevelProgress } from '@/lib/gamification';
 
 const RANK_STYLES = [
   { bg: 'bg-yellow-50 border-yellow-200', badge: 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white', icon: Crown },
@@ -41,7 +41,7 @@ export default function Leaderboard({ allEvents = [], currentUserEmail }) {
           const isMe = entry.user_email === currentUserEmail;
           const style = RANK_STYLES[i] || { bg: isMe ? 'bg-violet-50 border-violet-100' : 'bg-white border-transparent', badge: 'bg-slate-100 text-slate-600', icon: null };
           const RankIcon = style.icon;
-          const level = getLevel(entry.xp);
+          const level = getLevelProgress(entry.xp).level;
 
           return (
             <motion.div
@@ -62,7 +62,7 @@ export default function Leaderboard({ allEvents = [], currentUserEmail }) {
                   {entry.user_name || entry.user_email.split('@')[0]}
                   {isMe && <span className="ml-1.5 text-xs text-violet-400">(you)</span>}
                 </p>
-                <p className="text-xs text-slate-400">{level.name}</p>
+                <p className="text-xs text-slate-400">Level {level}</p>
               </div>
 
               {/* XP */}

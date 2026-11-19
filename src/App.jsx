@@ -7,6 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider } from 'next-themes';
+import SplashScreen from '@/components/SplashScreen';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -44,10 +45,11 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         <AuthProvider>
           <QueryClientProvider client={queryClientInstance}>
             <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <SplashScreen />
               <AuthenticatedApp />
             </Router>
             <Toaster />

@@ -131,7 +131,7 @@ export default function Messages() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#080d1a' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
         <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -139,7 +139,7 @@ export default function Messages() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#080d1a' }}>
+      <div className="min-h-screen flex items-center justify-center px-4 bg-[#080d1a]">
         <div className="text-center">
           <Lock className="w-12 h-12 text-violet-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">Sign in to Message</h2>
@@ -157,7 +157,7 @@ export default function Messages() {
   // Require username before messaging
   if (!user.full_name) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#080d1a' }}>
+      <div className="min-h-screen flex items-center justify-center px-4 bg-[#080d1a]">
         <div className="text-center max-w-sm">
           <UserCircle className="w-12 h-12 text-violet-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">Set Your Username First</h2>
@@ -173,9 +173,9 @@ export default function Messages() {
   }
 
   return (
-    <div className="min-h-screen py-6 px-4" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen py-6 px-4 bg-[#080d1a]">
       <div className="max-w-5xl mx-auto">
-        <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', height: '75vh', minHeight: '500px' }}>
+        <div className="rounded-2xl border border-white/10 overflow-hidden bg-white/[0.04] h-[75vh] min-h-[500px]">
           <div className="grid md:grid-cols-[280px_1fr] h-full">
 
             {/* ── Sidebar ── */}
@@ -327,8 +327,7 @@ export default function Messages() {
                         onKeyDown={handleKeyDown}
                         placeholder="Type a message... (Enter to send)"
                         rows={1}
-                        className="flex-1 resize-none rounded-xl px-3.5 py-2.5 text-sm bg-white/8 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/30 max-h-28 overflow-y-auto"
-                        style={{ minHeight: '42px' }}
+                        className="flex-1 resize-none rounded-xl px-3.5 py-2.5 text-sm bg-white/8 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/30 max-h-28 overflow-y-auto min-h-[42px]"
                       />
                       <button
                         type="submit"

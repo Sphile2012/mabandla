@@ -64,8 +64,17 @@ function makeEntity(name) {
 }
 
 const auth = {
-  me: () => request('GET', '/auth/me'),
+  me: async () => {
+    if (!getToken()) return null;
+    try {
+      return await request('GET', '/auth/me');
+    } catch (error) {
+      if (error.status === 401) setToken(null);
+      throw error;
+    }
+  },
   updateMe: (data) => request('PATCH', '/auth/me', data),
+  startTrial: (data) => request('POST', '/auth/start-trial', data),
   logout: (redirectUrl) => {
     setToken(null);
     if (redirectUrl) window.location.href = redirectUrl;
@@ -81,19 +90,23 @@ const auth = {
 
 const functions = {
   invoke: (name, payload) => request('POST', '/functions/' + name, payload),
+  dailyChallenge: () => request('GET', '/functions/dailyChallenge'),
+  submitDailyChallengeAnswer: (answer) => request('POST', '/functions/dailyChallenge/submit', { answer }),
 };
 
 const integrations = {
   Core: {
-    UploadFile: async ({ file }) => {
+    UploadFile: async ({ file, kind }) => {
       const token = getToken();
       const formData = new FormData();
       formData.append('file', file);
       const headers = {};
       if (token) headers['Authorization'] = 'Bearer ' + token;
-      const res = await fetch(BASE_URL + '/upload', { method: 'POST', headers, body: formData });
+      const res = await fetch(BASE_URL + '/upload' + (kind ? '?kind=' + kind : ''), { method: 'POST', headers, body: formData });
       if (!res.ok) {
-        const err = new Error('Upload failed');
+        let data = {};
+        try { data = await res.json(); } catch (e) { /* non-JSON error */ }
+        const err = new Error(data.error || 'Upload failed');
         err.status = res.status;
         throw err;
       }
@@ -110,6 +123,15 @@ const entities = {
   Notification: makeEntity('Notification'),
   Message: makeEntity('Message'),
   User: makeEntity('User'),
+  Badge: makeEntity('Badge'),
+  UserBadge: makeEntity('UserBadge'),
+  Announcement: makeEntity('Announcement'),
+  VideoProgress: makeEntity('VideoProgress'),
+  ForumPost: makeEntity('ForumPost'),
+  ForumReply: makeEntity('ForumReply'),
+  StudyGroup: makeEntity('StudyGroup'),
+  StudyGroupMember: makeEntity('StudyGroupMember'),
+  Feedback: makeEntity('Feedback'),
 };
 
 export const apiClient = { auth, entities, functions, integrations };

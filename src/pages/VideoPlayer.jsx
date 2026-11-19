@@ -12,7 +12,9 @@ import {
   Clock, 
   Eye, 
   Calendar,
-  ChevronRight
+  ChevronRight,
+  CheckCircle2,
+  FileDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -86,6 +88,46 @@ export default function VideoPlayer() {
 
   const canWatch = hasAccess();
 
+  const [downloading, setDownloading] = useState(false);
+  const handleDownloadNotes = async () => {
+    setDownloading(true);
+    try {
+      const { url, remaining, limit } = await prince.functions.invoke('downloadNotes', { video_id: videoId });
+      window.open(url, '_blank', 'noopener,noreferrer');
+      if (remaining !== null && remaining !== undefined) {
+        toast.success(`Download started. ${remaining} of ${limit} downloads left today.`);
+      }
+    } catch (err) {
+      toast.error(err.message || 'Could not download the notes.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const { data: progressRows = [] } = useQuery({
+    queryKey: ['video-progress', user?.email, videoId],
+    queryFn: () => prince.entities.VideoProgress.filter({ user_email: user?.email, video_id: videoId }),
+    enabled: !!user?.email && !!videoId,
+  });
+  const isCompleted = progressRows.some(p => p.completed);
+
+  const completeMutation = useMutation({
+    mutationFn: async () => {
+      const completion = { progress: 100, completed: true, completed_at: new Date().toISOString() };
+      if (progressRows[0]) {
+        await prince.entities.VideoProgress.update(progressRows[0].id, completion);
+      } else {
+        await prince.entities.VideoProgress.create({ video_id: videoId, user_email: user.email, ...completion });
+      }
+      await prince.functions.invoke('awardXP', { action_type: 'complete_video', reference_id: videoId }).catch(() => {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['video-progress'] });
+      toast.success('Lesson marked as complete');
+    },
+    onError: () => toast.error('Could not save your progress. Please try again.'),
+  });
+
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {
       const existing = favorites.find(f => f.video_id === videoId);
@@ -105,21 +147,11 @@ export default function VideoPlayer() {
   useEffect(() => {
     if (!video?.id || !user) return;
     prince.functions.invoke('trackVideoView', { video_id: video.id })
-      .catch(err => console.error('Failed to track view:', err));
-
-    // Award XP for watching — deduplicate by checking existing events
-    prince.entities.XPEvent.filter({ user_email: user.email, reference_id: video.id, action_type: 'video_watch' })
-      .then(existing => {
-        if (existing.length === 0) {
-          prince.entities.XPEvent.create({
-            user_email: user.email,
-            user_name: user.full_name || user.email.split('@')[0],
-            xp_amount: video.tier === 'Premium' ? 30 : 20,
-            action_type: 'video_watch',
-            reference_id: video.id,
-          }).catch(() => {});
-        }
-      }).catch(() => {});
+      .then(() => prince.functions.invoke('awardXP', {
+        action_type: 'watch_video',
+        reference_id: video.id,
+      }))
+      .catch(err => console.error('Failed to track view or award lesson XP:', err));
   }, [video?.id, user]);
 
   const handleShare = async () => {
@@ -207,6 +239,7 @@ export default function VideoPlayer() {
                   onContextMenu={(e) => e.preventDefault()}
                   poster={video.thumbnail_url || undefined}
                   playsInline
+                  onEnded={() => user && !isCompleted && !completeMutation.isPending && completeMutation.mutate()}
                 >
                   <source src={video.video_url} />
                   Your browser does not support HTML5 video.
@@ -281,7 +314,7 @@ export default function VideoPlayer() {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Clock className="w-4 h-4" />
-                      {video.duration || '10:00'}
+                      {video.duration || 'Duration unavailable'}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Calendar className="w-4 h-4" />
@@ -319,6 +352,30 @@ export default function VideoPlayer() {
                   <p className="text-slate-600 leading-relaxed">{video.description}</p>
                 </div>
               )}
+
+              <div className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row">
+                {user && canWatch && (
+                  <Button
+                    onClick={() => completeMutation.mutate()}
+                    disabled={isCompleted || completeMutation.isPending}
+                    className={`h-12 flex-1 rounded-xl text-base font-semibold transition-all hover:scale-[1.02] ${isCompleted ? 'bg-mint-100 text-mint-800 hover:bg-mint-100' : 'bg-gradient-to-r from-mint-500 to-mint-400 text-white'}`}
+                  >
+                    <CheckCircle2 className="mr-2 h-5 w-5" />
+                    {isCompleted ? 'Lesson completed' : 'Mark as complete'}
+                  </Button>
+                )}
+                {canWatch && video.has_notes && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleDownloadNotes}
+                    disabled={downloading}
+                    className="h-12 flex-1 rounded-xl border-violet-200 text-base font-semibold text-violet-700 transition-all hover:scale-[1.02] hover:bg-violet-50"
+                  >
+                    <FileDown className="mr-2 h-5 w-5" /> {downloading ? 'Preparing…' : 'Download notes'}
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Comments Section */}

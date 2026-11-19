@@ -12,14 +12,14 @@
 
 [functions.api]
   timeout = 26
-  external_node_modules = ["bcryptjs"]
+  included_files = []
 
 # Security Headers - Prevent Chrome blocking and improve security
 [[headers]]
   for = "/*"
   [headers.values]
     # Content Security Policy - Allow necessary resources while maintaining security
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com; connect-src 'self' https://*.supabase.co https://*.netlify.app; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co; media-src 'self' blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co https://*.netlify.app; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://www.payfast.co.za https://sandbox.payfast.co.za;"
     # Strict-Transport-Security - Force HTTPS
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     # X-Content-Type-Options - Prevent MIME sniffing
@@ -92,6 +92,6 @@
 [dev]
   command = "npm run dev"
   port = 8888
-  targetPort = 5173
+  targetPort = 5000
   publish = "dist"
   autoLaunch = false

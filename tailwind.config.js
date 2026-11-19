@@ -1,4 +1,31 @@
 /** @type {import('tailwindcss').Config} */
+const purplePalette = {
+  50: '#f6f3ff',
+  100: '#ece6ff',
+  200: '#ddd2ff',
+  300: '#c4b0ff',
+  400: '#a584fb',
+  500: '#8a5cf6',
+  600: '#7440ea',
+  700: '#6030cf',
+  800: '#4f2aa8',
+  900: '#3f2584',
+  950: '#26154f',
+}
+
+const mintPalette = {
+  50: '#effff7',
+  100: '#d6fbe8',
+  200: '#adf5d2',
+  300: '#74ebb3',
+  400: '#3fdc8f',
+  500: '#22c27a',
+  600: '#17a063',
+  700: '#168051',
+  800: '#166443',
+  900: '#145238',
+  950: '#062e20',
+}
 module.exports = {
     darkMode: ["class"],
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
@@ -10,6 +37,16 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+      violet: purplePalette,
+      purple: purplePalette,
+      pink: purplePalette,
+      rose: purplePalette,
+      fuchsia: purplePalette,
+      indigo: purplePalette,
+      blue: purplePalette,
+      lavender: purplePalette,
+      mint: mintPalette,
+      cyan: mintPalette,
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

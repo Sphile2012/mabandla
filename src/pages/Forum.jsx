@@ -86,7 +86,7 @@ export default function Forum() {
       await prince.entities.ForumPost.update(postId, { upvotes: (post.upvotes || 0) + 1 });
       queryClient.invalidateQueries(['forum-posts']);
     } catch (error) {
-      toast.error('Failed to upvote');
+      toast.error(error.message === 'You have already voted for this post.' ? error.message : 'Failed to upvote');
     }
   };
 
@@ -100,13 +100,13 @@ export default function Forum() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-[#080d1a]">
       {/* Header */}
-      <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-16 z-20 border-b border-white/8 bg-[rgba(8,13,26,0.95)] backdrop-blur-[20px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Orbitron',sans-serif" }}>
+              <h1 className="text-3xl font-bold text-white mb-2 [font-family:'Orbitron',sans-serif]">
                 <MessageSquare className="w-8 h-8 inline mr-3 text-violet-400" />
                 Discussion Forum
               </h1>

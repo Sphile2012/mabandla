@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <filter id="logoShadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#16377a" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect width="1080" height="1350" fill="#ffffff"/>
+  <g filter="url(#logoShadow)">
+    <image href="/logo.svg?v=3d-v2" x="170" y="170" width="740" height="740"/>
+  </g>
+</svg>

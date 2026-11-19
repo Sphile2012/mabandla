@@ -2,17 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { GraduationCap, BookOpen, Award, Heart, Play, ArrowRight, Lightbulb, Target, Globe } from 'lucide-react';
+import { GraduationCap, ArrowRight, Lightbulb, Target, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function About() {
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-[#080d1a]">
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-700 to-indigo-800 py-24 px-4">
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }} />
+        <div className="absolute inset-0 bg-[url('/academy-pattern.svg')] opacity-10" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -118,33 +116,6 @@ export default function About() {
             Welcome to a smarter way to learn mathematics.
           </p>
         </motion.div>
-      </section>
-
-      {/* Stats */}
-      <section className="bg-violet-50 py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { icon: BookOpen, label: 'Grades Covered', value: '3' },
-              { icon: Play, label: 'Video Lessons', value: '100+' },
-              { icon: Award, label: 'Years Experience', value: '10+' },
-              { icon: Heart, label: 'Students Helped', value: '500+' },
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 + 0.4 }}
-              >
-                <div className="w-14 h-14 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <stat.icon className="w-7 h-7 text-white" />
-                </div>
-                <div className="text-3xl font-bold text-slate-800">{stat.value}</div>
-                <div className="text-sm text-slate-500 mt-1">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* What We Teach */}

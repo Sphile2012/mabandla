@@ -56,18 +56,14 @@ export default function ChangePassword() {
     }
   };
 
-  const inputClass = "w-full h-12 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all";
-  const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' };
-  const focusBorder = 'rgba(124,58,237,0.7)';
+  const inputClass = "h-12 w-full rounded-xl border border-white/10 bg-white/[0.06] pl-10 pr-4 text-sm text-white placeholder:text-slate-500 outline-none transition-all hover:border-white/20 focus:border-violet-500";
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10"
-      style={{ background: 'linear-gradient(135deg,#050818 0%,#0a0f2e 50%,#0d0520 100%)' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-[linear-gradient(135deg,#050818 0%,#0a0f2e 50%,#0d0520 100%)]">
 
       {/* Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full"
-          style={{ background: 'radial-gradient(circle,rgba(124,58,237,0.15) 0%,transparent 70%)', filter: 'blur(40px)' }} />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.15) 0%,transparent 70%)] blur-[40px]" />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}
@@ -75,8 +71,7 @@ export default function ChangePassword() {
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 32px rgba(124,58,237,0.45)' }}>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[linear-gradient(135deg,#7c3aed,#2563eb)] shadow-[0_8px_32px_rgba(124,58,237,0.45)]">
             <Lock className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-1">Change Password</h1>
@@ -84,8 +79,7 @@ export default function ChangePassword() {
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl p-6 md:p-8 border border-white/10"
-          style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)' }}>
+        <div className="rounded-2xl p-6 md:p-8 border border-white/10 bg-[rgba(255,255,255,0.04)] backdrop-blur-[20px]">
 
           {/* Error/Success Messages */}
           <motion.div initial={{ height: 0, opacity: 0 }}
@@ -133,16 +127,12 @@ export default function ChangePassword() {
                     autoFocus
                     autoComplete="email"
                     className={inputClass}
-                    style={{ ...inputStyle, paddingLeft: '2.5rem', paddingRight: '1rem' }}
-                    onFocus={(e) => (e.target.style.borderColor = focusBorder)}
-                    onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                   />
                 </div>
               </div>
 
               <button type="submit" disabled={loading}
-                className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:pointer-events-none"
-                style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 4px 20px rgba(124,58,237,0.4)' }}>
+                className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:pointer-events-none bg-[linear-gradient(135deg,#7c3aed,#2563eb)] shadow-[0_4px_20px_rgba(124,58,237,0.4)]">
                 {loading ? (
                   <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending...</>
                 ) : (
@@ -163,16 +153,14 @@ export default function ChangePassword() {
               <div className="space-y-2">
                 <button
                   onClick={() => window.location.href = 'mailto:' + email}
-                  className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0"
-                  style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', boxShadow: '0 4px 20px rgba(34,197,94,0.35)' }}
+                  className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 bg-[linear-gradient(135deg,#22c55e,#16a34a)] shadow-[0_4px_20px_rgba(34,197,94,0.35)]"
                 >
                   <Mail className="w-4 h-4" />
                   Open Email App
                 </button>
                 <button
                   onClick={() => window.location.reload()}
-                  className="w-full h-12 rounded-xl font-semibold text-slate-300 text-center transition-all hover:text-white hover:border-white/20"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  className="w-full h-12 rounded-xl border border-white/10 bg-[rgba(255,255,255,0.04)] text-center font-semibold text-slate-300 transition-all hover:border-white/20 hover:text-white"
                 >
                   Try Again
                 </button>

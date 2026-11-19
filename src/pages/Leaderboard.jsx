@@ -35,13 +35,13 @@ export default function Leaderboard() {
   const userRank = leaderboard.findIndex(u => u.email === user?.email) + 1;
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-[#080d1a]">
       {/* Header */}
-      <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-16 z-20 border-b border-white/8 bg-[rgba(8,13,26,0.95)] backdrop-blur-[20px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Orbitron',sans-serif" }}>
+              <h1 className="text-3xl font-bold text-white mb-2 [font-family:'Orbitron',sans-serif]">
                 <Trophy className="w-8 h-8 inline mr-3 text-yellow-400" />
                 Leaderboard
               </h1>
@@ -72,8 +72,7 @@ export default function Leaderboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 p-6 rounded-2xl border-2 border-violet-500/50"
-            style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(37,99,235,0.2))' }}
+            className="mb-8 p-6 rounded-2xl border-2 border-violet-500/50 bg-[linear-gradient(135deg,rgba(124,58,237,0.2),rgba(37,99,235,0.2))]"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -107,17 +106,16 @@ export default function Leaderboard() {
         {leaderboard.length >= 3 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {[
-              { rank: 2, data: leaderboard[1], height: 'h-32', color: 'from-gray-400/20 to-slate-400/20', borderColor: 'border-gray-400/30' },
-              { rank: 1, data: leaderboard[0], height: 'h-40', color: 'from-yellow-500/20 to-amber-500/20', borderColor: 'border-yellow-500/30' },
-              { rank: 3, data: leaderboard[2], height: 'h-24', color: 'from-amber-600/20 to-orange-600/20', borderColor: 'border-amber-600/30' },
-            ].map(({ rank, data, height, color, borderColor }) => (
+              { rank: 2, data: leaderboard[1], height: 'h-32', background: 'bg-gradient-to-br from-gray-400/20 to-slate-400/20', borderColor: 'border-gray-400/30' },
+              { rank: 1, data: leaderboard[0], height: 'h-40', background: 'bg-gradient-to-br from-yellow-500/20 to-amber-500/20', borderColor: 'border-yellow-500/30' },
+              { rank: 3, data: leaderboard[2], height: 'h-24', background: 'bg-gradient-to-br from-amber-600/20 to-orange-600/20', borderColor: 'border-amber-600/30' },
+            ].map(({ rank, data, height, background, borderColor }) => (
               <motion.div
                 key={rank}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: rank * 0.1 }}
-                className={`relative p-6 rounded-2xl border ${borderColor} flex flex-col items-center`}
-                style={{ background: `linear-gradient(135deg,${color})` }}
+                className={`relative flex flex-col items-center rounded-2xl border p-6 ${background} ${borderColor}`}
               >
                 <div className={`absolute -top-4 ${height === 'h-40' ? '-top-6' : ''}`}>
                   {getRankIcon(rank)}

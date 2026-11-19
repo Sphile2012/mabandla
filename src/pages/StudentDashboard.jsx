@@ -43,7 +43,7 @@ export default function StudentDashboard() {
 
   const { data: xpEvents = [] } = useQuery({
     queryKey: ['xp-events'],
-    queryFn: () => prince.entities.XPEvent.list('-created_date', 500),
+    queryFn: () => prince.entities.XPEvent.list('-created_date', 501),
     enabled: !!user?.email,
   });
 
@@ -59,7 +59,9 @@ export default function StudentDashboard() {
     enabled: !!user?.email && !!user?.grade,
   });
 
-  const myXP = xpEvents.filter(e => e.user_email === user?.email).reduce((s, e) => s + (e.xp_amount || 0), 0);
+  const myXP = Number.isFinite(Number(user?.xp))
+    ? Number(user.xp)
+    : xpEvents.filter(e => e.user_email === user?.email).reduce((s, e) => s + (e.xp_amount || 0), 0);
   const myEventCount = xpEvents.filter(e => e.user_email === user?.email).length;
 
   const favoriteIds = new Set(favorites.map(f => f.video_id));

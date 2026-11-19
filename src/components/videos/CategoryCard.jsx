@@ -26,8 +26,8 @@ const categoryConfig = {
   },
   Statistics: {
     icon: BarChart3,
-    gradient: 'from-emerald-500 to-teal-500',
-    bg: 'bg-emerald-50',
+    gradient: 'from-mint-500 to-mint-400',
+    bg: 'bg-mint-50',
     description: 'Data & probability'
   },
   Geometry: {
@@ -38,8 +38,8 @@ const categoryConfig = {
   },
   Trigonometry: {
     icon: Triangle,
-    gradient: 'from-pink-500 to-rose-500',
-    bg: 'bg-pink-50',
+    gradient: 'from-violet-400 to-violet-600',
+    bg: 'bg-violet-100',
     description: 'Angles & identities'
   },
   Functions: {

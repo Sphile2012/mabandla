@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { GraduationCap, Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 import { toast } from 'sonner';
 import { getApiBaseUrl, parseJsonBody } from '@/api/client';
 
 export default function ResetPassword() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,7 +19,7 @@ export default function ResetPassword() {
     const [step, setStep] = useState(1); // 1 = OTP, 2 = New Password
 
     const urlParams = new URLSearchParams(window.location.search);
-    const email = urlParams.get('email') || '';
+    const email = urlParams.get('email') || location.state?.email || '';
 
     const handleOtpChange = (index, value) => {
         if (!/^\d*$/.test(value)) return;
@@ -74,8 +76,8 @@ export default function ResetPassword() {
             setError('Please enter your new password.');
             return;
         }
-        if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters long.');
+        if (newPassword.length < 8) {
+            setError('Password must be at least 8 characters long.');
             return;
         }
         if (newPassword !== confirmPassword) {
@@ -106,6 +108,21 @@ export default function ResetPassword() {
         }
     };
 
+    if (!email) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-white px-6 py-10">
+                <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg">
+                    <BrandLogo className="mx-auto mb-5 h-16 w-16" />
+                    <h1 className="text-2xl font-bold text-slate-900">Reset your password</h1>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">Start with your email address so we can send you a reset code.</p>
+                    <Link to={createPageUrl('ForgotPassword')} className="mt-6 inline-flex rounded-xl bg-[#16377a] px-5 py-3 font-semibold text-white hover:bg-[#0b2456]">
+                        Request a reset code
+                    </Link>
+                </section>
+            </main>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 flex flex-col items-center justify-center px-4 py-10">
             <motion.div
@@ -116,9 +133,7 @@ export default function ResetPassword() {
             >
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <div className="w-14 h-14 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <GraduationCap className="w-7 h-7 text-white" />
-                    </div>
+                    <BrandLogo className="mx-auto mb-4 h-16 w-16" />
                     <h1 className="text-2xl md:text-3xl font-bold text-slate-800">
                         {step === 1 ? 'Verify Code' : 'New Password'}
                     </h1>
@@ -174,7 +189,7 @@ export default function ResetPassword() {
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         className="w-full h-12 rounded-xl border border-slate-300 bg-white px-3.5 py-2 pl-10 pr-10 text-sm text-slate-900 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none transition-all"
                                         required
-                                        minLength={6}
+                                        minLength={8}
                                     />
                                     <button
                                         type="button"
@@ -197,7 +212,7 @@ export default function ResetPassword() {
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         className="w-full h-12 rounded-xl border border-slate-300 bg-white px-3.5 py-2 pl-10 text-sm text-slate-900 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none transition-all"
                                         required
-                                        minLength={6}
+                                        minLength={8}
                                     />
                                 </div>
                             </div>

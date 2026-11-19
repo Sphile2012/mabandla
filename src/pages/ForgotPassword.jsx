@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GraduationCap, Mail, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
+import { Mail, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 import { toast } from 'sonner';
 import { getApiBaseUrl, parseJsonBody } from '@/api/client';
 
@@ -44,7 +45,7 @@ export default function ForgotPassword() {
       }
 
       setSuccess(true);
-      toast.success('Password reset code sent to your email!');
+      toast.success('If an account exists, a reset code has been emailed.');
     } catch (err) {
       console.error('Forgot password error:', err);
       if (err.name === 'TypeError') {
@@ -59,18 +60,14 @@ export default function ForgotPassword() {
     }
   };
 
-  const inputClass = "w-full h-12 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 outline-none transition-all";
-  const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' };
-  const focusBorder = 'rgba(124,58,237,0.7)';
+  const inputClass = "h-12 w-full rounded-xl border border-white/10 bg-white/[0.06] pl-10 pr-4 text-sm text-white placeholder:text-slate-500 outline-none transition-all hover:border-white/20 focus:border-violet-500";
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10"
-      style={{ background: 'linear-gradient(135deg,#050818 0%,#0a0f2e 50%,#0d0520 100%)' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-[linear-gradient(135deg,#050818 0%,#0a0f2e 50%,#0d0520 100%)]">
 
       {/* Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full"
-          style={{ background: 'radial-gradient(circle,rgba(124,58,237,0.15) 0%,transparent 70%)', filter: 'blur(40px)' }} />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.15) 0%,transparent 70%)] blur-[40px]" />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}
@@ -79,18 +76,14 @@ export default function ForgotPassword() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to={createPageUrl('Home')}>
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-              style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 32px rgba(124,58,237,0.45)' }}>
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
+            <BrandLogo className="mx-auto mb-4 h-16 w-16" />
           </Link>
           <h1 className="text-3xl font-bold text-white mb-1">Reset Password</h1>
           <p className="text-slate-400 text-sm">Enter your email to receive a reset code</p>
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl p-6 md:p-8 border border-white/10"
-          style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)' }}>
+        <div className="rounded-2xl p-6 md:p-8 border border-white/10 bg-[rgba(255,255,255,0.04)] backdrop-blur-[20px]">
 
           {/* Error/Success Messages */}
           <AnimatePresence>
@@ -118,8 +111,8 @@ export default function ForgotPassword() {
                 <div className="flex items-start gap-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl px-4 py-3 text-sm">
                   <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <div>
-                    <div className="font-medium">Reset code sent!</div>
-                    <div className="text-xs mt-1 opacity-90">Check your email for the 6-digit code</div>
+                    <div className="font-medium">Check your email</div>
+                    <div className="text-xs mt-1 opacity-90">If an account exists, a 6-digit reset code has been sent.</div>
                   </div>
                 </div>
               </motion.div>
@@ -142,17 +135,13 @@ export default function ForgotPassword() {
                     autoFocus
                     autoComplete="email"
                     className={inputClass}
-                    style={{ ...inputStyle, paddingLeft: '2.5rem', paddingRight: '1rem' }}
-                    onFocus={(e) => (e.target.style.borderColor = focusBorder)}
-                    onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                   />
                 </div>
               </div>
 
               {/* Submit */}
               <button type="submit" disabled={loading}
-                className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 mt-2 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:pointer-events-none"
-                style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 4px 20px rgba(124,58,237,0.4)' }}>
+                className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 mt-2 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:pointer-events-none bg-[linear-gradient(135deg,#7c3aed,#2563eb)] shadow-[0_4px_20px_rgba(124,58,237,0.4)]">
                 {loading ? (
                   <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending...</>
                 ) : (
@@ -163,12 +152,11 @@ export default function ForgotPassword() {
           ) : (
             <div className="text-center space-y-4">
               <p className="text-slate-300 text-sm">
-                We've sent a 6-digit reset code to your email address.
+                If an account exists for this address, a 6-digit reset code has been emailed.
               </p>
               <button
-                onClick={() => navigate(createPageUrl('ResetPassword'), { state: { email } })}
-                className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0"
-                style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 4px 20px rgba(124,58,237,0.4)' }}>
+                onClick={() => navigate(`${createPageUrl('ResetPassword')}?email=${encodeURIComponent(email)}`, { state: { email } })}
+                className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 bg-[linear-gradient(135deg,#7c3aed,#2563eb)] shadow-[0_4px_20px_rgba(124,58,237,0.4)]">
                 Enter Reset Code <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -181,8 +169,7 @@ export default function ForgotPassword() {
           </div>
 
           <Link to={createPageUrl('Login')}
-            className="block w-full h-12 rounded-xl text-sm font-semibold text-slate-300 text-center leading-[3rem] transition-all hover:text-white hover:border-white/20"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            className="block w-full h-12 rounded-xl border border-white/10 bg-[rgba(255,255,255,0.04)] text-center text-sm font-semibold leading-[3rem] text-slate-300 transition-all hover:border-white/20 hover:text-white">
             Back to Sign In
           </Link>
         </div>

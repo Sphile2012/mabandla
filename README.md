@@ -1,39 +1,29 @@
-**Welcome to your Base44 project** 
+# Prince Math Academy
 
-**About**
+Grade 10–12 mathematics tutoring app. React + Vite + Tailwind, Express API (`server/app.js`), Supabase database and storage, PayFast subscriptions.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+## Run locally
 
-This project contains everything you need to run your app locally.
+1. `npm install`
+2. Copy `.env.example` to `.env` and fill in the values.
+3. Run the latest `supabase/schema.sql` in the Supabase SQL editor (safe to re-run; required for verified video views and one-vote-per-user forum voting).
+4. Terminal 1: `node server/index.js` (API on port 3001). Terminal 2: `npm run dev` (app on port 5000).
+5. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` for password-reset email. Gmail requires an app password. Reset requests return an error until SMTP is configured and delivery succeeds; reset codes are never written to server logs.
 
-**Edit the code in your local development environment**
+## Deploy to Netlify
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+1. Push the repo and connect it in Netlify. Build settings come from `netlify.toml`.
+2. Add every variable from `.env.example` in Site settings → Environment variables.
+   - `APP_ORIGIN` must be the live site URL (used for CORS and the PayFast return/notify URLs).
+   - Use a long random `JWT_SECRET`.
+   - Configure the SMTP variables with valid credentials so password-reset emails can be delivered.
+   - Set `PAYFAST_SANDBOX=false` for live payments.
+3. Make an admin by setting `role` to `admin` for your user in the Supabase `users` table.
 
-**Prerequisites:** 
+## Security notes
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
-
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
-```
-
-Run the app: `npm run dev`
-
-**Publish your changes**
-
-Open [Base44.com](http://Base44.com) and click on Publish.
-
-**Docs & Support**
-
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
-
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+- RLS is on for every table; only the API (service-role key) reads or writes data.
+- Passwords use bcrypt, sessions use short-lived JWTs, and auth routes are rate limited.
+- PayFast payments are only activated after signature, merchant and PayFast server confirmation checks.
+- Notes and new video uploads go to a private bucket and are served through short-lived signed links, and only to learners with access.
+- Notes downloads are limited per day and per lesson (`DOWNLOAD_LIMIT_PER_DAY`, `DOWNLOAD_LIMIT_PER_LESSON`).

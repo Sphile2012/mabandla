@@ -47,6 +47,23 @@ export function calculateLevel(xp) {
   return 1;
 }
 
+export function getLevelProgress(xp) {
+  const totalXP = Math.max(0, Math.floor(Number(xp) || 0));
+  const level = calculateLevel(totalXP);
+  const currentLevelXP = LEVEL_THRESHOLDS[level - 1];
+  const nextLevelXP = LEVEL_THRESHOLDS[level];
+  const xpToNextLevel = nextLevelXP === undefined ? 0 : nextLevelXP - totalXP;
+
+  return {
+    level,
+    progress: nextLevelXP === undefined
+      ? 100
+      : Math.min(99, Math.round(((totalXP - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100)),
+    xpToNextLevel,
+    isMaxLevel: nextLevelXP === undefined,
+  };
+}
+
 /**
  * Get XP needed to reach next level
  */
@@ -67,36 +84,17 @@ export async function awardXP(userEmail, actionType, referenceId = null) {
     const xpAmount = XP_REWARDS[actionType] || 0;
     if (xpAmount === 0) return;
 
-    // Get current user data
-    const users = await prince.entities.User.filter({ email: userEmail });
-    if (!users || users.length === 0) return;
-
-    const user = users[0];
-    const currentXP = user.xp || 0;
-    const newXP = currentXP + xpAmount;
-    const newLevel = calculateLevel(newXP);
-
-    // Update user XP and level
-    await prince.entities.User.update(user.id, {
-      xp: newXP,
-      level: newLevel,
-    });
-
-    // Log XP event
-    await prince.entities.XPEvent.create({
-      user_email: userEmail,
-      user_name: user.full_name,
-      xp_amount: xpAmount,
+    const result = await prince.functions.invoke('awardXP', {
       action_type: actionType,
       reference_id: referenceId,
     });
 
     // Check for level-up
-    if (newLevel > (user.level || 1)) {
-      await checkAndAwardBadge(userEmail, 'level_up', newLevel);
+    if (result.awarded && result.level > result.previous_level) {
+      await checkAndAwardBadge(userEmail, 'level_up', result.level);
     }
 
-    return { xp: newXP, level: newLevel, awarded: xpAmount };
+    return { ...result, awarded: result.awarded ? xpAmount : 0 };
   } catch (error) {
     console.error('Error awarding XP:', error);
     throw error;
@@ -108,58 +106,18 @@ export async function awardXP(userEmail, actionType, referenceId = null) {
  */
 export async function updateStreak(userEmail) {
   try {
-    const users = await prince.entities.User.filter({ email: userEmail });
-    if (!users || users.length === 0) return;
-
-    const user = users[0];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const lastActivity = user.last_activity_date ? new Date(user.last_activity_date) : null;
-    const currentStreak = user.current_streak || 0;
-    const longestStreak = user.longest_streak || 0;
-
-    let newStreak = currentStreak;
-    let streakBonus = false;
-
-    if (!lastActivity) {
-      // First activity
-      newStreak = 1;
-    } else {
-      lastActivity.setHours(0, 0, 0, 0);
-      const diffDays = Math.floor((today - lastActivity) / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) {
-        // Same day, no change
-        return { streak: currentStreak, bonus: false };
-      } else if (diffDays === 1) {
-        // Consecutive day
-        newStreak = currentStreak + 1;
-      } else {
-        // Streak broken
-        newStreak = 1;
-      }
-    }
-
-    // Award streak bonus every 7 days
-    if (newStreak > 0 && newStreak % 7 === 0 && newStreak > currentStreak) {
-      streakBonus = true;
-      await awardXP(userEmail, 'streak_bonus');
-    }
+    const result = await prince.functions.invoke('updateStreak', {});
 
     // Check for streak badges
-    if (newStreak >= 3) await checkAndAwardBadge(userEmail, 'streak_3');
-    if (newStreak >= 7) await checkAndAwardBadge(userEmail, 'streak_7');
-    if (newStreak >= 30) await checkAndAwardBadge(userEmail, 'streak_30');
+    if (result.current_streak >= 3) await checkAndAwardBadge(userEmail, 'streak_3');
+    if (result.current_streak >= 7) await checkAndAwardBadge(userEmail, 'streak_7');
+    if (result.current_streak >= 30) await checkAndAwardBadge(userEmail, 'streak_30');
 
-    // Update user
-    await prince.entities.User.update(user.id, {
-      current_streak: newStreak,
-      longest_streak: Math.max(longestStreak, newStreak),
-      last_activity_date: today.toISOString(),
-    });
-
-    return { streak: newStreak, bonus: streakBonus };
+    return {
+      streak: result.current_streak,
+      longestStreak: result.longest_streak,
+      bonus: result.bonus_awarded,
+    };
   } catch (error) {
     console.error('Error updating streak:', error);
     throw error;

@@ -48,11 +48,13 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import About from './pages/About';
+import AIChat from './pages/AIChat';
 import AdminUpload from './pages/AdminUpload';
 import Categories from './pages/Categories';
 import Certificates from './pages/Certificates';
 import ChangePassword from './pages/ChangePassword';
 import CompleteProfile from './pages/CompleteProfile';
+import DailyChallenge from './pages/DailyChallenge';
 import DownloadApp from './pages/DownloadApp';
 import Favorites from './pages/Favorites';
 import Feedback from './pages/Feedback';
@@ -67,6 +69,7 @@ import Messages from './pages/Messages';
 import OTPVerify from './pages/OTPVerify';
 import ParentPortal from './pages/ParentPortal';
 import PaymentSuccess from './pages/PaymentSuccess';
+import Practice from './pages/Practice';
 import Pricing from './pages/Pricing';
 import Profile from './pages/Profile';
 import PublicProfile from './pages/PublicProfile';
@@ -75,17 +78,20 @@ import ResetPassword from './pages/ResetPassword';
 import StudentDashboard from './pages/StudentDashboard';
 import StudyGroups from './pages/StudyGroups';
 import VideoPlayer from './pages/VideoPlayer';
+import UserGuide from './pages/UserGuide';
 import WorkedExamples from './pages/WorkedExamples';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "About": About,
+    "AIChat": AIChat,
     "AdminUpload": AdminUpload,
     "Categories": Categories,
     "Certificates": Certificates,
     "ChangePassword": ChangePassword,
     "CompleteProfile": CompleteProfile,
+    "DailyChallenge": DailyChallenge,
     "DownloadApp": DownloadApp,
     "Favorites": Favorites,
     "Feedback": Feedback,
@@ -100,6 +106,7 @@ export const PAGES = {
     "OTPVerify": OTPVerify,
     "ParentPortal": ParentPortal,
     "PaymentSuccess": PaymentSuccess,
+    "Practice": Practice,
     "Pricing": Pricing,
     "Profile": Profile,
     "PublicProfile": PublicProfile,
@@ -108,6 +115,7 @@ export const PAGES = {
     "StudentDashboard": StudentDashboard,
     "StudyGroups": StudyGroups,
     "VideoPlayer": VideoPlayer,
+    "UserGuide": UserGuide,
     "WorkedExamples": WorkedExamples,
 }
 

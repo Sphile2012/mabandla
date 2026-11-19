@@ -61,7 +61,7 @@ export default function PublicProfile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#080d1a' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
         <div className="w-8 h-8 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
       </div>
     );
@@ -69,7 +69,7 @@ export default function PublicProfile() {
 
   if (!profileUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#080d1a' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
         <div className="text-center">
           <Shield className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <p className="text-slate-400">Profile not found</p>
@@ -84,11 +84,11 @@ export default function PublicProfile() {
   const xpToNextLevel = (level * 100) - totalXP;
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-[#080d1a]">
       {/* Header */}
-      <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-16 z-20 border-b border-white/8 bg-[rgba(8,13,26,0.95)] backdrop-blur-[20px]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Orbitron',sans-serif" }}>
+          <h1 className="text-3xl font-bold text-white mb-2 font-[family-name:Orbitron,sans-serif]">
             Public Profile
           </h1>
           <p className="text-slate-400">View student achievements and progress</p>

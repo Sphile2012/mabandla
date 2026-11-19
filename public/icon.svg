@@ -1,4 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="80" fill="#7c3aed"/>
-  <text x="256" y="320" font-family="Arial" font-size="280" font-weight="bold" fill="white" text-anchor="middle">M</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f7f9fd"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd45a"/>
+      <stop offset=".5" stop-color="#fdbd2d"/>
+      <stop offset="1" stop-color="#e9a91d"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#315fa3"/>
+      <stop offset=".55" stop-color="#16377a"/>
+      <stop offset="1" stop-color="#0b2456"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <g transform="translate(256 258)">
+    <path d="M0-210 145-158v88c0 76-38 130-145 175C-107 60-145 6-145-70v-88Z" fill="#06184b" opacity=".18" transform="translate(8 10)"/>
+    <path d="M0-220 145-168v88c0 76-38 130-145 175C-107 50-145-4-145-80v-88Z" fill="url(#blue)" stroke="#071f5d" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M0-198 123-151v71c0 64-29 107-123 148C-94 27-123-16-123-80v-71Z" fill="url(#blue)" stroke="#5d94df" stroke-width="5" stroke-linejoin="round"/>
+    <g fill="url(#gold)" stroke="#fff2a1" stroke-width="2">
+      <path d="M-85-168c-12-25-27-43-43-59l35 12 26-38 29 38 38-38 38 38 26-38 35 12c-16 16-31 34-43 59Z"/>
+      <circle cx="-84" cy="-211" r="13"/>
+      <circle cx="-38" cy="-248" r="13"/>
+      <circle cx="38" cy="-248" r="13"/>
+      <circle cx="84" cy="-211" r="13"/>
+      <circle cx="0" cy="-270" r="14"/>
+    </g>
+    <text x="0" y="35" fill="#eef4ff" stroke="#06184b" stroke-width="8" paint-order="stroke" font-family="Georgia,serif" font-size="182" font-weight="700" text-anchor="middle">P</text>
+    <g fill="#09275f" font-family="Georgia,serif" font-size="44" font-weight="700" text-anchor="middle">
+      <text x="-78" y="-18">Σ</text>
+      <text x="78" y="-18">×</text>
+    </g>
+    <path d="M0 55c-42-42-92-55-145-44 11 47 34 73 67 89 31 15 58 17 78 10Z" fill="#071b50" stroke="#06184b" stroke-width="7"/>
+    <path d="M0 55c42-42 92-55 145-44-11 47-34 73-67 89-31 15-58 17-78 10Z" fill="#071b50" stroke="#06184b" stroke-width="7"/>
+    <path d="M0 110c-30-27-69-40-133-43 28 15 47 34 65 47 28 13 48 16 68-4Z" fill="#164da2"/>
+    <path d="M0 110c30-27 69-40 133-43-28 15-47 34-65 47-28 13-48 16-68-4Z" fill="#164da2"/>
+    <path d="M0 110c-34-29-75-39-127-40M0 110c34-29 75-39 127-40" fill="none" stroke="#ffc52d" stroke-width="8" stroke-linecap="round"/>
+  </g>
 </svg>

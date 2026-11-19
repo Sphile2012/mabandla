@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GraduationCap, Building2, Shield, ChevronDown } from 'lucide-react';
+import { Building2, Shield, ChevronDown, Eye, EyeOff } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -15,7 +16,6 @@ import {
 import { toast } from 'sonner';
 import { setToken } from '@/api/client';
 
-const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const banks = ['FNB', 'Standard Bank', 'ABSA', 'Nedbank', 'Capitec', 'African Bank', 'Discovery Bank', 'TymeBank', 'Investec'];
 
 export default function Register() {
@@ -32,6 +32,9 @@ export default function Register() {
     account_type: '',
   });
   const [showBanking, setShowBanking] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -46,9 +49,8 @@ export default function Register() {
       setError('Please fill in your name and password.');
       return;
     }
-
-    if (!formData.grade) {
-      setError('Please select your grade level.');
+    if (formData.password !== confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
 
@@ -95,55 +97,29 @@ export default function Register() {
     }
   };
 
-  // Temporary bypass for development/testing
-  const handleBypassRegister = () => {
-    const fakeToken = 'dev-bypass-token-' + Date.now();
-    const fakeUser = {
-      id: 'dev-user-' + Date.now(),
-      email: 'dev@example.com',
-      full_name: 'Development User',
-      role: 'admin',
-      grade: 'Grade 10',
-      phone_number: '+27812345678',
-      subscription_tier: 'Premium',
-      subscription_active: true,
-      subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      trial_end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-      created_at: new Date().toISOString(),
-      created_date: new Date().toISOString()
-    };
-
-    // Store token and user data
-    setToken(fakeToken);
-    localStorage.setItem('user', JSON.stringify(fakeUser));
-
-    toast.success('Development bypass registration successful');
-    navigate(createPageUrl('Home'), { replace: true });
-  };
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10" style={{ background: 'linear-gradient(135deg,#0a0f2e 0%,#0f1a4e 50%,#1a0a3e 100%)' }}>
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#f7f9fc] px-4 py-10">
+      <div aria-hidden="true" className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-[#dbe6f8]/70 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-48 -right-32 h-[28rem] w-[28rem] rounded-full bg-[#fff0c8]/70 blur-3xl" />
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="relative z-10 w-full max-w-md"
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <GraduationCap className="w-7 h-7 text-white" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Create Your Account</h1>
-          <p className="text-slate-300 mt-1.5 text-sm md:text-base">
-            Start your 3-day free trial � no credit card required
+          <BrandLogo className="mx-auto mb-4 h-16 w-16" />
+          <h1 className="text-2xl font-extrabold text-[#0b2456] md:text-3xl">Create your account</h1>
+          <p className="mt-1.5 text-sm text-slate-600 md:text-base">
+            Start your 3-day free trial — no credit card required
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/10 p-6 md:p-8">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(11,36,86,0.12)] md:p-8">
           {error && (
-            <div className="mb-5 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+            <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
@@ -151,71 +127,101 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
-              <Label htmlFor="full_name" className="text-sm font-medium text-slate-200">Full Name *</Label>
+              <Label htmlFor="full_name" className="text-sm font-semibold text-slate-700">Full name *</Label>
               <Input
                 id="full_name"
                 placeholder="e.g. Thabo Nkosi"
                 value={formData.full_name}
                 onChange={set('full_name')}
-                className="mt-1.5"
+                className="mt-1.5 border-slate-300 bg-slate-50 hover:border-[#b8c5d8] hover:bg-white focus-visible:border-[#d99b12] focus-visible:ring-[#d99b12]/25"
                 required
               />
             </div>
 
             {/* Email */}
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-slate-200">Email Address *</Label>
+              <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Email address *</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={set('email')}
-                className="mt-1.5"
+                className="mt-1.5 border-slate-300 bg-slate-50 hover:border-[#b8c5d8] hover:bg-white focus-visible:border-[#d99b12] focus-visible:ring-[#d99b12]/25"
                 required
               />
             </div>
 
             {/* Password */}
             <div>
-              <Label htmlFor="password" className="text-sm font-medium text-slate-200">Password *</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Create a password"
-                value={formData.password}
-                onChange={set('password')}
-                className="mt-1.5"
-                required
-              />
+              <Label htmlFor="password" className="text-sm font-semibold text-slate-700">Password *</Label>
+              <div className="relative mt-1.5">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={set('password')}
+                  className="border-slate-300 bg-slate-50 pr-12 hover:border-[#b8c5d8] hover:bg-white focus-visible:border-[#d99b12] focus-visible:ring-[#d99b12]/25"
+                  minLength={8}
+                  maxLength={128}
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-[#16377a] transition hover:text-[#9b6b00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d99b12]"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword
+                    ? <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    : <Eye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="confirm_password" className="text-sm font-semibold text-slate-700">Confirm password *</Label>
+              <div className="relative mt-1.5">
+                <Input
+                  id="confirm_password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className="border-slate-300 bg-slate-50 pr-12 hover:border-[#b8c5d8] hover:bg-white focus-visible:border-[#d99b12] focus-visible:ring-[#d99b12]/25"
+                  minLength={8}
+                  maxLength={128}
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-[#16377a] transition hover:text-[#9b6b00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d99b12]"
+                  aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
+                  aria-pressed={showConfirmPassword}
+                >
+                  {showConfirmPassword
+                    ? <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    : <Eye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
             </div>
 
             {/* Phone */}
             <div>
-              <Label htmlFor="phone" className="text-sm font-medium text-slate-200">Phone Number</Label>
+              <Label htmlFor="phone" className="text-sm font-semibold text-slate-700">Phone number</Label>
               <Input
                 id="phone"
                 type="tel"
                 placeholder="e.g. 0812345678"
                 value={formData.phone_number}
                 onChange={set('phone_number')}
-                className="mt-1.5"
+                className="mt-1.5 border-slate-300 bg-slate-50 hover:border-[#b8c5d8] hover:bg-white focus-visible:border-[#d99b12] focus-visible:ring-[#d99b12]/25"
               />
-            </div>
-
-            {/* Grade */}
-            <div>
-              <Label className="text-sm font-medium text-slate-200">Grade Level *</Label>
-              <Select value={formData.grade} onValueChange={setSelect('grade')}>
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue placeholder="Select your grade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {grades.map(g => (
-                    <SelectItem key={g} value={g}>{g}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Banking Details Toggle */}
@@ -223,13 +229,13 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setShowBanking(v => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors text-sm font-medium text-slate-700"
+                className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-[#16377a] transition-colors hover:border-[#d8bd76] hover:bg-[#fffaf0]"
               >
                 <span className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-violet-500" />
+                  <Building2 className="w-4 h-4 text-[#d99b12]" />
                   Banking Details <span className="text-slate-400 font-normal">(optional)</span>
                 </span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showBanking ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-[#16377a] transition-transform ${showBanking ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -243,11 +249,11 @@ export default function Register() {
                     <div className="pt-3 space-y-3">
                       <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
                         <Shield className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-xs text-amber-200">Your banking details are securely stored and only used for refunds.</p>
+                        <p className="text-xs text-amber-900">Your banking details are securely stored and only used for refunds.</p>
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium text-slate-200">Bank Name</Label>
+                        <Label className="text-sm font-semibold text-slate-700">Bank name</Label>
                         <Select value={formData.bank_name} onValueChange={setSelect('bank_name')}>
                           <SelectTrigger className="mt-1.5">
                             <SelectValue placeholder="Select your bank" />
@@ -261,27 +267,27 @@ export default function Register() {
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium text-slate-200">Account Holder Name</Label>
+                        <Label className="text-sm font-semibold text-slate-700">Account holder name</Label>
                         <Input
                           value={formData.account_holder}
                           onChange={set('account_holder')}
                           placeholder="Full name as per bank account"
-                          className="mt-1.5"
+                          className="mt-1.5 border-slate-300 bg-slate-50 hover:border-[#b8c5d8] hover:bg-white focus-visible:border-[#d99b12] focus-visible:ring-[#d99b12]/25"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-sm font-medium text-slate-200">Account Number</Label>
+                          <Label className="text-sm font-semibold text-slate-700">Account number</Label>
                           <Input
                             value={formData.account_number}
                             onChange={set('account_number')}
                             placeholder="Account number"
-                            className="mt-1.5"
+                            className="mt-1.5 border-slate-300 bg-slate-50 hover:border-[#b8c5d8] hover:bg-white focus-visible:border-[#d99b12] focus-visible:ring-[#d99b12]/25"
                           />
                         </div>
                         <div>
-                          <Label className="text-sm font-medium text-slate-200">Account Type</Label>
+                          <Label className="text-sm font-semibold text-slate-700">Account type</Label>
                           <Select value={formData.account_type} onValueChange={setSelect('account_type')}>
                             <SelectTrigger className="mt-1.5">
                               <SelectValue placeholder="Type" />
@@ -303,7 +309,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 h-11 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all"
+              className="mt-2 h-12 w-full rounded-xl bg-[#16377a] font-bold text-white shadow-[0_8px_20px_rgba(22,55,122,0.2)] transition-all hover:-translate-y-0.5 hover:bg-[#0b2456] disabled:pointer-events-none disabled:opacity-50"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -313,23 +319,15 @@ export default function Register() {
               ) : 'Create Account'}
             </button>
 
-            {/* Temporary bypass button for development */}
-            <button
-              type="button"
-              onClick={handleBypassRegister}
-              className="w-full mt-3 h-10 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 transition-all border border-slate-600 hover:border-slate-400"
-            >
-              Bypass Registration (Development)
-            </button>
           </form>
 
           {/* Benefits */}
-          <div className="mt-6 pt-5 border-t border-white/10">
-            <p className="text-xs text-slate-400 text-center mb-3">What you get with your free trial:</p>
-            <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
+          <div className="mt-6 border-t border-slate-100 pt-5">
+            <p className="mb-3 text-center text-xs font-semibold text-slate-500">What you get with your free trial:</p>
+            <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
               {['3 days full access', 'All grade lessons', 'Ask questions', 'No credit card'].map(b => (
                 <div key={b} className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-violet-400 rounded-full flex-shrink-0" />
+                  <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#d99b12]" />
                   {b}
                 </div>
               ))}
@@ -338,13 +336,13 @@ export default function Register() {
         </div>
 
         {/* Sign In Link */}
-        <p className="text-center text-sm text-slate-400 mt-5">
+        <p className="mt-5 text-center text-sm text-slate-600">
           Already have an account?{' '}
-          <Link to={createPageUrl('Login')} className="text-violet-400 hover:text-violet-300 font-semibold">
+          <Link to={createPageUrl('Login')} className="font-bold text-[#16377a] underline decoration-[#d99b12] underline-offset-4 hover:text-[#9b6b00]">
             Sign In
           </Link>
         </p>
       </motion.div>
-    </div>
+    </main>
   );
 }

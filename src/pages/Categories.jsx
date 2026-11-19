@@ -11,9 +11,9 @@ import { Slider } from '@/components/ui/slider';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoCard from '../components/videos/VideoCard';
 import GradeCard from '@/components/videos/GradeCard';
+import { getLessonLoadErrorMessage } from '@/lib/lessonErrors';
 
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
-const topics = ['Algebra', 'Functions', 'Geometry', 'Trigonometry', 'Calculus', 'Number Patterns', 'Finance', 'Probability', 'Analytical Geometry'];
 const tiers = ['Standard', 'Premium'];
 
 export default function Categories() {
@@ -30,17 +30,20 @@ export default function Categories() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    prince.auth.me().then(setUser).catch(() => setUser(null));
+    prince.auth.me().then((u) => {
+      setUser(u);
+      if (u?.grade && grades.includes(u.grade)) setSelectedGrade(u.grade);
+    }).catch(() => setUser(null));
     const urlParams = new URLSearchParams(window.location.search);
     const gradeParam = urlParams.get('grade');
     const topicParam = urlParams.get('topic');
-    if (gradeParam && grades.includes(gradeParam)) setSelectedGrade(gradeParam);
+    if (gradeParam && grades.includes(gradeParam)) setSelectedGrade((g) => g || gradeParam);
     if (topicParam) setSelectedTopic(decodeURIComponent(topicParam));
   }, []);
 
-  const { data: videos = [], isLoading } = useQuery({
+  const { data: videos = [], isPending: videosPending, isError: videosFailed, error: videosError, refetch: refetchVideos } = useQuery({
     queryKey: ['videos'],
-    queryFn: () => prince.entities.Video.list('-created_date', 200),
+    queryFn: () => prince.entities.Video.list('-created_date'),
   });
 
   const { data: favorites = [] } = useQuery({
@@ -96,21 +99,25 @@ export default function Categories() {
   }, {});
 
   // Get topics that actually have videos for selected grade
-  const availableTopics = selectedGrade
-    ? [...new Set(videos.filter(v => v.grade === selectedGrade).map(v => v.topic).filter(Boolean))]
-    : topics;
+  const availableTopics = [...new Set(
+    videos
+      .filter(video => !selectedGrade || video.grade === selectedGrade)
+      .map(video => video.topic)
+      .filter(Boolean)
+  )];
 
-  const clearAll = () => { setSelectedGrade(null); setSelectedTopic(null); setSelectedTier(null); setSearchQuery(''); setMaxDuration(60); setMinViews(0); };
-  const hasFilters = selectedGrade || selectedTopic || selectedTier || searchQuery || maxDuration !== 60 || minViews > 0;
+  const myGrade = user?.grade && grades.includes(user.grade) ? user.grade : null;
+  const clearAll = () => { setSelectedGrade(myGrade); setSelectedTopic(null); setSelectedTier(null); setSearchQuery(''); setMaxDuration(60); setMinViews(0); };
+  const hasFilters = (selectedGrade && selectedGrade !== myGrade) || selectedTopic || selectedTier || searchQuery || maxDuration !== 60 || minViews > 0;
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-[#080d1a]">
       {/* Header */}
-      <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-16 z-20 border-b border-white/8 bg-[rgba(8,13,26,0.95)] backdrop-blur-[20px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {/* Search + view toggle + filters */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 relative">
+          <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
+            <div className="relative min-w-0 flex-1 basis-full sm:basis-auto">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <Input
                 placeholder="Search lessons, topics..."
@@ -125,7 +132,7 @@ export default function Categories() {
               )}
             </div>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[140px] h-10 bg-white/5 border-white/10 text-white">
+              <SelectTrigger className="h-10 w-[140px] border-white/10 bg-white/5 text-white">
                 <ArrowUpDown className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
@@ -141,12 +148,12 @@ export default function Categories() {
             <Button
               onClick={() => setIsFilterDialogOpen(true)}
               variant="outline"
-              className={`h-10 ${maxDuration !== 60 || minViews > 0 ? 'border-violet-500 text-violet-400' : 'border-white/10 text-slate-400'}`}
+              className={`h-10 shrink-0 ${maxDuration !== 60 || minViews > 0 ? 'border-violet-500 text-violet-400' : 'border-white/10 text-slate-400'}`}
             >
               <SlidersHorizontal className="w-4 h-4 mr-2" />
               Filters
             </Button>
-            <div className="flex items-center gap-1 p-1 rounded-lg border border-white/10 bg-white/5">
+            <div className="flex shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-1">
               <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
                 <Grid className="w-4 h-4" />
               </button>
@@ -161,7 +168,7 @@ export default function Categories() {
             <button onClick={clearAll} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${!hasFilters ? 'bg-violet-600 text-white' : 'bg-white/8 text-slate-400 hover:bg-white/12 hover:text-white border border-white/10'}`}>
               All
             </button>
-            {grades.map(grade => (
+            {!myGrade && grades.map(grade => (
               <button key={grade} onClick={() => { setSelectedGrade(selectedGrade === grade ? null : grade); setSelectedTopic(null); }}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${selectedGrade === grade ? 'bg-violet-600 text-white' : 'bg-white/8 text-slate-400 hover:bg-white/12 hover:text-white border border-white/10'}`}>
                 {grade} <span className="opacity-60 ml-1">({gradeVideoCounts[grade]})</span>
@@ -198,7 +205,7 @@ export default function Categories() {
             <h2 className="text-xl font-bold text-white mb-6">Browse by Grade</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {grades.map((grade, index) => (
-                <GradeCard key={grade} grade={grade} videoCount={gradeVideoCounts[grade]} index={index} />
+                <GradeCard key={grade} grade={grade} videoCount={videosPending || videosFailed ? undefined : gradeVideoCounts[grade]} index={index} />
               ))}
             </div>
           </div>
@@ -221,11 +228,13 @@ export default function Categories() {
           <h2 className="text-lg font-bold text-white">
             {selectedGrade ? `${selectedGrade}${selectedTopic ? ` · ${selectedTopic}` : ''}` : searchQuery ? `Results for "${searchQuery}"` : 'All Lessons'}
           </h2>
-          <span className="text-sm text-slate-500">{filteredVideos.length} {filteredVideos.length === 1 ? 'lesson' : 'lessons'}</span>
+          <span className="text-sm text-slate-500">
+            {videosPending || videosFailed ? '' : `${filteredVideos.length} ${filteredVideos.length === 1 ? 'lesson' : 'lessons'}`}
+          </span>
         </div>
 
         {/* Loading */}
-        {isLoading ? (
+        {videosPending ? (
           <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
             {[...Array(8)].map((_, i) => (
               <div key={i} className="rounded-2xl overflow-hidden border border-white/8 bg-white/4">
@@ -237,6 +246,13 @@ export default function Categories() {
                 </div>
               </div>
             ))}
+          </div>
+        ) : videosFailed ? (
+          <div role="alert" className="rounded-xl border border-red-400/30 bg-red-950/50 px-4 py-6 text-center text-sm text-red-100">
+            <p>{getLessonLoadErrorMessage(videosError)}</p>
+            <button type="button" onClick={() => refetchVideos()} className="mt-3 font-semibold underline underline-offset-2 hover:text-white">
+              Try again
+            </button>
           </div>
         ) : filteredVideos.length > 0 ? (
           <div className={`grid gap-5 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1 max-w-3xl'}`}>

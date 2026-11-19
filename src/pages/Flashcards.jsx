@@ -160,13 +160,13 @@ export default function Flashcards() {
   const progress = ((currentCard + 1) / flashcards[selectedTopic].length) * 100;
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-[#080d1a]">
       {/* Header */}
-      <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(8,13,26,0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-16 z-20 border-b border-white/8 bg-[rgba(8,13,26,0.95)] backdrop-blur-[20px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Orbitron',sans-serif" }}>
+              <h1 className="text-3xl font-bold text-white mb-2 [font-family:'Orbitron',sans-serif]">
                 <BookOpen className="w-8 h-8 inline mr-3 text-violet-400" />
                 Flashcards
               </h1>
@@ -219,20 +219,17 @@ export default function Flashcards() {
 
             {/* Card */}
             <motion.div
-              className="relative h-96 cursor-pointer"
+              className="relative h-96 cursor-pointer [perspective:1000px]"
               onClick={handleFlip}
-              style={{ perspective: 1000 }}
             >
               <motion.div
-                className="relative w-full h-full"
-                style={{ transformStyle: 'preserve-3d' }}
+                className="relative w-full h-full [transform-style:preserve-3d]"
                 animate={{ rotateY: flipped ? 180 : 0 }}
                 transition={{ duration: 0.6 }}
               >
                 {/* Front */}
                 <div
-                  className="absolute inset-0 backface-hidden rounded-2xl p-8 flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(37,99,235,0.2))', border: '1px solid rgba(124,58,237,0.3)' }}
+                  className="absolute inset-0 backface-hidden rounded-2xl p-8 flex items-center justify-center bg-[linear-gradient(135deg,rgba(124,58,237,0.2),rgba(37,99,235,0.2))] border border-[rgba(124,58,237,0.3)]"
                 >
                   <div className="text-center">
                     <p className="text-sm text-violet-300 mb-4">Question</p>
@@ -243,8 +240,7 @@ export default function Flashcards() {
 
                 {/* Back */}
                 <div
-                  className="absolute inset-0 backface-hidden rounded-2xl p-8 flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg,rgba(16,185,129,0.2),rgba(6,182,212,0.2))', border: '1px solid rgba(16,185,129,0.3)', transform: 'rotateY(180deg)' }}
+                  className="absolute inset-0 backface-hidden rounded-2xl p-8 flex items-center justify-center bg-[linear-gradient(135deg,rgba(16,185,129,0.2),rgba(6,182,212,0.2))] border border-[rgba(16,185,129,0.3)] [transform:rotateY(180deg)]"
                 >
                   <div className="text-center">
                     <p className="text-sm text-emerald-300 mb-4">Answer</p>

@@ -3,14 +3,17 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
-  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
-  <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=20261119" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=20261119" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg?v=20261119" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png?v=20261119" />
+  <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png?v=20261119" />
 
   <!-- Viewport - optimized for all devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Note: Screen orientation is controlled via Screen Orientation API in JavaScript -->
 
@@ -19,7 +22,7 @@
 
   <!-- Security & Privacy -->
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <meta name="theme-color" content="#7c3aed" />
+  <meta name="theme-color" content="#5b38e8" />
   <meta name="color-scheme" content="light dark" />
   <meta name="supported-color-schemes" content="light dark" />
 
@@ -34,56 +37,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Prince Math" />
   <meta name="application-name" content="Prince Math Academy" />
-  <meta name="msapplication-TileColor" content="#7c3aed" />
+  <meta name="msapplication-TileColor" content="#5b38e8" />
   <meta name="msapplication-TileImage" content="/icon-192.png" />
   <meta name="msapplication-config" content="/manifest.json" />
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
-
-  <!-- Screen Orientation Lock Script -->
-  <script>
-    // Lock screen to portrait on mobile devices, but allow user to rotate if they choose
-    (function() {
-      function lockOrientation() {
-        if ('orientation' in screen && typeof screen.orientation === 'object') {
-          // Try to lock to portrait but don't force it - allow user choice
-          screen.orientation.lock('portrait-primary').catch(function(err) {
-            // Silently fail if lock is not supported or user denies
-            // This allows the user to rotate if they choose
-            console.log('Screen orientation lock not available or denied:', err.message);
-          });
-        }
-      }
-
-      // Only apply on mobile devices
-      function isMobile() {
-        return (
-          typeof window.orientation !== 'undefined' ||
-          navigator.userAgent.indexOf('IEMobile') !== -1 ||
-          /Mobi|Android|iPhone|iPad|iPod|BlackBerry|webOS/i.test(navigator.userAgent)
-        );
-      }
-
-      if (isMobile()) {
-        // Try to lock on load
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', lockOrientation);
-        } else {
-          lockOrientation();
-        }
-
-        // Also try on resize/orientation change
-        window.addEventListener('resize', function() {
-          setTimeout(lockOrientation, 100);
-        });
-
-        window.addEventListener('orientationchange', function() {
-          setTimeout(lockOrientation, 100);
-        });
-      }
-    })();
-  </script>
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://princemath.co.za" />
@@ -120,15 +79,6 @@
   <meta name="twitter:image" content="https://princemath.co.za/icon-512.png" />
 
   <title>Prince Math Academy — Grade 10-12 Mathematics</title>
-
-  <!-- Premium fonts with preconnect for faster loading -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style"
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
 
   <!-- Early connection to API -->
   <link rel="preconnect" href="/api" />
@@ -217,11 +167,26 @@
     </div>
   </div>
 
+  <script type="module">
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      void (async () => {
+        try {
+          const registrations = await navigator.serviceWorker?.getRegistrations() || [];
+          await Promise.all(registrations.map((registration) => registration.unregister()));
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+        } catch (error) {
+          console.warn('[PWA] Could not clear the development service worker cache:', error);
+        }
+      })();
+    }
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 
   <!-- Service Worker Registration with error handling -->
   <script>
-    if ('serviceWorker' in navigator) {
+    const isLocalDevelopment = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if ('serviceWorker' in navigator && !isLocalDevelopment) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/sw.js')
           .then(function (registration) {

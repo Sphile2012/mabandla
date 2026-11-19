@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { prince } from '@/api/princeClient';
 import { motion } from 'framer-motion';
 import { User, Building2, Save, CheckCircle, Shield, LogOut, CreditCard, Award, Flame, TrendingUp } from 'lucide-react';
@@ -18,7 +18,7 @@ const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 // Reusable dark section card — plain function, no forwardRef needed
 function Section({ sectionRef = null, icon, title, desc, children }) {
   return (
-    <div ref={sectionRef} className="rounded-2xl p-5 border border-white/8" style={{ background: 'rgba(255,255,255,0.04)' }}>
+    <div ref={sectionRef} className="rounded-2xl p-5 border border-white/8 bg-white/[0.04]">
       <div className="flex items-center gap-2 mb-1">
         {icon}
         <h3 className="font-semibold text-white text-sm">{title}</h3>
@@ -84,8 +84,14 @@ export default function Profile() {
     prince.auth.logout('/');
   };
 
+  const { data: badges = [] } = useQuery({
+    queryKey: ['user-badges', user?.email],
+    queryFn: () => getUserBadges(user.email),
+    enabled: !!user?.email,
+  });
+
   if (!user) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
       <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -95,21 +101,15 @@ export default function Profile() {
   const trialActive = user.trial_end_date && new Date(user.trial_end_date) > now;
   const subActive = user.subscription_active && user.subscription_end_date && new Date(user.subscription_end_date) > now;
 
-  const { data: badges = [] } = useQuery({
-    queryKey: ['user-badges', user?.email],
-    queryFn: () => getUserBadges(user?.email),
-    enabled: !!user?.email,
-  });
-
   const xpToNextLevel = getXPToNextLevel(user?.xp || 0);
 
   return (
-    <div className="min-h-screen pb-12" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen pb-12 bg-[#080d1a]">
       {/* Header */}
-      <div className="relative overflow-hidden py-12 px-4" style={{ background: 'linear-gradient(135deg,#0f0a2e,#1a0a3e,#0a1628)' }}>
-        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(ellipse at 50% 0%,rgba(124,58,237,0.25) 0%,transparent 70%)' }} />
+      <div className="relative overflow-hidden py-12 px-4 bg-[linear-gradient(135deg,#0f0a2e,#1a0a3e,#0a1628)]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,58,237,0.25)_0%,transparent_70%)]" />
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="relative max-w-3xl mx-auto text-center">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 24px rgba(124,58,237,0.4)' }}>
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold bg-[linear-gradient(135deg,#7c3aed,#2563eb)] shadow-[0_8px_24px_rgba(124,58,237,0.4)]">
             {initials}
           </div>
           <h1 className="text-2xl font-bold text-white mb-1">{user.full_name}</h1>
@@ -238,7 +238,7 @@ export default function Profile() {
                   <p className="text-amber-300 text-sm">Expires {new Date(user.trial_end_date).toLocaleDateString()}</p>
                 </div>
                 <Link to={createPageUrl('Pricing')}>
-                  <button type="button" className="px-4 py-2 rounded-lg text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)' }}>
+                  <button type="button" className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[linear-gradient(135deg,#7c3aed,#2563eb)]">
                     Subscribe
                   </button>
                 </Link>
@@ -258,7 +258,7 @@ export default function Profile() {
                   <p className="text-slate-400 text-sm">Subscribe to access all lessons</p>
                 </div>
                 <Link to={createPageUrl('Pricing')}>
-                  <button type="button" className="px-4 py-2 rounded-lg text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)' }}>
+                  <button type="button" className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[linear-gradient(135deg,#7c3aed,#2563eb)]">
                     View Plans
                   </button>
                 </Link>
@@ -271,8 +271,7 @@ export default function Profile() {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 h-11 rounded-xl font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:-translate-y-0.5"
-              style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 4px 16px rgba(124,58,237,0.35)' }}
+              className="flex-1 h-11 rounded-xl font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:-translate-y-0.5 bg-[linear-gradient(135deg,#7c3aed,#2563eb)] shadow-[0_4px_16px_rgba(124,58,237,0.35)]"
             >
               {loading ? (
                 <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>

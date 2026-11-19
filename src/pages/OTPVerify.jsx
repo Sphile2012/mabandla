@@ -2,7 +2,8 @@
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { GraduationCap, ArrowLeft, RefreshCw, CheckCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, CheckCircle } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function OTPVerify() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -115,9 +116,7 @@ export default function OTPVerify() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <GraduationCap className="w-7 h-7 text-white" />
-          </div>
+          <BrandLogo className="mx-auto mb-4 h-16 w-16" />
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Verify Your Email</h1>
           <p className="text-slate-500 mt-1.5 text-sm md:text-base">
             We sent a 6-digit code to

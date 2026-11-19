@@ -41,13 +41,9 @@ export default function CompleteProfile() {
     if (!formData.grade) { toast.error('Please select your grade'); return; }
     setLoading(true);
     try {
-      const trialEndDate = new Date();
-      trialEndDate.setDate(trialEndDate.getDate() + 3);
-      await prince.auth.updateMe({
+      await prince.auth.startTrial({
         phone_number: formData.phone_number,
         grade: formData.grade,
-        subscription_tier: 'Trial',
-        trial_end_date: trialEndDate.toISOString(),
         ...(formData.bank_name && { bank_name: formData.bank_name }),
         ...(formData.account_holder && { account_holder: formData.account_holder }),
         ...(formData.account_number && { account_number: formData.account_number }),
@@ -62,21 +58,21 @@ export default function CompleteProfile() {
   };
 
   if (!user) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
       <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen" style={{ background: '#080d1a' }}>
+    <div className="min-h-screen bg-[#080d1a]">
       {/* Hero */}
-      <div className="relative overflow-hidden py-14 px-4 text-center" style={{ background: 'linear-gradient(135deg,#0f0a2e,#1a0a3e,#0a1628)' }}>
-        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(ellipse at 50% 0%,rgba(124,58,237,0.3) 0%,transparent 70%)' }} />
+      <div className="relative overflow-hidden py-14 px-4 text-center bg-[linear-gradient(135deg,#0f0a2e,#1a0a3e,#0a1628)]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,58,237,0.3)_0%,transparent_70%)]" />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative max-w-xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 uppercase tracking-widest" style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)', color: '#a78bfa' }}>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 uppercase tracking-widest bg-[rgba(124,58,237,0.2)] border border-[rgba(124,58,237,0.4)] text-[#a78bfa]">
             <Sparkles className="w-3.5 h-3.5" /> Start Your Free Trial
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-3" style={{ fontFamily: "'Sora',sans-serif" }}>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 [font-family:'Sora',sans-serif]">
             Welcome, {user.full_name}! 👋
           </h1>
           <p className="text-slate-300">Get <span className="text-amber-300 font-semibold">3 days free access</span> to all Grade 10–12 Mathematics lessons</p>
@@ -86,7 +82,7 @@ export default function CompleteProfile() {
       {/* Form */}
       <div className="max-w-xl mx-auto px-4 py-10">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="rounded-2xl p-6 md:p-8 border border-white/10" style={{ background: 'rgba(255,255,255,0.04)' }}>
+          className="rounded-2xl p-6 md:p-8 border border-white/10 bg-[rgba(255,255,255,0.04)]">
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email (readonly) */}
@@ -117,7 +113,7 @@ export default function CompleteProfile() {
             </div>
 
             {/* Banking (optional) */}
-            <div className="rounded-xl p-4 border border-white/8" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div className="rounded-xl p-4 border border-white/8 bg-[rgba(255,255,255,0.03)]">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="w-4 h-4 text-violet-400" />
                 <span className="text-sm font-semibold text-white">Banking Details <span className="text-slate-500 font-normal">(optional)</span></span>
@@ -146,7 +142,7 @@ export default function CompleteProfile() {
             </div>
 
             {/* Trial benefits */}
-            <div className="rounded-xl p-4 border border-violet-500/20" style={{ background: 'rgba(124,58,237,0.08)' }}>
+            <div className="rounded-xl p-4 border border-violet-500/20 bg-[rgba(124,58,237,0.08)]">
               <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-violet-400" /> Your 3-Day Free Trial Includes:
               </h3>
@@ -162,8 +158,7 @@ export default function CompleteProfile() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none transition-all hover:-translate-y-0.5"
-              style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', boxShadow: '0 8px 24px rgba(124,58,237,0.4)' }}
+              className="w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none transition-all hover:-translate-y-0.5 bg-[linear-gradient(135deg,#7c3aed,#2563eb)] shadow-[0_8px_24px_rgba(124,58,237,0.4)]"
             >
               {loading ? (
                 <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Setting up trial...</>

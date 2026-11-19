@@ -51,7 +51,7 @@ export default function ParentPortal() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0f1e' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0f1e]">
         <div className="text-center">
           <Shield className="w-16 h-16 text-violet-400 mx-auto mb-4" />
           <p className="text-white">Please sign in to access the parent portal</p>
@@ -61,11 +61,11 @@ export default function ParentPortal() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0f1e' }}>
+    <div className="min-h-screen bg-[#0a0f1e]">
       {/* Header */}
-      <div className="sticky top-16 z-20 border-b border-white/8" style={{ background: 'rgba(10,15,30,0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-16 z-20 border-b border-white/8 bg-[rgba(10,15,30,0.95)] backdrop-blur-[20px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "Playfair Display, Georgia, serif" }}>
+          <h1 className="text-3xl font-bold text-white mb-2 font-[family-name:Playfair_Display,Georgia,serif]">
             Parent Portal
           </h1>
           <p className="text-slate-400">Monitor your child's learning progress and achievements</p>

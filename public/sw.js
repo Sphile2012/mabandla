@@ -3,8 +3,9 @@
  * Enhanced for cross-browser compatibility and offline support
  */
 
-const CACHE_NAME = 'prince-math-v3';
-const CACHE_VERSION = 'v3.0.0';
+const CACHE_PREFIX = 'prince-math-';
+const CACHE_NAME = `${CACHE_PREFIX}v8`;
+const CACHE_VERSION = 'v8.0.0';
 
 // Static assets to cache on install
 const STATIC_ASSETS = [
@@ -14,6 +15,9 @@ const STATIC_ASSETS = [
   '/icon-192.png',
   '/icon-512.png',
   '/icon.svg',
+  '/logo.svg',
+  '/front-cover.svg',
+  '/prince-logo-3d.png',
 ];
 
 // Network timeout for fetch requests
@@ -43,7 +47,7 @@ self.addEventListener('activate', (event) => {
       .then((keys) => {
         return Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
             .map((key) => {
               console.log('[SW] Deleting old cache:', key);
               return caches.delete(key);
@@ -84,14 +88,13 @@ self.addEventListener('fetch', (event) => {
     // Cache-first for static assets
     event.respondWith(cacheFirst(request));
   } else if (isAPIRequest(url)) {
-    // Network-first for API requests (never cache)
-    event.respondWith(networkFirst(request));
+    // Never serve stale API responses from cache.
+    event.respondWith(networkOnly(request));
   } else if (isNavigationRequest(request)) {
     // Network-first with offline fallback for navigation
     event.respondWith(networkFirstWithOfflineFallback(request));
   } else {
-    // Default: network first with cache fallback
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkOnly(request));
   }
 });
 
@@ -148,29 +151,13 @@ async function cacheFirst(request) {
   }
 }
 
-// Network-first strategy for API and dynamic content
-async function networkFirst(request) {
+async function networkOnly(request) {
   try {
-    const networkResponse = await fetchWithTimeout(request);
-    if (networkResponse && networkResponse.ok) {
-      // Cache successful responses
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
+    return await fetchWithTimeout(request);
   } catch (error) {
-    // Fallback to cache
-    const cache = await caches.open(CACHE_NAME);
-    const cachedResponse = await cache.match(request);
-    
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    // Return error response
     return new Response(JSON.stringify({
       error: 'Offline',
-      message: 'You are offline and this resource is not cached.'
+      message: 'You are offline. Live lesson and account data is unavailable.'
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }
@@ -211,8 +198,8 @@ async function networkFirstWithOfflineFallback(request) {
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #080d1a 0%, #1a1a2e 100%);
-            color: #e2e8f0;
+            background: linear-gradient(135deg, #f5f4ff 0%, #e8e4ff 100%);
+            color: #292347;
             text-align: center;
             padding: 20px;
           }
@@ -222,7 +209,7 @@ async function networkFirstWithOfflineFallback(request) {
           h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            background: linear-gradient(135deg, #6546e8, #4c2ed0);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -230,11 +217,11 @@ async function networkFirstWithOfflineFallback(request) {
           p {
             font-size: 1.1rem;
             line-height: 1.6;
-            color: #94a3b8;
+            color: #6b6685;
             margin-bottom: 2rem;
           }
           button {
-            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            background: linear-gradient(135deg, #6546e8, #4c2ed0);
             color: white;
             border: none;
             padding: 12px 32px;

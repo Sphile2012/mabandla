@@ -54,31 +54,11 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(true);
       setAuthError(null);
 
-      // First, try to get user from API
-      try {
-        const currentUser = await prince.auth.me();
-        setUser(currentUser);
-        setIsAuthenticated(true);
-        setLastActivity(Date.now());
-      } catch (apiError) {
-        // If API fails, check for bypass user in localStorage
-        const bypassUserStr = localStorage.getItem('user');
-        if (bypassUserStr) {
-          try {
-            const bypassUser = JSON.parse(bypassUserStr);
-            setUser(bypassUser);
-            setIsAuthenticated(true);
-            setLastActivity(Date.now());
-          } catch (parseError) {
-            setUser(null);
-            setIsAuthenticated(false);
-          }
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      }
-    } catch (error) {
+      const currentUser = await prince.auth.me();
+      setUser(currentUser);
+      setIsAuthenticated(Boolean(currentUser));
+      if (currentUser) setLastActivity(Date.now());
+    } catch {
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -90,7 +70,6 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     setLastActivity(0);
-    localStorage.removeItem('user'); // Clear bypass user data
     prince.auth.logout(shouldRedirect ? window.location.href : undefined);
   };
 

@@ -40,16 +40,12 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import AdminStats from '../components/admin/AdminStats';
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@princemath.co.za';
-
 const grades = ['Grade 10', 'Grade 11', 'Grade 12'];
 const tiers = ['Standard', 'Premium'];
 const topics = ['Algebra', 'Functions', 'Geometry', 'Trigonometry', 'Calculus', 'Number Patterns', 'Finance', 'Probability', 'Analytical Geometry', 'Other'];
 
 function checkAccess(user) {
-  if (!user) return false;
-  if (user.email === ADMIN_EMAIL || user.role === 'admin' || user.role === 'teacher') return true;
-  return false;
+  return user?.role === 'admin';
 }
 
 export default function AdminUpload() {
@@ -70,13 +66,14 @@ export default function AdminUpload() {
     duration: '',
     video_url: '',
     thumbnail_url: '',
+    notes_url: '',
   });
   const [announcementForm, setAnnouncementForm] = useState({
     title: '',
     content: '',
     priority: 'normal',
   });
-  const [uploading, setUploading] = useState({ video: false, thumbnail: false });
+  const [uploading, setUploading] = useState({ video: false, thumbnail: false, notes: false });
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -203,7 +200,7 @@ export default function AdminUpload() {
   });
 
   const resetForm = () => {
-    setFormData({ title: '', description: '', grade: '', tier: 'Standard', topic: '', customTopic: '', duration: '', video_url: '', thumbnail_url: '' });
+    setFormData({ title: '', description: '', grade: '', tier: 'Standard', topic: '', customTopic: '', duration: '', video_url: '', thumbnail_url: '', notes_url: '' });
     setEditingVideo(null);
     setIsDialogOpen(false);
   };
@@ -248,15 +245,15 @@ export default function AdminUpload() {
   const handleFileUpload = async (file, type) => {
     try {
       setUploading(prev => ({ ...prev, [type]: true }));
-      const maxSize = type === 'video' ? 500 * 1024 * 1024 : 5 * 1024 * 1024;
+      const maxSize = type === 'video' ? 500 * 1024 * 1024 : type === 'notes' ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        toast.error(`File too large. Max: ${type === 'video' ? '500MB' : '5MB'}`);
+        toast.error(`File too large. Max: ${type === 'video' ? '500MB' : type === 'notes' ? '20MB' : '5MB'}`);
         setUploading(prev => ({ ...prev, [type]: false }));
         return;
       }
-      const { file_url } = await prince.integrations.Core.UploadFile({ file });
+      const { file_url } = await prince.integrations.Core.UploadFile({ file, kind: type === 'notes' ? 'notes' : undefined });
       setFormData(prev => ({ ...prev, [`${type}_url`]: file_url }));
-      toast.success(`${type === 'video' ? 'Video' : 'Thumbnail'} uploaded!`);
+      toast.success(`${type === 'video' ? 'Video' : type === 'notes' ? 'Notes' : 'Thumbnail'} uploaded!`);
     } catch (error) {
       toast.error(`Upload failed: ${error.message}`);
     } finally {
@@ -293,6 +290,7 @@ export default function AdminUpload() {
       duration: video.duration || '',
       video_url: video.video_url || '',
       thumbnail_url: video.thumbnail_url || '',
+      notes_url: video.notes_url || '',
     });
     setIsDialogOpen(true);
   };
@@ -305,7 +303,7 @@ export default function AdminUpload() {
             <AlertCircle className="w-10 h-10 text-red-500" />
           </div>
           <h2 className="text-2xl font-bold text-slate-800 mb-3">Access Denied</h2>
-          <p className="text-slate-500">Only teachers and admins can upload and manage video lessons.</p>
+          <p className="text-slate-500">Only admins can upload and manage video lessons.</p>
         </motion.div>
       </div>
     );
@@ -671,13 +669,34 @@ export default function AdminUpload() {
                   )}
                 </div>
               </div>
+
+              {/* Notes Upload */}
+              <div className="sm:col-span-2">
+                <Label>Lesson Notes (PDF)</Label>
+                <div className="mt-1.5 border-2 border-dashed border-slate-200 rounded-xl p-5 text-center hover:border-violet-300 transition-colors">
+                  {formData.notes_url ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="text-sm font-medium text-violet-700">Notes PDF uploaded (private, download-limited)</span>
+                      <Button type="button" variant="ghost" size="sm" aria-label="Remove notes" onClick={() => setFormData(prev => ({ ...prev, notes_url: '' }))}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer block">
+                      <input type="file" accept="application/pdf,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'notes')} disabled={uploading.notes} />
+                      <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                      <p className="text-sm text-slate-600">{uploading.notes ? 'Uploading...' : 'Click to upload notes (PDF, max 20MB)'}</p>
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
               <Button
                 type="submit"
-                disabled={createVideoMutation.isPending || updateVideoMutation.isPending || uploading.video || uploading.thumbnail}
+                disabled={createVideoMutation.isPending || updateVideoMutation.isPending || uploading.video || uploading.thumbnail || uploading.notes}
                 className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
               >
                 <Save className="w-4 h-4 mr-2" />
