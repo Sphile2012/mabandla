@@ -17,6 +17,7 @@ dist-ssr
 
 # Git worktree (local only)
 .git-prince/
+mabandla-1/
 
 # Scripts (may contain local paths)
 scripts/

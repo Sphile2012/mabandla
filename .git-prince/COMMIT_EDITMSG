@@ -1,1 +1,1 @@
-Remove sensitive credentials from .env.example
+chore: add es-iterator-helpers devDependency to fix eslint missing module error

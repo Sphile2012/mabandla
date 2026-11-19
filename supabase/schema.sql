@@ -1,4 +1,4 @@
--- Prince Math Academy — Supabase Schema
+﻿-- Prince Math Academy — Supabase Schema
 -- Run this in your Supabase SQL editor to create all tables.
 
 -- Enable UUID extension
@@ -278,6 +278,21 @@ create table if not exists announcements (
   created_date   timestamptz default now()
 );
 
+-- ── OTP Codes ─────────────────────────────────────────────────────────────────
+-- Used for password reset, email verification, and password change flows.
+create table if not exists otp_codes (
+  id          text primary key default gen_random_uuid()::text,
+  email       text not null,
+  otp_hash    text not null,
+  purpose     text not null,  -- 'password_reset' | 'email_verify' | 'password_change'
+  expires_at  timestamptz not null,
+  used        boolean default false,
+  created_at  timestamptz default now()
+);
+
+-- Index for fast lookup
+create index if not exists otp_codes_email_purpose_idx on otp_codes (email, purpose);
+
 -- ── Badges ─────────────────────────────────────────────────────────────────────
 create table if not exists badges (
   id          text primary key default gen_random_uuid()::text,
@@ -324,7 +339,7 @@ create table if not exists daily_challenges (
   answer_text     text,
   date            date unique not null,
   is_active       boolean default true,
-  created_at       timestamptz default now(),
+  created_at      timestamptz default now(),
   created_date    timestamptz default now()
 );
 

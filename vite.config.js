@@ -34,9 +34,18 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
-    esbuildOptions: {
-      drop: process.env.NODE_ENV === 'production' ? ['console'] : [],
+    target: ['es2015', 'chrome58', 'firefox57', 'safari11', 'edge18'],
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-date': ['date-fns'],
+        },
+      },
     },
+    chunkSizeWarningLimit: 600,
   },
   publicDir: 'public',
-});
+})
