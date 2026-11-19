@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  SECRETS_SCAN_ENABLED = "false"
+  SECRETS_SCAN_ENABLED = "true"
   NODE_VERSION = "20"
   VITE_API_BASE_URL = "/api"
 
