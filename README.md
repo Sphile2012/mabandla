@@ -14,13 +14,14 @@ Grade 10-12 mathematics tutoring app. React + Vite + Tailwind, Express API (`ser
 
 1. Push the repo and connect it in Netlify. Build settings come from `netlify.toml`.
 2. Add the environment variables from `.env.example` in Site configuration -> Environment variables.
-   - `APP_ORIGIN` must be the live site URL, e.g. `https://www.princemath.co.za` (used for CORS and PayFast return/notify/cancel URLs).
+   - `APP_ORIGIN` must be the primary live site URL, e.g. `https://princemath.co.za` (used for CORS and PayFast return/notify/cancel URLs). Keep `https://www.princemath.co.za` redirecting to the apex domain in Netlify.
    - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `JWT_SECRET` are required.
    - `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY`, `PAYFAST_PASSPHRASE`, and `PAYFAST_SANDBOX` must match your PayFast configuration (`PAYFAST_SANDBOX=false` for live payments).
    - Configure SMTP variables with valid credentials so password-reset emails can be delivered (for Gmail, use an App Password and ensure the mailbox allows SMTP access).
    - `VITE_API_BASE_URL` is already set to `/api` in `netlify.toml` for production builds.
-3. Re-run `supabase/schema.sql` in the Supabase SQL editor when schema changes are deployed.
-4. Make an admin by setting `role` to `admin` for your user in the Supabase `users` table.
+3. In Netlify Domain management, set `princemath.co.za` as the primary domain and redirect `www.princemath.co.za` to it. If using external DNS, point the registrar/name servers or apex records to Netlify as shown in the domain/DNS settings, then provision HTTPS for the apex domain.
+4. Re-run `supabase/schema.sql` in the Supabase SQL editor when schema changes are deployed.
+5. Make an admin by setting `role` to `admin` for your user in the Supabase `users` table.
 
 ## Security notes
 

@@ -60,7 +60,12 @@ app.set('trust proxy', 1);
 app.disable('x-powered-by');
 app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
+const defaultOrigins = [
+  'https://princemath.co.za',
+  'https://www.princemath.co.za',
+];
 const allowedOrigins = new Set([
+  ...defaultOrigins,
   process.env.APP_ORIGIN,
   process.env.URL,
   'http://localhost:5000',
