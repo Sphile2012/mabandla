@@ -500,18 +500,23 @@ alter table users add column if not exists longest_streak integer default 0;
 alter table users add column if not exists last_activity_date timestamptz;
 alter table user_badges add column if not exists created_at timestamptz default now();
 alter table study_group_members add column if not exists created_at timestamptz default now();
+-- OTP codes are stored on users in the current implementation; secure this table if present.
+alter table if exists otp_codes enable row level security;
 notify pgrst, 'reload schema';
 
 create table if not exists download_log (
   id          uuid primary key default gen_random_uuid(),
   user_email  text not null,
-  video_id    uuid,
+  video_id    text,
   created_at  timestamptz default now()
 );
+
+-- Existing databases: align download_log.video_id with videos.id (text) for compatibility.
+alter table download_log alter column video_id type text using video_id::text;
 create index if not exists download_log_user_time_idx on download_log (user_email, created_at desc);
 
 -- One row per PayFast payment (pf_payment_id is unique) so a replayed notification
--- can never grant a subscription twice.
+-- can never grant a subscription twice. applied_at marks successful subscription activation.
 create table if not exists payments (
   id            uuid primary key default gen_random_uuid(),
   pf_payment_id text unique not null,
@@ -521,9 +526,11 @@ create table if not exists payments (
   tier          text,
   amount        numeric(10,2),
   status        text,
+  applied_at    timestamptz,
   created_at    timestamptz default now()
 );
 create index if not exists payments_user_idx on payments (user_id, created_at desc);
+alter table payments add column if not exists applied_at timestamptz;
 
 -- ── Row Level Security ────────────────────────────────────────────────────────
 -- Browsers never talk to Supabase directly: every request goes through the API,

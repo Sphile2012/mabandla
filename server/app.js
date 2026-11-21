@@ -1154,8 +1154,9 @@ app.post('/api/payfast-webhook', limiter(60_000, 120, 'Too many requests.'), exp
     const amount = parseFloat(raw.amount_gross);
     const planOk = PAYFAST_GRADES.includes(grade) && PAYFAST_PLANS[tier] !== undefined;
 
-    // 4. Record the payment once. A replayed notification hits the unique key and is ignored.
-    const { error: insertError } = await supabase.from('payments').insert({
+    // 4. Record the payment once. A replayed notification hits the unique key.
+    let payment = null;
+    const paymentRow = {
       id: uuidv4(),
       pf_payment_id: pfPaymentId,
       m_payment_id: raw.m_payment_id || null,
@@ -1164,21 +1165,32 @@ app.post('/api/payfast-webhook', limiter(60_000, 120, 'Too many requests.'), exp
       tier: tier || null,
       amount: Number.isFinite(amount) ? amount : null,
       status: raw.payment_status || null,
-    });
+    };
+    const { data: insertedPayment, error: insertError } = await supabase.from('payments').insert(paymentRow).select().maybeSingle();
     if (insertError) {
-      if (insertError.code === '23505') return res.send('OK');
-      throw insertError;
+      if (insertError.code === '23505') {
+        const { data: existingPayment, error: existingError } = await supabase.from('payments')
+          .select('*').eq('pf_payment_id', pfPaymentId).maybeSingle();
+        if (existingError || !existingPayment) throw existingError || new Error('Payment record unavailable');
+        payment = existingPayment;
+      } else {
+        throw insertError;
+      }
+    } else {
+      payment = insertedPayment || paymentRow;
     }
 
-    if (raw.payment_status !== 'COMPLETE') return res.send('OK');
+    if ((payment.status || raw.payment_status) !== 'COMPLETE') return res.send('OK');
+    if (payment.applied_at) return res.send('OK');
 
     if (!userId || !planOk || Math.abs(amount - PAYFAST_PLANS[tier]) > 0.01) {
       console.error('PayFast ITN: amount/plan mismatch');
       return res.status(400).send('Invalid payment details');
     }
 
-    const { data: user } = await supabase.from('users')
+    const { data: user, error: userError } = await supabase.from('users')
       .select('id,email,subscription_active,subscription_end_date').eq('id', userId).maybeSingle();
+    if (userError) throw userError;
     if (!user) {
       console.error('PayFast ITN: unknown user');
       return res.status(400).send('Unknown user');
@@ -1190,20 +1202,33 @@ app.post('/api/payfast-webhook', limiter(60_000, 120, 'Too many requests.'), exp
     const subscriptionEndDate = new Date(Math.max(now.getTime(), currentEnd.getTime()));
     subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
 
-    await supabase.from('users').update({
+    const { error: activationError } = await supabase.from('users').update({
       subscription_tier: tier,
       grade,
       subscription_grade: grade,
       subscription_end_date: subscriptionEndDate.toISOString(),
       subscription_active: true,
     }).eq('id', user.id);
+    if (activationError) {
+      console.error('PayFast ITN: subscription activation failed:', activationError.message);
+      return res.status(500).send('Subscription activation failed');
+    }
 
-    await supabase.from('notifications').insert({
+    const { error: appliedError } = await supabase.from('payments')
+      .update({ applied_at: new Date().toISOString() }).eq('pf_payment_id', pfPaymentId);
+    if (appliedError) {
+      console.error('PayFast ITN: could not mark payment applied:', appliedError.message);
+    }
+
+    const { error: notificationError } = await supabase.from('notifications').insert({
       id: uuidv4(),
       user_email: user.email,
       message: `Your ${grade} ${tier} subscription is now active!`,
       is_read: false,
     });
+    if (notificationError) {
+      console.error('PayFast ITN: could not create activation notification:', notificationError.message);
+    }
 
     res.send('OK');
   } catch (error) {
