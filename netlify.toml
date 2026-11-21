@@ -5,6 +5,8 @@
 
 [build.environment]
   SECRETS_SCAN_ENABLED = "true"
+  # Non-sensitive values expected in source/client bundle; avoid false-positive secrets scan failures.
+  SECRETS_SCAN_OMIT_KEYS = "APP_ORIGIN,ADMIN_EMAIL,VITE_API_BASE_URL"
   NODE_VERSION = "20"
   VITE_API_BASE_URL = "/api"
 
