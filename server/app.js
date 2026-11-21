@@ -347,15 +347,25 @@ const hashOtp = (email, otp) => crypto.createHmac('sha256', JWT_SECRET || 'x').u
 let mailer;
 function getMailer() {
   if (mailer !== undefined) return mailer;
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
-  mailer = SMTP_USER && SMTP_PASS
-    ? nodemailer.createTransport({
-        host: SMTP_HOST || 'smtp.gmail.com',
-        port: Number(SMTP_PORT || 465),
-        secure: Number(SMTP_PORT || 465) === 465,
-        auth: { user: SMTP_USER, pass: SMTP_PASS },
-      })
-    : null;
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE } = process.env;
+  if (!SMTP_USER || !SMTP_PASS) {
+    mailer = null;
+    return mailer;
+  }
+  const port = Number(SMTP_PORT || 465);
+  const secure = typeof SMTP_SECURE === 'string' && SMTP_SECURE !== ''
+    ? SMTP_SECURE === 'true'
+    : port === 465;
+  mailer = nodemailer.createTransport({
+    host: SMTP_HOST || 'smtp.gmail.com',
+    port,
+    secure,
+    requireTLS: !secure,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
+  });
   return mailer;
 }
 const normaliseEmail = (e) => String(e || '').trim().toLowerCase();

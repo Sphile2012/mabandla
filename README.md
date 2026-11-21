@@ -8,7 +8,7 @@ Grade 10-12 mathematics tutoring app. React + Vite + Tailwind, Express API (`ser
 2. Copy `.env.example` to `.env` and fill in the values.
 3. Run the latest `supabase/schema.sql` in the Supabase SQL editor (safe to re-run; required for verified video views and one-vote-per-user forum voting).
 4. Terminal 1: `node server/index.js` (API on port 3001). Terminal 2: `npm run dev` (app on port 5000).
-5. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_FROM` for password-reset email. Gmail requires an app password. Reset requests return an error until SMTP is configured and delivery succeeds; reset codes are never written to server logs.
+5. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_FROM` for password-reset email (optionally `SMTP_SECURE`). Gmail requires an App Password (not your regular account password). Reset requests return an error until SMTP is configured and delivery succeeds; reset codes are never written to server logs.
 
 ## Deploy to Netlify
 
@@ -17,7 +17,7 @@ Grade 10-12 mathematics tutoring app. React + Vite + Tailwind, Express API (`ser
    - `APP_ORIGIN` must be the live site URL, e.g. `https://www.princemath.co.za` (used for CORS and PayFast return/notify/cancel URLs).
    - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `JWT_SECRET` are required.
    - `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY`, `PAYFAST_PASSPHRASE`, and `PAYFAST_SANDBOX` must match your PayFast configuration (`PAYFAST_SANDBOX=false` for live payments).
-   - Configure SMTP variables with valid credentials so password-reset emails can be delivered.
+   - Configure SMTP variables with valid credentials so password-reset emails can be delivered (for Gmail, use an App Password and ensure the mailbox allows SMTP access).
    - `VITE_API_BASE_URL` is already set to `/api` in `netlify.toml` for production builds.
 3. Re-run `supabase/schema.sql` in the Supabase SQL editor when schema changes are deployed.
 4. Make an admin by setting `role` to `admin` for your user in the Supabase `users` table.
