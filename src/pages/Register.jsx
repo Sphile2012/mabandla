@@ -109,7 +109,7 @@ export default function Register() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <BrandLogo className="mx-auto mb-4 h-16 w-16" />
+          <BrandLogo className="mx-auto mb-4 h-14 sm:h-16 w-auto max-w-full" />
           <h1 className="text-2xl font-extrabold text-[#0b2456] md:text-3xl">Create your account</h1>
           <p className="mt-1.5 text-sm text-slate-600 md:text-base">
             Start your 3-day free trial — no credit card required

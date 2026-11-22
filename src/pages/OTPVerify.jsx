@@ -116,7 +116,7 @@ export default function OTPVerify() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <BrandLogo className="mx-auto mb-4 h-16 w-16" />
+          <BrandLogo className="mx-auto mb-4 h-14 sm:h-16 w-auto max-w-full" />
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Verify Your Email</h1>
           <p className="text-slate-500 mt-1.5 text-sm md:text-base">
             We sent a 6-digit code to

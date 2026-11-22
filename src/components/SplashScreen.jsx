@@ -89,7 +89,7 @@ export default function SplashScreen() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <BrandLogo className="mb-5 h-64 w-64 drop-shadow-[0_18px_28px_rgba(11,36,86,0.14)]" />
+              <BrandLogo className="mb-5 h-28 sm:h-36 w-auto max-w-[90vw] drop-shadow-[0_18px_28px_rgba(11,36,86,0.14)]" />
               <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-[#0b2456] sm:text-4xl">
                 Mathematics made clear.
               </h1>

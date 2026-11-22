@@ -147,7 +147,7 @@ export default function Login() {
         <section className="flex items-center justify-center p-7 sm:p-10 lg:p-12">
           <div className="w-full max-w-sm">
             <div className="mb-8">
-              <BrandLogo className="mb-5 h-16 w-16" />
+              <BrandLogo className="mb-5 h-14 sm:h-16 w-auto max-w-full" />
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-600">Welcome back</p>
               <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#35294b]">Sign in to continue</h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">Your next study session is just a moment away.</p>

@@ -112,7 +112,7 @@ export default function ResetPassword() {
         return (
             <main className="flex min-h-screen items-center justify-center bg-white px-6 py-10">
                 <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg">
-                    <BrandLogo className="mx-auto mb-5 h-16 w-16" />
+                    <BrandLogo className="mx-auto mb-5 h-14 sm:h-16 w-auto max-w-full" />
                     <h1 className="text-2xl font-bold text-slate-900">Reset your password</h1>
                     <p className="mt-3 text-sm leading-6 text-slate-600">Start with your email address so we can send you a reset code.</p>
                     <Link to={createPageUrl('ForgotPassword')} className="mt-6 inline-flex rounded-xl bg-[#16377a] px-5 py-3 font-semibold text-white hover:bg-[#0b2456]">
@@ -133,7 +133,7 @@ export default function ResetPassword() {
             >
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <BrandLogo className="mx-auto mb-4 h-16 w-16" />
+                    <BrandLogo className="mx-auto mb-4 h-14 sm:h-16 w-auto max-w-full" />
                     <h1 className="text-2xl md:text-3xl font-bold text-slate-800">
                         {step === 1 ? 'Verify Code' : 'New Password'}
                     </h1>

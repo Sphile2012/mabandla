@@ -1,97 +1,76 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 220" role="img" aria-labelledby="title desc">
   <title id="title">Prince Math Academy logo</title>
-  <desc id="description">A three-dimensional royal blue shield with a gold crown, open book and Prince Math Academy lettering</desc>
+  <desc id="desc">A landscape Prince Math Academy wordmark with a royal blue shield emblem and gold accents.</desc>
   <defs>
     <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffd45a"/>
-      <stop offset=".5" stop-color="#fdbd2d"/>
-      <stop offset="1" stop-color="#e9a91d"/>
+      <stop offset="0" stop-color="#ffe08a"/>
+      <stop offset="0.45" stop-color="#f7c948"/>
+      <stop offset="1" stop-color="#d89b1c"/>
     </linearGradient>
-    <linearGradient id="blue" x1=".15" y1="0" x2=".85" y2="1">
-      <stop offset="0" stop-color="#1d4f94"/>
-      <stop offset=".48" stop-color="#16377a"/>
+    <linearGradient id="blue" x1="0.2" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#2f63b3"/>
+      <stop offset="0.5" stop-color="#16377a"/>
       <stop offset="1" stop-color="#0b2456"/>
     </linearGradient>
-    <linearGradient id="blueEdge" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#315fa3"/>
-      <stop offset=".5" stop-color="#16377a"/>
-      <stop offset="1" stop-color="#0b2456"/>
+    <linearGradient id="blueDeep" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#295899"/>
+      <stop offset="1" stop-color="#081a3d"/>
     </linearGradient>
     <linearGradient id="page" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset=".7" stop-color="#eaf1ff"/>
-      <stop offset="1" stop-color="#bdcce9"/>
+      <stop offset="1" stop-color="#d7e6ff"/>
     </linearGradient>
-    <linearGradient id="monogram" x1=".2" y1="0" x2=".8" y2="1">
-      <stop offset="0" stop-color="#315fa3"/>
-      <stop offset=".38" stop-color="#16377a"/>
-      <stop offset=".72" stop-color="#102b63"/>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="0.4" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="wordMain" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a4f9c"/>
       <stop offset="1" stop-color="#0b2456"/>
     </linearGradient>
-    <linearGradient id="glass" x1=".12" y1="0" x2=".82" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity=".48"/>
-      <stop offset=".24" stop-color="#cfe5ff" stop-opacity=".24"/>
-      <stop offset=".58" stop-color="#ffffff" stop-opacity=".04"/>
-      <stop offset="1" stop-color="#9fcaff" stop-opacity=".12"/>
-    </linearGradient>
-    <linearGradient id="glint" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity=".04"/>
-    </linearGradient>
-    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
-      <feDropShadow dx="0" dy="16" stdDeviation="11" flood-color="#06184b" flood-opacity=".34"/>
-    </filter>
-    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#06184b" flood-opacity=".3"/>
+    <filter id="drop" x="-20%" y="-30%" width="140%" height="170%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#06184b" flood-opacity="0.28"/>
     </filter>
   </defs>
 
-  <g filter="url(#shadow)" transform="translate(52 10) scale(.8 .62)">
-    <g transform="translate(260 78)">
-      <path d="M-38 60C-32 31-49 12-59-9l31 11 22-36 30 36 26-36 23 36 31-11c-11 27-27 45-31 69H-38Z" fill="#9e6500" opacity=".28" transform="translate(8 10)"/>
-      <path d="M-38 50C-32 21-49 2-59-19l31 11 22-36 30 36 26-36 23 36 31-11c-11 27-27 45-31 69H-38Z" fill="url(#gold)" stroke="#fff1a1" stroke-width="2"/>
-      <circle cx="-44" cy="-8" r="10" fill="url(#gold)"/>
-      <circle cx="-6" cy="-42" r="10" fill="url(#gold)"/>
-      <circle cx="34" cy="-42" r="10" fill="url(#gold)"/>
-      <circle cx="74" cy="-8" r="10" fill="url(#gold)"/>
-      <circle cx="0" cy="-63" r="11" fill="#ffc83d"/>
-      <path d="M-46 38c21 10 44 12 66 4 20 8 42 6 66-4l-7 18c-39 18-79 18-118 0Z" fill="url(#gold)"/>
-    </g>
+  <g transform="translate(28 8) scale(0.92)">
+    <g filter="url(#drop)">
+      <g transform="translate(74 2)">
+        <path d="M-24 34c3-16-6-27-11-39l18 6 13-21 17 21 15-21 13 21 18-6c-6 16-15 27-17 39z" fill="#b7791f" opacity="0.28" transform="translate(5 5)"/>
+        <path d="M-24 30c3-16-6-27-11-39l18 6 13-21 17 21 15-21 13 21 18-6c-6 16-15 27-17 39z" fill="url(#gold)" stroke="#fff1b8" stroke-width="1.5"/>
+        <circle cx="-22" cy="-2" r="6" fill="url(#gold)"/>
+        <circle cx="0" cy="-21" r="6" fill="url(#gold)"/>
+        <circle cx="23" cy="-21" r="6" fill="url(#gold)"/>
+        <circle cx="45" cy="-2" r="6" fill="url(#gold)"/>
+        <circle cx="12" cy="-34" r="6.5" fill="#ffc94d"/>
+        <path d="M-25 22c12 6 25 7 38 2 11 5 24 4 38-2l-4 10c-22 10-45 10-68 0z" fill="url(#gold)"/>
+      </g>
 
-    <path d="M260 112 390 158v92c0 70-35 126-130 169-95-43-130-99-130-169v-92Z" fill="#06184b" opacity=".22" transform="translate(9 12)"/>
-    <path d="M260 96 398 146v104c0 76-39 136-138 181-99-45-138-105-138-181V146Z" fill="url(#blueEdge)" stroke="#06184b" stroke-width="8" stroke-linejoin="round"/>
-    <path d="M260 116 378 159v91c0 63-31 115-118 155-87-40-118-92-118-155v-91Z" fill="url(#blue)" stroke="#799cd7" stroke-width="4" stroke-linejoin="round"/>
-    <path d="M260 116 378 159v91c0 63-31 115-118 155-87-40-118-92-118-155v-91Z" fill="url(#glass)"/>
-    <path d="m151 174 109-40 103 38" fill="none" stroke="url(#glint)" stroke-linecap="round" stroke-width="8"/>
-    <path d="M151 177v73c0 28 5 51 15 73" fill="none" stroke="#d7eaff" stroke-linecap="round" stroke-opacity=".46" stroke-width="5"/>
-    <path d="M260 128v266" fill="none" stroke="#0b255e" stroke-width="3" opacity=".7"/>
+      <path d="M86 34 164 62v56c0 44-22 78-78 104-56-26-78-60-78-104V62z" fill="url(#blueDeep)" stroke="#06184b" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M86 46 152 70v48c0 38-18 67-66 90-48-23-66-52-66-90V70z" fill="url(#blue)" stroke="#8fb6e8" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M86 46 152 70v48c0 38-18 67-66 90-48-23-66-52-66-90V70z" fill="url(#shine)"/>
+      <path d="M86 54v140" stroke="#0b2456" stroke-width="2" opacity="0.55"/>
 
-    <g filter="url(#soft)">
-      <path d="M194 148h54c35 0 58 21 58 54 0 35-24 56-60 56h-15v53c0 24 10 29 31 29v12h-88v-12c18-1 25-8 25-29V192c0-21-7-28-25-30v-14Zm37 19v71h10c20 0 31-13 31-35 0-23-10-36-30-36Z" fill="#03164a" opacity=".30" transform="translate(9 9)"/>
-      <path d="M194 148h54c35 0 58 21 58 54 0 35-24 56-60 56h-15v53c0 24 10 29 31 29v12h-88v-12c18-1 25-8 25-29V192c0-21-7-28-25-30v-14Zm37 19v71h10c20 0 31-13 31-35 0-23-10-36-30-36Z" fill="url(#monogram)" stroke="#06184b" stroke-width="5" stroke-linejoin="round"/>
-      <path d="M194 148h54c35 0 58 21 58 54 0 35-24 56-60 56h-15v53c0 24 10 29 31 29v12h-88v-12c18-1 25-8 25-29V192c0-21-7-28-25-30v-14Zm37 19v71h10c20 0 31-13 31-35 0-23-10-36-30-36Z" fill="url(#glass)" opacity=".42"/>
-    </g>
+      <path d="M49 92h31c21 0 35 13 35 33 0 21-14 34-36 34h-9v31c0 14 6 17 18 17v7H35v-7c10 0 15-4 15-17v-68c0-13-5-17-15-18v-12Zm21 12v43h6c12 0 19-8 19-21s-6-22-18-22Z" fill="#ffffff" fill-opacity="0.96"/>
+      <path d="M49 92h31c21 0 35 13 35 33 0 21-14 34-36 34h-9v31c0 14 6 17 18 17v7H35v-7c10 0 15-4 15-17v-68c0-13-5-17-15-18v-12Zm21 12v43h6c12 0 19-8 19-21s-6-22-18-22Z" fill="url(#shine)" opacity="0.35"/>
 
-    <g fill="#09275f" font-family="Georgia, serif" font-size="45" font-weight="700" text-anchor="middle">
-      <text x="181" y="245">Σ</text>
-      <text x="339" y="246">×</text>
-    </g>
+      <text x="40" y="148" fill="#dfeeff" font-family="Georgia, serif" font-size="24" font-weight="700">Σ</text>
+      <text x="123" y="148" fill="#dfeeff" font-family="Georgia, serif" font-size="22" font-weight="700">π</text>
 
-    <g filter="url(#soft)">
-      <path d="M260 390c-43-47-96-63-154-52 10 47 34 78 69 95 33 16 62 20 85 15Z" fill="#071b50" stroke="#06184b" stroke-width="5"/>
-      <path d="M260 390c43-47 96-63 154-52-10 47-34 78-69 95-33 16-62 20-85 15Z" fill="#071b50" stroke="#06184b" stroke-width="5"/>
-      <path d="M260 438c-19-26-62-57-154-66 28 16 47 37 66 50 32 21 60 26 88 16Z" fill="#164da2"/>
-      <path d="M260 438c19-26 62-57 154-66-28 16-47 37-66 50-32 21-60 26-88 16Z" fill="#164da2"/>
-      <path d="M260 438c-31-30-78-48-142-57" fill="none" stroke="#ffc52d" stroke-width="7" stroke-linecap="round"/>
-      <path d="M260 438c31-30 78-48 142-57" fill="none" stroke="#ffc52d" stroke-width="7" stroke-linecap="round"/>
+      <path d="M86 182c-22-24-49-33-79-27 6 25 19 41 37 50 17 8 31 10 42 8z" fill="#123a7a" stroke="#06184b" stroke-width="2.5"/>
+      <path d="M86 182c22-24 49-33 79-27-6 25-19 41-37 50-17 8-31 10-42 8z" fill="#123a7a" stroke="#06184b" stroke-width="2.5"/>
+      <path d="M86 206c-17-17-42-27-74-31 15 10 25 21 34 27 15 9 27 11 40 4z" fill="url(#page)" stroke="#b9d2ff" stroke-width="1.5"/>
+      <path d="M86 206c17-17 42-27 74-31-15 10-25 21-34 27-15 9-27 11-40 4z" fill="url(#page)" stroke="#b9d2ff" stroke-width="1.5"/>
+      <path d="M86 206c-18-14-41-24-71-29" fill="none" stroke="url(#gold)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M86 206c18-14 41-24 71-29" fill="none" stroke="url(#gold)" stroke-width="4" stroke-linecap="round"/>
     </g>
   </g>
 
-  <g text-anchor="middle" filter="url(#soft)">
-    <text x="260" y="354" fill="#06184b" stroke="#06184b" stroke-width="1" font-family="Georgia, 'Times New Roman', serif" font-size="70" font-weight="700" letter-spacing="7">PRINCE</text>
-    <path d="M84 372h91M345 372h91" stroke="#f5ad18" stroke-width="5" stroke-linecap="round"/>
-    <circle cx="175" cy="372" r="4" fill="#f5ad18"/>
-    <circle cx="345" cy="372" r="4" fill="#f5ad18"/>
-    <text x="260" y="399" fill="#0a2d75" font-family="Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="2">MATH ACADEMY</text>
+  <g transform="translate(240 58)">
+    <text x="0" y="72" fill="url(#wordMain)" font-family="Georgia, 'Times New Roman', serif" font-size="96" font-weight="700" letter-spacing="5">PRINCE</text>
+    <rect x="4" y="94" width="360" height="6" rx="3" fill="url(#gold)"/>
+    <rect x="374" y="94" width="360" height="6" rx="3" fill="#d8e6ff" opacity="0.9"/>
+    <text x="2" y="144" fill="#1b4b93" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800" letter-spacing="8">MATH ACADEMY</text>
   </g>
 </svg>

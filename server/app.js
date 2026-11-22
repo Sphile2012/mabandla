@@ -68,12 +68,28 @@ const allowedOrigins = new Set([
   ...defaultOrigins,
   process.env.APP_ORIGIN,
   process.env.URL,
+  process.env.DEPLOY_PRIME_URL,
+  process.env.DEPLOY_URL,
   'http://localhost:5000',
   'http://127.0.0.1:5000',
   'http://localhost:8888',
 ].filter(Boolean).map((o) => o.replace(/\/$/, '')));
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  const normalized = origin.replace(/\/$/, '');
+  if (allowedOrigins.has(normalized)) return true;
+  try {
+    const { hostname, protocol } = new URL(normalized);
+    if (protocol === 'https:' && hostname.endsWith('.netlify.app')) return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 app.use(cors({
-  origin: (origin, cb) => cb(null, !origin || allowedOrigins.has(origin)),
+  origin: (origin, cb) => cb(null, isAllowedOrigin(origin)),
   credentials: true,
 }));
 

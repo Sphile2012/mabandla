@@ -76,7 +76,7 @@ export default function ForgotPassword() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to={createPageUrl('Home')}>
-            <BrandLogo className="mx-auto mb-4 h-16 w-16" />
+            <BrandLogo className="mx-auto mb-4 h-14 sm:h-16 w-auto max-w-full" />
           </Link>
           <h1 className="text-3xl font-bold text-white mb-1">Reset Password</h1>
           <p className="text-slate-400 text-sm">Enter your email to receive a reset code</p>
