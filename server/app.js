@@ -112,6 +112,48 @@ app.use('/api/functions/downloadNotes', limiter(60_000, 10, 'Too many download r
 app.use('/api/functions/trackVideoView', limiter(60_000, 30, 'Too many video view requests. Please wait.'));
 const aiChatRequests = new Map();
 
+const DEFAULT_AI_SYSTEM_PROMPT = 'You are the Prince Math Academy study assistant. Help South African Grade 10-12 learners understand mathematics step by step. Explain working clearly, ask a short guiding question when useful, and adapt to the learner. Do not claim to know which lessons, subscriptions, or account details a learner has; you do not have access to those records. If asked something outside your knowledge, say so plainly.';
+
+async function getStoredAiSettings() {
+  try {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'ai')
+      .maybeSingle();
+    if (error) throw error;
+    const value = data?.value;
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  } catch (error) {
+    // Table may not exist yet on older deployments; fall back to environment config.
+    console.warn('AI settings read skipped:', error.message);
+    return {};
+  }
+}
+
+async function resolveAiConfig() {
+  const stored = await getStoredAiSettings();
+  const envApiKey = typeof process.env.AI_API_KEY === 'string' ? process.env.AI_API_KEY.trim() : '';
+  const envApiUrl = typeof process.env.AI_API_URL === 'string' ? process.env.AI_API_URL.trim() : '';
+  const envModel = typeof process.env.AI_MODEL === 'string' ? process.env.AI_MODEL.trim() : '';
+  const storedApiKey = typeof stored.apiKey === 'string' ? stored.apiKey.trim() : '';
+  const storedApiUrl = typeof stored.apiUrl === 'string' ? stored.apiUrl.trim() : '';
+  const storedModel = typeof stored.model === 'string' ? stored.model.trim() : '';
+  const storedSystemPrompt = typeof stored.systemPrompt === 'string' ? stored.systemPrompt.trim() : '';
+  const enabled = typeof stored.enabled === 'boolean' ? stored.enabled : true;
+  const apiKey = storedApiKey || envApiKey;
+  return {
+    enabled,
+    apiUrl: storedApiUrl || envApiUrl || 'https://api.openai.com/v1/chat/completions',
+    model: storedModel || envModel || 'gpt-4o-mini',
+    apiKey,
+    systemPrompt: storedSystemPrompt || DEFAULT_AI_SYSTEM_PROMPT,
+    hasApiKey: Boolean(apiKey),
+    hasStoredApiKey: Boolean(storedApiKey),
+    envConfigured: Boolean(envApiKey),
+  };
+}
+
 app.get('/api/health', async (_req, res) => {
   const paymentConfiguration = process.env.PAYFAST_MERCHANT_ID
     && process.env.PAYFAST_MERCHANT_KEY
@@ -573,7 +615,11 @@ app.get('/api/entities/:entity', authenticatePrivateEntityRead, async (req, res)
       query = query.eq('user_email', req.user.email);
     } else if (entity === 'Message') {
       query = query.or(`sender_email.eq.${req.user.email},recipient_email.eq.${req.user.email}`);
+    } else if (entity === 'Announcement') {
+      query = query.eq('is_deleted', false).eq('is_active', true);
     }
+  } else if (!req.user && entity === 'Announcement') {
+    query = query.eq('is_deleted', false).eq('is_active', true);
   }
 
   // Filters
@@ -606,8 +652,14 @@ app.get('/api/entities/:entity', authenticatePrivateEntityRead, async (req, res)
   const { data, error } = await query;
   if (error) return res.status(400).json({ error: error.message });
 
+  let result = data || [];
+  if (entity === 'Announcement' && (!req.user || req.user.role !== 'admin')) {
+    const now = Date.now();
+    result = result.filter((a) => !a.expires_at || new Date(a.expires_at).getTime() > now);
+  }
+
   // Normalise: expose created_at as created_date for frontend compatibility
-  const rows = await Promise.all((data || []).map(async (r) => normalise(entity === 'Video' ? await redactVideo(r, req.user) : r)));
+  const rows = await Promise.all(result.map(async (r) => normalise(entity === 'Video' ? await redactVideo(r, req.user) : r)));
   res.json(rows);
 });
 
@@ -624,6 +676,11 @@ app.get('/api/entities/:entity/:id', authenticatePrivateEntityRead, async (req, 
   const { data, error } = await supabase.from(TABLE(entity))
     .select(entity === 'User' ? PUBLIC_USER_FIELDS : '*').eq('id', id).single();
   if (error) return res.status(404).json({ error: 'Not found' });
+  if (entity === 'Announcement' && (!req.user || req.user.role !== 'admin')) {
+    if (data.is_deleted || data.is_active === false || (data.expires_at && new Date(data.expires_at).getTime() <= Date.now())) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+  }
   if (req.user && req.user.role !== 'admin' && ['Favorite', 'XPEvent', 'Notification', 'Message', 'VideoProgress', 'Feedback'].includes(entity) && !ownsRecord(data, req.user)) {
     return res.status(404).json({ error: 'Not found' });
   }
@@ -961,8 +1018,8 @@ app.post('/api/functions/trackVideoView', requireAuth, async (req, res) => {
 // POST /api/functions/getAdminStats
 app.post('/api/functions/getAdminStats', requireAdmin, async (req, res) => {
   const [{ data: videos }, { data: users }] = await Promise.all([
-    supabase.from('videos').select('*'),
-    supabase.from('users').select('*'),
+    supabase.from('videos').select('id,title,views,grade,tier'),
+    supabase.from('users').select('role,trial_end_date,subscription_active,subscription_end_date'),
   ]);
 
   const totalVideos = videos?.length || 0;
@@ -1073,7 +1130,11 @@ app.post('/api/functions/aiChat', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'The latest message must be from the student.' });
   }
 
-  if (!process.env.AI_API_KEY) {
+  const aiConfig = await resolveAiConfig();
+  if (!aiConfig.enabled) {
+    return res.status(503).json({ error: 'The AI tutor is currently disabled. Please contact the academy administrator.' });
+  }
+  if (!aiConfig.apiKey) {
     return res.status(503).json({ error: 'The AI tutor is not configured yet. Please contact the academy administrator.' });
   }
 
@@ -1081,18 +1142,18 @@ app.post('/api/functions/aiChat', requireAuth, async (req, res) => {
   const timeout = setTimeout(() => controller.abort(), 25000);
 
   try {
-    const response = await fetch(process.env.AI_API_URL || 'https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(aiConfig.apiUrl, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.AI_API_KEY}`,
+        Authorization: `Bearer ${aiConfig.apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: process.env.AI_MODEL || 'gpt-4o-mini',
+        model: aiConfig.model,
         messages: [
           {
             role: 'system',
-            content: 'You are the Prince Math Academy study assistant. Help South African Grade 10-12 learners understand mathematics step by step. Explain working clearly, ask a short guiding question when useful, and adapt to the learner. Do not claim to know which lessons, subscriptions, or account details a learner has; you do not have access to those records. If asked something outside your knowledge, say so plainly.',
+            content: aiConfig.systemPrompt || DEFAULT_AI_SYSTEM_PROMPT,
           },
           ...conversation,
         ],
@@ -1124,6 +1185,76 @@ app.post('/api/functions/aiChat', requireAuth, async (req, res) => {
   } finally {
     clearTimeout(timeout);
   }
+});
+
+app.post('/api/functions/getAISettings', requireAdmin, async (_req, res) => {
+  const stored = await getStoredAiSettings();
+  const config = await resolveAiConfig();
+  res.json({
+    enabled: config.enabled,
+    apiUrl: config.apiUrl,
+    model: config.model,
+    systemPrompt: config.systemPrompt,
+    hasApiKey: config.hasApiKey,
+    hasStoredApiKey: config.hasStoredApiKey,
+    envConfigured: config.envConfigured,
+    usingEnvApiKey: !config.hasStoredApiKey && config.envConfigured,
+    storedApiUrl: typeof stored.apiUrl === 'string' ? stored.apiUrl : '',
+    storedModel: typeof stored.model === 'string' ? stored.model : '',
+  });
+});
+
+app.post('/api/functions/updateAISettings', requireAdmin, async (req, res) => {
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  const stored = await getStoredAiSettings();
+
+  const next = { ...stored };
+  if (typeof body.enabled === 'boolean') next.enabled = body.enabled;
+  if (Object.hasOwn(body, 'apiUrl')) {
+    const apiUrl = typeof body.apiUrl === 'string' ? body.apiUrl.trim() : '';
+    if (apiUrl && !/^https?:\/\//i.test(apiUrl)) {
+      return res.status(400).json({ error: 'API URL must start with http:// or https://.' });
+    }
+    next.apiUrl = apiUrl;
+  }
+  if (Object.hasOwn(body, 'model')) {
+    next.model = typeof body.model === 'string' ? body.model.trim().slice(0, 120) : '';
+  }
+  if (Object.hasOwn(body, 'systemPrompt')) {
+    const systemPrompt = typeof body.systemPrompt === 'string' ? body.systemPrompt.trim() : '';
+    if (systemPrompt.length > 4000) return res.status(400).json({ error: 'System prompt is too long (max 4000 characters).' });
+    next.systemPrompt = systemPrompt;
+  }
+  if (body.clearApiKey === true) {
+    next.apiKey = '';
+  } else if (typeof body.apiKey === 'string' && body.apiKey.trim()) {
+    const apiKey = body.apiKey.trim();
+    if (apiKey.length > 500) return res.status(400).json({ error: 'API key is too long.' });
+    next.apiKey = apiKey;
+  }
+
+  const { error } = await supabase
+    .from('app_settings')
+    .upsert({ key: 'ai', value: next, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  if (error) {
+    console.error('Failed to save AI settings:', error.message);
+    return res.status(500).json({ error: 'Could not save AI settings. Ensure the app_settings table exists in Supabase.' });
+  }
+
+  const config = await resolveAiConfig();
+  res.json({
+    success: true,
+    settings: {
+      enabled: config.enabled,
+      apiUrl: config.apiUrl,
+      model: config.model,
+      systemPrompt: config.systemPrompt,
+      hasApiKey: config.hasApiKey,
+      hasStoredApiKey: config.hasStoredApiKey,
+      envConfigured: config.envConfigured,
+      usingEnvApiKey: !config.hasStoredApiKey && config.envConfigured,
+    },
+  });
 });
 
 // ─── PayFast Webhook ──────────────────────────────────────────────────────────

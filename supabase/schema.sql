@@ -532,6 +532,14 @@ create table if not exists payments (
 create index if not exists payments_user_idx on payments (user_id, created_at desc);
 alter table payments add column if not exists applied_at timestamptz;
 
+-- ── App settings (admin-configurable) ─────────────────────────────────────────
+-- Stores small JSON settings documents keyed by name (e.g. "ai").
+create table if not exists app_settings (
+  key        text primary key,
+  value      jsonb not null default '{}'::jsonb,
+  updated_at timestamptz default now()
+);
+
 -- ── Row Level Security ────────────────────────────────────────────────────────
 -- Browsers never talk to Supabase directly: every request goes through the API,
 -- which uses the service-role key (bypasses RLS). Enabling RLS with NO policies
@@ -558,3 +566,4 @@ alter table forum_votes enable row level security;
 alter table feedback enable row level security;
 alter table download_log enable row level security;
 alter table payments enable row level security;
+alter table app_settings enable row level security;

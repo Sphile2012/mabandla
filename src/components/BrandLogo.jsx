@@ -1,5 +1,5 @@
 export default function BrandLogo({ className = 'h-12 w-auto', showText = false, textClassName = '' }) {
-  const logoSrc = '/logo.svg?v=landscape-v2';
+  const logoSrc = '/logo.svg?v=crest-navy-p-v1';
   if (!showText) {
     return <img src={logoSrc} alt="Prince Math Academy" className={className} style={{ width: 'auto' }} />;
   }

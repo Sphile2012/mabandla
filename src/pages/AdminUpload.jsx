@@ -17,6 +17,8 @@ import {
   CheckCircle,
   Megaphone,
   RotateCcw,
+  Bot,
+  KeyRound,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +55,7 @@ export default function AdminUpload() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [activeTab, setActiveTab] = useState('videos'); // 'videos' or 'announcements'
+  const [activeTab, setActiveTab] = useState('videos'); // 'videos', 'announcements', or 'ai'
   const [announcementDialogOpen, setAnnouncementDialogOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [formData, setFormData] = useState({
@@ -74,6 +76,14 @@ export default function AdminUpload() {
     priority: 'normal',
   });
   const [uploading, setUploading] = useState({ video: false, thumbnail: false, notes: false });
+  const [aiForm, setAiForm] = useState({
+    enabled: true,
+    apiUrl: '',
+    model: '',
+    apiKey: '',
+    clearApiKey: false,
+    systemPrompt: '',
+  });
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -96,6 +106,27 @@ export default function AdminUpload() {
     queryFn: () => prince.entities.Announcement.list('-created_date', 100),
     enabled: user?.role === 'admin',
   });
+
+  const { data: aiSettings, isLoading: aiSettingsLoading } = useQuery({
+    queryKey: ['ai-settings'],
+    queryFn: () => prince.functions.invoke('getAISettings', {}),
+    enabled: user?.role === 'admin',
+  });
+
+  useEffect(() => {
+    if (!aiSettings) return;
+    setAiForm((prev) => ({
+      ...prev,
+      enabled: aiSettings.enabled !== false,
+      apiUrl: aiSettings.storedApiUrl || '',
+      model: aiSettings.storedModel || '',
+      systemPrompt: aiSettings.systemPrompt && aiSettings.systemPrompt !== 'You are the Prince Math Academy study assistant. Help South African Grade 10-12 learners understand mathematics step by step. Explain working clearly, ask a short guiding question when useful, and adapt to the learner. Do not claim to know which lessons, subscriptions, or account details a learner has; you do not have access to those records. If asked something outside your knowledge, say so plainly.'
+        ? aiSettings.systemPrompt
+        : '',
+      apiKey: '',
+      clearApiKey: false,
+    }));
+  }, [aiSettings]);
 
   const { data: xpEvents = [] } = useQuery({
     queryKey: ['xp-events'],
@@ -198,6 +229,31 @@ export default function AdminUpload() {
     },
     onError: (error) => toast.error(error.message || 'Failed to restore announcement'),
   });
+
+  const saveAISettingsMutation = useMutation({
+    mutationFn: (data) => prince.functions.invoke('updateAISettings', data),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
+      if (result?.settings) {
+        setAiForm((prev) => ({ ...prev, apiKey: '', clearApiKey: false }));
+      }
+      toast.success('AI settings saved.');
+    },
+    onError: (error) => toast.error(error.message || 'Failed to save AI settings'),
+  });
+
+  const handleAISubmit = (e) => {
+    e.preventDefault();
+    const payload = {
+      enabled: aiForm.enabled,
+      apiUrl: aiForm.apiUrl.trim(),
+      model: aiForm.model.trim(),
+      systemPrompt: aiForm.systemPrompt,
+      clearApiKey: aiForm.clearApiKey,
+    };
+    if (aiForm.apiKey.trim()) payload.apiKey = aiForm.apiKey.trim();
+    saveAISettingsMutation.mutate(payload);
+  };
 
   const resetForm = () => {
     setFormData({ title: '', description: '', grade: '', tier: 'Standard', topic: '', customTopic: '', duration: '', video_url: '', thumbnail_url: '', notes_url: '' });
@@ -319,20 +375,26 @@ export default function AdminUpload() {
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-600 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
                 {activeTab === 'videos' ? (
                   <Video className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                ) : (
+                ) : activeTab === 'announcements' ? (
                   <Megaphone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                ) : (
+                  <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 )}
               </div>
               <div>
                 <h1 className="text-lg sm:text-xl font-bold text-slate-800">
-                  {activeTab === 'videos' ? 'Video Management' : 'Announcements'}
+                  {activeTab === 'videos' ? 'Video Management' : activeTab === 'announcements' ? 'Announcements' : 'AI Settings'}
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  {activeTab === 'videos' ? `${videos.length} lessons uploaded` : `${announcements.length} announcements`}
+                  {activeTab === 'videos'
+                    ? `${videos.length} lessons uploaded`
+                    : activeTab === 'announcements'
+                      ? `${announcements.length} announcements`
+                      : 'Configure the AI study assistant'}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 justify-end">
               <Button
                 variant={activeTab === 'videos' ? 'default' : 'outline'}
                 onClick={() => setActiveTab('videos')}
@@ -350,6 +412,15 @@ export default function AdminUpload() {
               >
                 <Megaphone className="w-4 h-4 mr-1.5" />
                 Announcements
+              </Button>
+              <Button
+                variant={activeTab === 'ai' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('ai')}
+                className="text-sm"
+                size="sm"
+              >
+                <Bot className="w-4 h-4 mr-1.5" />
+                AI Settings
               </Button>
               {activeTab === 'videos' && (
                 <Button
@@ -529,6 +600,135 @@ export default function AdminUpload() {
             )}
           </div>
         )}
+
+        {/* AI Settings */}
+        {activeTab === 'ai' && (
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="font-semibold text-slate-800">AI Study Assistant Configuration</h2>
+                <p className="text-sm text-slate-500 mt-0.5">Configure the OpenAI-compatible provider used by the AI chat feature.</p>
+              </div>
+              <Badge variant={aiSettings?.hasApiKey ? 'outline' : 'secondary'} className={aiSettings?.hasApiKey ? 'text-green-700 border-green-300' : ''}>
+                {aiSettings?.hasApiKey ? 'Configured' : 'Not configured'}
+              </Badge>
+            </div>
+
+            {aiSettingsLoading ? (
+              <div className="p-8 text-center text-slate-400">Loading AI settings...</div>
+            ) : (
+              <form onSubmit={handleAISubmit} className="p-4 sm:p-6 space-y-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2 flex items-center justify-between rounded-xl border border-slate-200 p-4">
+                    <div>
+                      <p className="font-medium text-slate-800">Enable AI tutor</p>
+                      <p className="text-sm text-slate-500">Turn the AI study assistant on or off for learners.</p>
+                    </div>
+                    <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={aiForm.enabled}
+                        onChange={(e) => setAiForm((prev) => ({ ...prev, enabled: e.target.checked }))}
+                        className="h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                      />
+                      Enabled
+                    </label>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="ai-api-url">API URL</Label>
+                    <Input
+                      id="ai-api-url"
+                      value={aiForm.apiUrl}
+                      onChange={(e) => setAiForm((prev) => ({ ...prev, apiUrl: e.target.value }))}
+                      placeholder={aiSettings?.envConfigured ? 'Using environment/default URL unless overridden' : 'https://api.openai.com/v1/chat/completions'}
+                      className="mt-1.5"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">Leave blank to use the environment/default OpenAI-compatible chat completions URL.</p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ai-model">Model</Label>
+                    <Input
+                      id="ai-model"
+                      value={aiForm.model}
+                      onChange={(e) => setAiForm((prev) => ({ ...prev, model: e.target.value }))}
+                      placeholder="gpt-4o-mini"
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ai-api-key">API Key</Label>
+                    <div className="relative mt-1.5">
+                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Input
+                        id="ai-api-key"
+                        type="password"
+                        value={aiForm.apiKey}
+                        onChange={(e) => setAiForm((prev) => ({ ...prev, apiKey: e.target.value, clearApiKey: false }))}
+                        placeholder={aiSettings?.hasStoredApiKey ? 'Stored key saved (leave blank to keep)' : aiSettings?.envConfigured ? 'Using environment key (enter to override)' : 'Enter API key'}
+                        className="pl-9"
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                      <span>{aiSettings?.hasStoredApiKey ? 'A key is stored in app settings.' : aiSettings?.envConfigured ? 'Using AI_API_KEY from environment.' : 'No API key configured.'}</span>
+                      {(aiSettings?.hasStoredApiKey || aiSettings?.envConfigured) && (
+                        <label className="inline-flex items-center gap-2 text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={aiForm.clearApiKey}
+                            onChange={(e) => setAiForm((prev) => ({ ...prev, clearApiKey: e.target.checked, apiKey: e.target.checked ? '' : prev.apiKey }))}
+                            className="h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                          />
+                          Clear stored key
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="ai-system-prompt">System Prompt (optional)</Label>
+                    <Textarea
+                      id="ai-system-prompt"
+                      value={aiForm.systemPrompt}
+                      onChange={(e) => setAiForm((prev) => ({ ...prev, systemPrompt: e.target.value }))}
+                      placeholder="Leave blank to use the default Prince Math Academy tutor instructions."
+                      className="mt-1.5 min-h-[140px]"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">Custom instructions for the AI tutor. Leave blank to use the built-in default behavior.</p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  {aiSettings?.envConfigured && !aiSettings?.hasStoredApiKey
+                    ? 'The server environment already has an AI API key configured. Saving a key here stores an override in the database; clearing the stored key falls back to the environment key.'
+                    : 'API keys saved here are stored in the database and used by the server. Never share keys publicly. After changing settings, test the AI chat to confirm the provider and model are correct.'}
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-2 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => queryClient.invalidateQueries({ queryKey: ['ai-settings'] })}
+                    disabled={saveAISettingsMutation.isPending}
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={saveAISettingsMutation.isPending}
+                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {saveAISettingsMutation.isPending ? 'Saving...' : 'Save AI Settings'}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -629,21 +829,37 @@ export default function AdminUpload() {
 
               {/* Video Upload */}
               <div className="sm:col-span-2">
-                <Label>Video File</Label>
+                <Label htmlFor="video-url">Video URL</Label>
+                <Input
+                  id="video-url"
+                  value={formData.video_url || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, video_url: e.target.value }))}
+                  placeholder="Paste a video URL or upload a file below"
+                  className="mt-1.5"
+                />
+                <p className="text-xs text-slate-500 mt-1">Use an external/hosted video URL, or upload a video file below.</p>
+              </div>
+
+              <div className="sm:col-span-2">
+                <Label>Video File Upload</Label>
                 <div className="mt-1.5 border-2 border-dashed border-slate-200 rounded-xl p-5 text-center hover:border-violet-300 transition-colors">
-                  {formData.video_url ? (
+                  {uploading.video ? (
                     <div className="flex items-center justify-center gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                      <span className="text-sm text-slate-600">Video uploaded successfully</span>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => setFormData(prev => ({ ...prev, video_url: '' }))}>
-                        <X className="w-4 h-4" />
-                      </Button>
+                      <Upload className="w-5 h-5 text-violet-500 animate-pulse" />
+                      <span className="text-sm text-slate-600">Uploading... please wait</span>
                     </div>
                   ) : (
                     <label className="cursor-pointer block">
-                      <input type="file" accept="video/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'video')} disabled={uploading.video} />
+                      <input
+                        type="file"
+                        accept="video/*"
+                        className="hidden"
+                        onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'video')}
+                        disabled={uploading.video}
+                      />
                       <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
-                      <p className="text-sm text-slate-600">{uploading.video ? 'Uploading... please wait' : 'Click to upload video (max 500MB)'}</p>
+                      <p className="text-sm text-slate-600">Click to upload a video file (max 500MB)</p>
+                      {formData.video_url && <p className="text-xs text-green-600 mt-1">A video URL is currently set. Uploading will replace it.</p>}
                     </label>
                   )}
                 </div>
