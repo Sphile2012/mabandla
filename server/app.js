@@ -110,49 +110,6 @@ app.use(['/api/auth/forgot-password', '/api/auth/verify-otp', '/api/auth/reset-p
   limiter(15 * 60_000, 10, 'Too many reset attempts. Try again in 15 minutes.'));
 app.use('/api/functions/downloadNotes', limiter(60_000, 10, 'Too many download requests. Please wait.'));
 app.use('/api/functions/trackVideoView', limiter(60_000, 30, 'Too many video view requests. Please wait.'));
-const aiChatRequests = new Map();
-
-const DEFAULT_AI_SYSTEM_PROMPT = 'You are the Prince Math Academy study assistant. Help South African Grade 10-12 learners understand mathematics step by step. Explain working clearly, ask a short guiding question when useful, and adapt to the learner. Do not claim to know which lessons, subscriptions, or account details a learner has; you do not have access to those records. If asked something outside your knowledge, say so plainly.';
-
-async function getStoredAiSettings() {
-  try {
-    const { data, error } = await supabase
-      .from('app_settings')
-      .select('value')
-      .eq('key', 'ai')
-      .maybeSingle();
-    if (error) throw error;
-    const value = data?.value;
-    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-  } catch (error) {
-    // Table may not exist yet on older deployments; fall back to environment config.
-    console.warn('AI settings read skipped:', error.message);
-    return {};
-  }
-}
-
-async function resolveAiConfig() {
-  const stored = await getStoredAiSettings();
-  const envApiKey = typeof process.env.AI_API_KEY === 'string' ? process.env.AI_API_KEY.trim() : '';
-  const envApiUrl = typeof process.env.AI_API_URL === 'string' ? process.env.AI_API_URL.trim() : '';
-  const envModel = typeof process.env.AI_MODEL === 'string' ? process.env.AI_MODEL.trim() : '';
-  const storedApiKey = typeof stored.apiKey === 'string' ? stored.apiKey.trim() : '';
-  const storedApiUrl = typeof stored.apiUrl === 'string' ? stored.apiUrl.trim() : '';
-  const storedModel = typeof stored.model === 'string' ? stored.model.trim() : '';
-  const storedSystemPrompt = typeof stored.systemPrompt === 'string' ? stored.systemPrompt.trim() : '';
-  const enabled = typeof stored.enabled === 'boolean' ? stored.enabled : true;
-  const apiKey = storedApiKey || envApiKey;
-  return {
-    enabled,
-    apiUrl: storedApiUrl || envApiUrl || 'https://api.openai.com/v1/chat/completions',
-    model: storedModel || envModel || 'gpt-4o-mini',
-    apiKey,
-    systemPrompt: storedSystemPrompt || DEFAULT_AI_SYSTEM_PROMPT,
-    hasApiKey: Boolean(apiKey),
-    hasStoredApiKey: Boolean(storedApiKey),
-    envConfigured: Boolean(envApiKey),
-  };
-}
 
 app.get('/api/health', async (_req, res) => {
   const paymentConfiguration = process.env.PAYFAST_MERCHANT_ID
@@ -168,7 +125,6 @@ app.get('/api/health', async (_req, res) => {
     return res.status(503).json({
       status: 'not_ready',
       database: 'not_configured',
-      ai: process.env.AI_API_KEY ? 'configured' : 'not_configured',
       payments: paymentConfiguration,
       email: emailConfiguration,
       errors: requiredConfigErrors,
@@ -182,7 +138,6 @@ app.get('/api/health', async (_req, res) => {
       return res.status(503).json({
         status: 'not_ready',
         database: 'unavailable',
-        ai: process.env.AI_API_KEY ? 'configured' : 'not_configured',
         payments: paymentConfiguration,
         email: emailConfiguration,
         errors: ['The database connection could not be verified.'],
@@ -192,7 +147,6 @@ app.get('/api/health', async (_req, res) => {
     return res.json({
       status: 'ok',
       database: 'connected',
-      ai: process.env.AI_API_KEY ? 'configured' : 'not_configured',
       payments: paymentConfiguration,
       email: emailConfiguration,
     });
@@ -201,7 +155,6 @@ app.get('/api/health', async (_req, res) => {
     return res.status(503).json({
       status: 'not_ready',
       database: 'unavailable',
-      ai: process.env.AI_API_KEY ? 'configured' : 'not_configured',
       payments: paymentConfiguration,
       email: emailConfiguration,
       errors: ['The database connection could not be verified.'],
@@ -1092,169 +1045,6 @@ app.post('/api/functions/validateVideoUpload', requireAdmin, (req, res) => {
   const validTiers = ['Standard', 'Premium'];
   if (!validTiers.includes(tier)) return res.status(400).json({ error: 'Invalid tier' });
   res.json({ success: true, message: 'Validation passed', uploader: req.user.full_name });
-});
-
-app.post('/api/functions/aiChat', requireAuth, async (req, res) => {
-  const now = Date.now();
-  const recentRequests = aiChatRequests.get(req.user.id) || [];
-  const requestsInWindow = recentRequests.filter((timestamp) => now - timestamp < 60_000);
-  if (requestsInWindow.length >= 10) {
-    return res.status(429).json({ error: 'You have reached the AI tutor limit. Please wait a minute and try again.' });
-  }
-  requestsInWindow.push(now);
-  aiChatRequests.set(req.user.id, requestsInWindow);
-  if (aiChatRequests.size > 1000) {
-    for (const [userId, timestamps] of aiChatRequests) {
-      if (!timestamps.some((timestamp) => now - timestamp < 60_000)) aiChatRequests.delete(userId);
-    }
-  }
-
-  const { messages } = req.body;
-  if (!Array.isArray(messages) || messages.length === 0 || messages.length > 12) {
-    return res.status(400).json({ error: 'Send between 1 and 12 chat messages.' });
-  }
-
-  const conversation = [];
-  for (const message of messages) {
-    if (!message || !['user', 'assistant'].includes(message.role) || typeof message.content !== 'string') {
-      return res.status(400).json({ error: 'Each message must have a valid role and text.' });
-    }
-    const content = message.content.trim();
-    if (!content || content.length > 4000) {
-      return res.status(400).json({ error: 'Messages must be between 1 and 4000 characters.' });
-    }
-    conversation.push({ role: message.role, content });
-  }
-
-  if (conversation.at(-1).role !== 'user') {
-    return res.status(400).json({ error: 'The latest message must be from the student.' });
-  }
-
-  const aiConfig = await resolveAiConfig();
-  if (!aiConfig.enabled) {
-    return res.status(503).json({ error: 'The AI tutor is currently disabled. Please contact the academy administrator.' });
-  }
-  if (!aiConfig.apiKey) {
-    return res.status(503).json({ error: 'The AI tutor is not configured yet. Please contact the academy administrator.' });
-  }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25000);
-
-  try {
-    const response = await fetch(aiConfig.apiUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${aiConfig.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: aiConfig.model,
-        messages: [
-          {
-            role: 'system',
-            content: aiConfig.systemPrompt || DEFAULT_AI_SYSTEM_PROMPT,
-          },
-          ...conversation,
-        ],
-        max_tokens: 1000,
-        temperature: 0.4,
-      }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      console.error('AI provider returned HTTP', response.status);
-      return res.status(502).json({ error: 'The AI tutor is temporarily unavailable. Please try again shortly.' });
-    }
-
-    const result = await response.json();
-    const answer = result.choices?.[0]?.message?.content;
-    if (typeof answer !== 'string' || !answer.trim()) {
-      console.error('AI provider returned no assistant response');
-      return res.status(502).json({ error: 'The AI tutor could not produce an answer. Please try again.' });
-    }
-
-    return res.json({ answer: answer.trim() });
-  } catch (error) {
-    if (error.name === 'AbortError') {
-      return res.status(504).json({ error: 'The AI tutor took too long to respond. Please try again.' });
-    }
-    console.error('AI tutor request failed:', error.message);
-    return res.status(502).json({ error: 'The AI tutor is temporarily unavailable. Please try again shortly.' });
-  } finally {
-    clearTimeout(timeout);
-  }
-});
-
-app.post('/api/functions/getAISettings', requireAdmin, async (_req, res) => {
-  const stored = await getStoredAiSettings();
-  const config = await resolveAiConfig();
-  res.json({
-    enabled: config.enabled,
-    apiUrl: config.apiUrl,
-    model: config.model,
-    systemPrompt: config.systemPrompt,
-    hasApiKey: config.hasApiKey,
-    hasStoredApiKey: config.hasStoredApiKey,
-    envConfigured: config.envConfigured,
-    usingEnvApiKey: !config.hasStoredApiKey && config.envConfigured,
-    storedApiUrl: typeof stored.apiUrl === 'string' ? stored.apiUrl : '',
-    storedModel: typeof stored.model === 'string' ? stored.model : '',
-  });
-});
-
-app.post('/api/functions/updateAISettings', requireAdmin, async (req, res) => {
-  const body = req.body && typeof req.body === 'object' ? req.body : {};
-  const stored = await getStoredAiSettings();
-
-  const next = { ...stored };
-  if (typeof body.enabled === 'boolean') next.enabled = body.enabled;
-  if (Object.hasOwn(body, 'apiUrl')) {
-    const apiUrl = typeof body.apiUrl === 'string' ? body.apiUrl.trim() : '';
-    if (apiUrl && !/^https?:\/\//i.test(apiUrl)) {
-      return res.status(400).json({ error: 'API URL must start with http:// or https://.' });
-    }
-    next.apiUrl = apiUrl;
-  }
-  if (Object.hasOwn(body, 'model')) {
-    next.model = typeof body.model === 'string' ? body.model.trim().slice(0, 120) : '';
-  }
-  if (Object.hasOwn(body, 'systemPrompt')) {
-    const systemPrompt = typeof body.systemPrompt === 'string' ? body.systemPrompt.trim() : '';
-    if (systemPrompt.length > 4000) return res.status(400).json({ error: 'System prompt is too long (max 4000 characters).' });
-    next.systemPrompt = systemPrompt;
-  }
-  if (body.clearApiKey === true) {
-    next.apiKey = '';
-  } else if (typeof body.apiKey === 'string' && body.apiKey.trim()) {
-    const apiKey = body.apiKey.trim();
-    if (apiKey.length > 500) return res.status(400).json({ error: 'API key is too long.' });
-    next.apiKey = apiKey;
-  }
-
-  const { error } = await supabase
-    .from('app_settings')
-    .upsert({ key: 'ai', value: next, updated_at: new Date().toISOString() }, { onConflict: 'key' });
-  if (error) {
-    console.error('Failed to save AI settings:', error.message);
-    return res.status(500).json({ error: 'Could not save AI settings. Ensure the app_settings table exists in Supabase.' });
-  }
-
-  const config = await resolveAiConfig();
-  res.json({
-    success: true,
-    settings: {
-      enabled: config.enabled,
-      apiUrl: config.apiUrl,
-      model: config.model,
-      systemPrompt: config.systemPrompt,
-      hasApiKey: config.hasApiKey,
-      hasStoredApiKey: config.hasStoredApiKey,
-      envConfigured: config.envConfigured,
-      usingEnvApiKey: !config.hasStoredApiKey && config.envConfigured,
-    },
-  });
 });
 
 // ─── PayFast Webhook ──────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@ import { prince } from '@/api/princeClient';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Shield, Download, Moon, Sun, Trophy, BookOpen, RotateCw, MessageSquare, CheckCircle, MessageSquare as ForumIcon, Users, Baby, Award, Bot, Flame, PenLine, BarChart3 } from 'lucide-react';
+import { Home, Grid3X3, Heart, Menu, X, User, LogOut, GraduationCap, Info, CreditCard, MessageCircle, Shield, Download, Moon, Sun, Trophy, BookOpen, RotateCw, MessageSquare, CheckCircle, MessageSquare as ForumIcon, Users, Baby, Award, Flame, PenLine, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -16,7 +16,6 @@ const navItems = [
   { name: 'Lessons', icon: Grid3X3, page: 'Categories' },
   { name: 'Practice', icon: PenLine, page: 'Practice' },
   { name: 'Daily Challenge', icon: Flame, page: 'DailyChallenge' },
-  { name: 'AI Study Assistant', icon: Bot, page: 'AIChat' },
   { name: 'User Guide', icon: BookOpen, page: 'UserGuide' },
   { name: 'Leaderboard', icon: Trophy, page: 'Leaderboard' },
   { name: 'Formula Sheets', icon: BookOpen, page: 'FormulaSheets' },
@@ -299,9 +298,9 @@ export default function Layout({ children, currentPageName }) {
               <BrandLogo className="h-9 w-auto" />
             </div>
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500">
-              {['About', 'Pricing', 'DownloadApp', 'Categories', 'DailyChallenge', 'AIChat', 'UserGuide'].map(p => (
+              {['About', 'Pricing', 'DownloadApp', 'Categories', 'DailyChallenge', 'UserGuide'].map(p => (
                 <Link key={p} to={createPageUrl(p)} className="hover:text-violet-400 transition-colors">
-                  {p === 'DownloadApp' ? 'Install App' : p === 'Categories' ? 'Lessons' : p === 'DailyChallenge' ? 'Daily Challenge' : p === 'AIChat' ? 'AI Assistant' : p === 'UserGuide' ? 'User Guide' : p}
+                  {p === 'DownloadApp' ? 'Install App' : p === 'Categories' ? 'Lessons' : p === 'DailyChallenge' ? 'Daily Challenge' : p === 'UserGuide' ? 'User Guide' : p}
                 </Link>
               ))}
             </div>

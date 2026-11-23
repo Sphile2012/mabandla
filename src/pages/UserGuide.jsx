@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Download, Heart, MessageCircleQuestion, Search, UserRound } from 'lucide-react';
+import { BookOpen, Download, Heart, Search } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
 const steps = [
@@ -11,15 +11,15 @@ const steps = [
     linkText: 'Browse lessons',
   },
   {
-    title: 'Ask the AI study assistant',
-    description: 'Sign in, open Ask, and type a maths question. Ask for a worked example or for one step to be explained more simply.',
-    icon: MessageCircleQuestion,
-    link: 'AIChat',
-    linkText: 'Ask a question',
+    title: 'Practice and challenge yourself',
+    description: 'Use Practice and Daily Challenge to build confidence. Open worked examples and formula sheets when you need quick revision.',
+    icon: BookOpen,
+    link: 'Practice',
+    linkText: 'Start practice',
   },
   {
     title: 'Save lessons and manage your account',
-    description: 'Sign in to save favourite lessons. Open your account menu to view your profile, favourites, and available learning features.',
+    description: 'Sign in to save favourite lessons. Open your account menu to view your profile, favourites, progress, and available learning features.',
     icon: Heart,
     link: 'Profile',
     linkText: 'View profile',
@@ -43,7 +43,7 @@ export default function UserGuide() {
         </div>
         <h1 className="text-3xl font-bold text-white sm:text-4xl">User guide</h1>
         <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
-          A quick guide to studying with Prince Math Academy on your phone.
+          A quick guide to learning with the Prince Math Academy app on your phone.
         </p>
       </header>
 
@@ -66,16 +66,6 @@ export default function UserGuide() {
           </section>
         ))}
       </div>
-
-      <section className="mt-6 rounded-2xl border border-amber-300/15 bg-amber-300/5 p-5">
-        <h2 className="flex items-center gap-2 font-semibold text-amber-100">
-          <UserRound className="h-4 w-4" />
-          Using the AI assistant
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-amber-100/70">
-          The assistant works through the questions you send; it does not see your private account or lesson records. AI explanations can be incorrect, so compare important answers with your teacher or course materials. If the assistant is not configured or available, the app will tell you instead of inventing an answer.
-        </p>
-      </section>
 
       <p className="mt-6 text-center text-sm text-slate-500">
         Need more help? <Link to={createPageUrl('Feedback')} className="font-medium text-violet-300 hover:text-violet-200">Send feedback</Link>.
