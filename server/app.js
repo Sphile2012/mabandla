@@ -33,6 +33,7 @@ import { isIP } from 'node:net';
 import nodemailer from 'nodemailer';
 import { createClient } from '@supabase/supabase-js';
 import { createDailyChallenge, isCorrectDailyAnswer } from './dailyChallenge.js';
+import { generatePayfastSignature, pfEncode } from './payfast.js';
 
 // ─── Supabase client ──────────────────────────────────────────────────────────
 const requiredConfigErrors = [];
@@ -1068,11 +1069,6 @@ const PAYFAST_PLANS = { Standard: 100, Premium: 150 };
 const PAYFAST_GRADES = ['Grade 10', 'Grade 11', 'Grade 12'];
 const payfastHost = () => (process.env.PAYFAST_SANDBOX === 'true' ? 'https://sandbox.payfast.co.za' : 'https://www.payfast.co.za');
 
-// PayFast encodes like PHP urlencode: uppercase hex, spaces as "+", and !'()*~ escaped.
-const pfEncode = (v) => encodeURIComponent(String(v).trim())
-  .replace(/[!'()*~]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)
-  .replace(/%20/g, '+');
-
 const safeEqual = (a, b) => {
   const x = Buffer.from(String(a));
   const y = Buffer.from(String(b));
@@ -1307,19 +1303,6 @@ function normalise(row) {
   if (!row) return row;
   // Expose created_at as created_date for frontend compatibility
   return { ...row, created_date: row.created_date || row.created_at };
-}
-
-function generatePayfastSignature(data, passphrase) {
-  const filtered = Object.fromEntries(
-    Object.entries(data).filter(([, v]) => v !== undefined && v !== null && v !== '')
-  );
-  const queryString = Object.keys(filtered)
-    .map(key => `${key}=${pfEncode(filtered[key])}`)
-    .join('&');
-  const finalString = passphrase
-    ? `${queryString}&passphrase=${pfEncode(passphrase)}`
-    : queryString;
-  return crypto.createHash('md5').update(finalString).digest('hex');
 }
 
 // ─── Error handler ────────────────────────────────────────────────────────────
