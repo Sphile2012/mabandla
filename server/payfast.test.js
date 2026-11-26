@@ -1,8 +1,18 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { generatePayfastSignature } from './payfast.js';
+import { createMonthlySubscriptionFields, generatePayfastSignature } from './payfast.js';
 
 describe('generatePayfastSignature', () => {
+  it('orders recurring fields as required by PayFast', () => {
+    assert.deepEqual(createMonthlySubscriptionFields('100.00', '2026-11-27'), {
+      subscription_type: '1',
+      billing_date: '2026-11-27',
+      recurring_amount: '100.00',
+      frequency: '3',
+      cycles: '0',
+    });
+  });
+
   it('uses PayFast form encoding for special characters and spaces', () => {
     const data = {
       merchant_id: '10000100',

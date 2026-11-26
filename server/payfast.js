@@ -2,6 +2,16 @@ import crypto from 'node:crypto';
 
 export const pfEncode = (value) => encodeURIComponent(String(value).trim()).replace(/%20/g, '+');
 
+export function createMonthlySubscriptionFields(amount, billingDate) {
+  return {
+    subscription_type: '1',
+    billing_date: billingDate,
+    recurring_amount: amount,
+    frequency: '3',
+    cycles: '0',
+  };
+}
+
 export function generatePayfastSignature(data, passphrase) {
   let parameterString = '';
   for (const [key, value] of Object.entries(data)) {

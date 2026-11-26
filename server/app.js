@@ -33,7 +33,7 @@ import { isIP } from 'node:net';
 import nodemailer from 'nodemailer';
 import { createClient } from '@supabase/supabase-js';
 import { createDailyChallenge, isCorrectDailyAnswer } from './dailyChallenge.js';
-import { generatePayfastSignature, pfEncode } from './payfast.js';
+import { createMonthlySubscriptionFields, generatePayfastSignature, pfEncode } from './payfast.js';
 
 // ─── Supabase client ──────────────────────────────────────────────────────────
 const requiredConfigErrors = [];
@@ -954,11 +954,7 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
     custom_str1: String(user.id),
     custom_str2: grade,
     custom_str3: tier,
-    subscription_type: '1',
-    frequency: '3',
-    cycles: '0',
-    billing_date: billingDateString,
-    recurring_amount: amountNum.toFixed(2),
+    ...createMonthlySubscriptionFields(amountNum.toFixed(2), billingDateString),
   };
 
   const signature = generatePayfastSignature(paymentData, passphrase);
