@@ -23,12 +23,13 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
+import { isIP } from 'node:net';
 import nodemailer from 'nodemailer';
 import { createClient } from '@supabase/supabase-js';
 import { createDailyChallenge, isCorrectDailyAnswer } from './dailyChallenge.js';
@@ -102,6 +103,10 @@ const limiter = (windowMs, max, message) => rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: message },
+  keyGenerator: (req) => {
+    const clientIp = req.ip || req.get('x-nf-client-connection-ip');
+    return clientIp && isIP(clientIp) ? ipKeyGenerator(clientIp) : 'ip:unknown';
+  },
 });
 app.use('/api', limiter(60_000, 300, 'Too many requests. Please slow down.'));
 app.use('/api/auth/login', limiter(15 * 60_000, 10, 'Too many login attempts. Try again in 15 minutes.'));
@@ -415,12 +420,14 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   }
 
   try {
+    const appOrigin = (process.env.APP_ORIGIN || '').replace(/\/$/, '');
+    const resetLink = appOrigin ? `${appOrigin}/ResetPassword?email=${encodeURIComponent(email)}` : '';
     const delivery = await mailer.sendMail({
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: email,
       subject: 'Your Prince Math Academy reset code',
-      text: `Your password reset code is ${otp}. It expires in 10 minutes. If you did not ask for it, ignore this email.`,
-      html: `<div style="font-family:sans-serif"><h2>Prince Math Academy</h2><p>Your password reset code is</p><p style="font-size:32px;font-weight:bold;letter-spacing:6px;color:#6d28d9">${otp}</p><p>It expires in 10 minutes. If you did not ask for it, ignore this email.</p></div>`,
+      text: `Your password reset code is ${otp}. It expires in 10 minutes.${resetLink ? `\n\nReset your password here: ${resetLink}` : ''}\n\nIf you did not ask for it, ignore this email.`,
+      html: `<div style="font-family:sans-serif"><h2>Prince Math Academy</h2><p>Your password reset code is</p><p style="font-size:32px;font-weight:bold;letter-spacing:6px;color:#6d28d9">${otp}</p><p>It expires in 10 minutes.</p>${resetLink ? `<p><a href="${resetLink}" style="display:inline-block;padding:12px 18px;background:#7c3aed;color:#fff;text-decoration:none;border-radius:10px;font-weight:600">Reset password</a></p><p style="font-size:12px;color:#64748b">If the button does not work, open this link: <a href="${resetLink}">${resetLink}</a></p>` : ''}<p>If you did not ask for it, ignore this email.</p></div>`,
     });
     const accepted = delivery.accepted?.some((recipient) => (
       (typeof recipient === 'string' ? recipient : recipient.address).toLowerCase() === email
@@ -916,7 +923,11 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
   // PayFast requires a passphrase for recurring subscriptions.
   if (!merchantId || !merchantKey || !passphrase) return res.status(503).json({ error: 'Payments are not configured yet.' });
   const paymentUrl = `${payfastHost()}/eng/process`;
-  const appOrigin = (process.env.APP_ORIGIN || 'https://princemath.co.za').replace(/\/$/, '');
+  const appOrigin = (
+    process.env.APP_ORIGIN
+    || process.env.DEPLOY_PRIME_URL
+    || 'https://www.princemath.co.za'
+  ).replace(/\/$/, '');
 
   const user = req.user;
   const nameParts = (user.full_name || 'Student User').trim().split(' ');
@@ -924,6 +935,9 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
   const nameLast = nameParts.slice(1).join(' ') || 'User';
 
   const amountNum = PRICES[tier];
+  const billingDate = new Date();
+  billingDate.setDate(billingDate.getDate() + 1);
+  const billingDateString = billingDate.toISOString().slice(0, 10);
   const paymentData = {
     merchant_id: merchantId,
     merchant_key: merchantKey,
@@ -942,6 +956,8 @@ app.post('/api/functions/createPayFastPayment', requireAuth, async (req, res) =>
     subscription_type: '1',
     frequency: '3',
     cycles: '0',
+    billing_date: billingDateString,
+    recurring_amount: amountNum.toFixed(2),
   };
 
   const signature = generatePayfastSignature(paymentData, passphrase);
